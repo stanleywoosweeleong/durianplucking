@@ -541,7 +541,7 @@ body.lang-en .en.blk{display:block}
 </div>
 
 <script>
-const CACHE_VERSION='durianripe-20260708-95';
+const CACHE_VERSION='durianripe-20260709-96';
 document.getElementById('ver').textContent=CACHE_VERSION.split('-').slice(1).join('-');
 
 /* ---- language ---- */
@@ -561,12 +561,19 @@ langBtn.addEventListener('click',()=>{
 });
 
 /* ---- tabs ---- */
+const TAB_KEY='durianripe_lastTab';
+function saveTab(p){ try{ localStorage.setItem(TAB_KEY,p); }catch(e){} }
+function getSavedTab(){
+  try{ const p=localStorage.getItem(TAB_KEY);
+    return document.querySelector(`.tab[data-p="${p}"]`)?p:null; }catch(e){ return null; }
+}
 document.querySelectorAll('.tab').forEach(t=>{
   t.addEventListener('click',()=>{
     document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
     document.querySelectorAll('.panel').forEach(x=>x.classList.remove('active'));
     t.classList.add('active');
     document.getElementById(t.dataset.p).classList.add('active');
+    saveTab(t.dataset.p);
     if(t.dataset.p==='insights' && typeof renderInsights==='function') renderInsights();
     window.scrollTo({top:0,behavior:'smooth'});
   });
@@ -2273,6 +2280,12 @@ function renderInsights(){
 
 
 /* ---- service worker ---- */
+/* restore last-selected tab on launch (runs after all handlers/functions are defined) */
+(function(){
+  const p=getSavedTab();
+  if(p && p!=='guide'){ const el=document.querySelector(`.tab[data-p="${p}"]`); if(el) el.click(); }
+})();
+
 if('serviceWorker' in navigator){
   navigator.serviceWorker.register('sw.js').catch(()=>{});
 }
