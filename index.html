@@ -541,7 +541,7 @@ body.lang-en .en.blk{display:block}
 </div>
 
 <script>
-const CACHE_VERSION='durianripe-20260708-94';
+const CACHE_VERSION='durianripe-20260708-95';
 document.getElementById('ver').textContent=CACHE_VERSION.split('-').slice(1).join('-');
 
 /* ---- language ---- */
@@ -1445,25 +1445,25 @@ function renderFarms(){
       const hasFlower=!!(lastLog&&lastLog.flowerDate);
       const hasDrop=!!(lastLog&&lastLog.actualDropStr);
       const hasCut=!!(lastLog&&lastLog.cutDateStr);
-      html+=`<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;margin-top:8px">`;
+      html+=`<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:10px">`;
       // flowering: always present; ✎ if already recorded
-      html+=`<button data-logflower="${farm.id}|${tree.id}" style="border:1.5px solid var(--line);background:${hasFlower?'#f3efe6':'#fff'};border-radius:10px;padding:11px 8px;font-size:12.5px;font-weight:700;text-align:center;color:var(--shell);cursor:pointer">${hasFlower?T('✎ 开花','✎ Flowering'):T('＋ 记录开花','＋ Log flowering')}</button>`;
+      html+=`<button data-logflower="${farm.id}|${tree.id}" style="border:1.5px solid var(--line);background:${hasFlower?'#f3efe6':'#fff'};border-radius:12px;padding:16px 10px;font-size:13.5px;font-weight:700;text-align:center;min-height:58px;display:flex;align-items:center;justify-content:center;line-height:1.25;color:var(--shell);cursor:pointer">${hasFlower?T('✎ 开花','✎ Flowering'):T('＋ 记录开花','＋ Log flowering')}</button>`;
       // drop: show once flowering exists; ✎ if recorded (so it stays editable)
       if(hasFlower && !hasCut){
-        html+=`<button data-logdrop="${farm.id}|${tree.id}" style="border:1.5px solid var(--good);background:${hasDrop?'#e3ecdf':'#eef5ec'};border-radius:10px;padding:11px 8px;font-size:12.5px;font-weight:700;text-align:center;color:var(--good);cursor:pointer">${hasDrop?T('✎ 落果日','✎ Drop date'):T('＋ 回填落果日','＋ Log actual drop')}</button>`;
+        html+=`<button data-logdrop="${farm.id}|${tree.id}" style="border:1.5px solid var(--good);background:${hasDrop?'#e3ecdf':'#eef5ec'};border-radius:12px;padding:16px 10px;font-size:13.5px;font-weight:700;text-align:center;min-height:58px;display:flex;align-items:center;justify-content:center;line-height:1.25;color:var(--good);cursor:pointer">${hasDrop?T('✎ 落果日','✎ Drop date'):T('＋ 回填落果日','＋ Log actual drop')}</button>`;
       }
       // cut: show once flowering exists and no natural drop; ✎ if recorded
       if(hasFlower && !hasDrop){
-        html+=`<button data-logcut="${farm.id}|${tree.id}" style="border:1.5px solid var(--warn);background:${hasCut?'#f6e8d2':'#fdf3e4'};border-radius:10px;padding:11px 8px;font-size:12.5px;font-weight:700;text-align:center;color:var(--warn);cursor:pointer">${hasCut?T('✎ 割果日','✎ Cut date'):T('＋ 记录割果日','＋ Log cut date')}</button>`;
+        html+=`<button data-logcut="${farm.id}|${tree.id}" style="border:1.5px solid var(--warn);background:${hasCut?'#f6e8d2':'#fdf3e4'};border-radius:12px;padding:16px 10px;font-size:13.5px;font-weight:700;text-align:center;min-height:58px;display:flex;align-items:center;justify-content:center;line-height:1.25;color:var(--warn);cursor:pointer">${hasCut?T('✎ 割果日','✎ Cut date'):T('＋ 记录割果日','＋ Log cut date')}</button>`;
       }
       const calcOpen=openMenus.has('calc:'+farm.id+'|'+tree.id);
-      html+=`<button data-runtree="${farm.id}|${tree.id}" style="border:1.5px solid var(--flesh);background:${calcOpen?'#f6e8d2':'#fffaf0'};border-radius:10px;padding:11px 8px;font-size:12.5px;font-weight:700;text-align:center;color:var(--warn);cursor:pointer">${calcOpen?T('▲ 收起决策','▲ Close calc'):T('用采收决策算','Run harvest calc')}</button>`;
+      html+=`<button data-runtree="${farm.id}|${tree.id}" style="border:1.5px solid var(--flesh);background:${calcOpen?'#f6e8d2':'#fffaf0'};border-radius:12px;padding:16px 10px;font-size:13.5px;font-weight:700;text-align:center;min-height:58px;display:flex;align-items:center;justify-content:center;line-height:1.25;color:var(--warn);cursor:pointer">${calcOpen?T('▲ 收起决策','▲ Close calc'):T('用采收决策算','Run harvest calc')}</button>`;
       if(hasFlower){
         const fbv=lastLog.feedback;
         const emap={happy:'😊',ok:'😐',unhappy:'🙁'};
         const hasFb=!!(fbv&&(fbv.rating||fbv.note));
         const fbLabel = hasFb ? (fbv.rating?emap[fbv.rating]+' ':'✎ ')+T('反馈','Feedback') : T('＋ 顾客反馈','＋ Customer feedback');
-        html+=`<button data-feedback="${farm.id}|${tree.id}" style="grid-column:1/-1;border:1.5px solid var(--shell);background:${hasFb?'#eef1f7':'#fff'};border-radius:10px;padding:11px 8px;font-size:12.5px;font-weight:700;text-align:center;color:var(--shell);cursor:pointer">${fbLabel}</button>`;
+        html+=`<button data-feedback="${farm.id}|${tree.id}" style="grid-column:1/-1;border:1.5px solid var(--shell);background:${hasFb?'#eef1f7':'#fff'};border-radius:12px;padding:16px 10px;font-size:13.5px;font-weight:700;text-align:center;min-height:58px;display:flex;align-items:center;justify-content:center;line-height:1.25;color:var(--shell);cursor:pointer">${fbLabel}</button>`;
       }
       html+=`</div>`; // close actions row
       // ---- inline harvest calc (plucking only) — expands here, no page jump ----
