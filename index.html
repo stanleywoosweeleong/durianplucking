@@ -1,0 +1,2329 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#1f3a2e">
+<meta name="description" content="Durian ripening science & harvest-timing decision tool (树熟 vs 割果).">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="榴梿成熟学">
+<title>树熟 · 割果 · 决策 · 榴梿成熟学</title>
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" sizes="180x180" href="icon-180.png">
+<link rel="apple-touch-icon" sizes="167x167" href="icon-167.png">
+<link rel="apple-touch-icon" sizes="152x152" href="icon-152.png">
+<link rel="manifest" href="manifest.json">
+<style>
+:root{
+  --shell:#1f3a2e;      /* durian shell dark green */
+  --shell-2:#2c5140;
+  --flesh:#e8a94b;      /* ripe flesh amber */
+  --flesh-hi:#f4c66d;
+  --cream:#f6efdf;      /* pale custard */
+  --cream-2:#efe4c9;
+  --paper:#fdfaf3;      /* very light warm tint for white cards */
+  --ink:#23281f;
+  --ink-soft:#54604b;
+  --thorn:#8a9a5b;      /* muted spike green */
+  --danger:#b4482f;
+  --line:#d8cba7;
+  --good:#3f7d55;
+  --warn:#c98a2b;
+  --shadow:0 2px 14px rgba(31,58,46,.12);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{
+  font-family:"Noto Sans SC","PingFang SC","Microsoft YaHei",-apple-system,system-ui,sans-serif;
+  background:var(--cream);color:var(--ink);
+  line-height:1.6;font-size:16px;
+  padding-bottom:env(safe-area-inset-bottom);
+}
+.wrap{max-width:720px;margin:0 auto}
+/* ---- header ---- */
+header{
+  background:linear-gradient(160deg,var(--shell) 0%,var(--shell-2) 100%);
+  color:var(--cream);padding:20px 18px 16px;
+  padding-top:calc(20px + env(safe-area-inset-top));
+  position:relative;overflow:hidden;
+}
+header .spikes{position:absolute;inset:0;opacity:.13;pointer-events:none}
+.htitle{display:flex;align-items:center;gap:12px;position:relative;z-index:1}
+.htitle svg{flex:0 0 auto}
+.htitle h1{font-size:20px;margin:0;font-weight:800;letter-spacing:.5px}
+.htitle .sub{font-size:12.5px;opacity:.82;margin-top:2px;font-weight:400}
+.credit{font-size:11px;opacity:.6;margin-top:10px;position:relative;z-index:1}
+/* ---- lang toggle ---- */
+.langbtn{
+  margin-left:auto;align-self:flex-start;margin-top:3px;flex:0 0 auto;
+  background:rgba(246,239,223,.14);border:1px solid rgba(246,239,223,.3);
+  color:var(--cream);border-radius:20px;padding:5px 13px;font-size:13px;font-weight:600;
+  cursor:pointer;backdrop-filter:blur(4px)
+}
+/* ---- tabs ---- */
+.tabs{display:flex;background:var(--shell-2);position:sticky;top:0;z-index:5}
+.tab{
+  flex:1;text-align:center;padding:13px 5px;color:rgba(246,239,223,.6);
+  font-weight:700;font-size:14px;cursor:pointer;border:none;background:none;
+  border-bottom:3px solid transparent;transition:.18s
+}
+.tab.active{color:var(--flesh-hi);border-bottom-color:var(--flesh)}
+/* ---- panels ---- */
+main{padding:18px 16px 40px}
+.panel{display:none;animation:fade .3s}
+.panel.active{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+/* ---- guide cards ---- */
+.lead{
+  background:linear-gradient(135deg,var(--flesh) 0%,var(--flesh-hi) 100%);
+  color:#4a3410;border-radius:16px;padding:16px 18px;margin-bottom:18px;
+  box-shadow:var(--shadow);font-weight:500
+}
+.lead b{font-weight:800}
+.card{
+  background:var(--paper);border:1px solid var(--line);border-radius:14px;
+  padding:16px 17px;margin-bottom:14px;box-shadow:var(--shadow)
+}
+.card h3{
+  margin:0 0 4px;font-size:16.5px;display:flex;align-items:center;gap:9px;color:var(--shell)
+}
+.card h3 .n{
+  flex:0 0 auto;width:26px;height:26px;border-radius:8px;background:var(--shell);
+  color:var(--flesh-hi);font-size:14px;display:grid;place-items:center;font-weight:800
+}
+.card .ts{font-size:11px;color:var(--thorn);font-weight:700;letter-spacing:.5px;margin-left:auto}
+.card p{margin:8px 0 0;font-size:14.5px;color:var(--ink)}
+.card .hi{color:var(--danger);font-weight:700}
+.card .term{color:var(--shell);font-weight:700}
+.pill-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:11px}
+.pill{background:var(--cream-2);border-radius:20px;padding:4px 12px;font-size:12.5px;font-weight:600;color:var(--ink-soft)}
+.vs{
+  display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:0;margin-top:11px;
+  border-radius:12px;overflow:hidden;border:1px solid var(--line);align-items:stretch
+}
+.vs>div{padding:11px 12px;font-size:13px}
+.vs .h{font-weight:800;font-size:13.5px;margin-bottom:4px}
+.vs .tree{background:#eef5ec}.vs .tree .h{color:var(--good)}
+.vs .pluck{background:#fdf3e4}.vs .pluck .h{color:var(--warn)}
+.vs .mid{background:var(--shell);color:var(--cream);display:grid;place-items:center;font-weight:800;font-size:12px;padding:0 8px}
+.quote{
+  border-left:3px solid var(--flesh);padding:6px 0 6px 13px;margin:11px 0 0;
+  font-size:13.5px;color:var(--ink-soft)
+}
+.labrow{display:grid;grid-template-columns:38% 62%;gap:8px;padding:9px 11px;font-size:12.5px;border-top:1px solid var(--line);align-items:start;color:var(--ink)}
+.labrow:first-child{border-top:none}
+.labrow small{color:var(--ink-soft);font-size:11px;font-weight:400}
+.labrow b{color:var(--shell)}
+/* ---- decision tool ---- */
+.tool-intro{font-size:14px;color:var(--ink-soft);margin-bottom:16px}
+.field{margin-bottom:18px}
+.field>label{display:block;font-weight:800;font-size:14.5px;margin-bottom:9px;color:var(--shell)}
+.field .hint{font-weight:400;color:var(--ink-soft);font-size:12.5px;margin-top:3px}
+/* Make the ENTIRE date field open the picker on tap (not just the icon). The
+   WebKit calendar-picker-indicator is stretched to cover the whole input, so any
+   tap on iOS Safari / Chrome triggers the native picker. A visible glyph is drawn
+   via background-image so users still see the calendar affordance. */
+#flowerDate{
+  -webkit-appearance:none;appearance:none;position:relative;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%231f3a2e' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><rect x='3' y='4' width='18' height='18' rx='2'/><line x1='16' y1='2' x2='16' y2='6'/><line x1='8' y1='2' x2='8' y2='6'/><line x1='3' y1='10' x2='21' y2='10'/></svg>");
+  background-repeat:no-repeat;background-position:right 14px center;
+}
+#flowerDate::-webkit-calendar-picker-indicator{
+  position:absolute;top:0;left:0;right:0;bottom:0;width:auto;height:auto;
+  margin:0;padding:0;opacity:0;cursor:pointer;
+}
+.opts{display:flex;flex-direction:column;gap:9px}
+.opt{
+  border:1.5px solid var(--line);border-radius:12px;padding:12px 14px;cursor:pointer;
+  background:#fff;transition:.15s;display:flex;align-items:flex-start;gap:11px
+}
+.opt:hover{border-color:var(--thorn)}
+.opt.sel{border-color:var(--flesh);background:#fffaf0;box-shadow:0 0 0 3px rgba(232,169,75,.14)}
+.opt .dot{flex:0 0 auto;width:18px;height:18px;border-radius:50%;border:2px solid var(--line);margin-top:2px;transition:.15s}
+.opt.sel .dot{border-color:var(--flesh);background:var(--flesh);box-shadow:inset 0 0 0 3px #fff}
+.opt .lbl{font-weight:700;font-size:14.5px}
+.opt .desc{font-size:12.5px;color:var(--ink-soft);margin-top:2px}
+/* Tile variant: equal-width side-by-side, no top/bottom hierarchy, no wasted right space */
+.opts.tiles{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.opts.tiles.three{grid-template-columns:1fr 1fr 1fr}
+.opts.tiles .opt{flex-direction:column;align-items:center;text-align:center;gap:5px;padding:14px 10px;justify-content:flex-start}
+.opts.tiles .opt .dot{display:none}
+.opts.tiles .opt .lbl{font-size:14px}
+.opts.tiles .opt .desc{font-size:11.5px;line-height:1.4}
+@media (max-width:360px){.opts.tiles.three{grid-template-columns:1fr}}
+/* Clone tiles: 11 varieties with DAA detail — keep name prominent, description compact */
+.opts.clone-tiles .opt{align-items:flex-start;text-align:left;padding:11px 12px;gap:3px}
+.opts.clone-tiles .opt .lbl{font-size:13.5px;line-height:1.25}
+.opts.clone-tiles .opt .desc{font-size:10.5px;line-height:1.35}
+.seg{display:flex;gap:8px;flex-wrap:wrap}
+.seg button{
+  flex:1;min-width:80px;border:1.5px solid var(--line);background:#fff;border-radius:10px;
+  padding:10px 6px;font-weight:700;font-size:14px;cursor:pointer;color:var(--ink-soft);transition:.15s
+}
+.seg button.sel{border-color:var(--flesh);background:var(--shell);color:var(--flesh-hi)}
+.btn-go{
+  width:100%;border:none;border-radius:13px;padding:15px;font-size:16px;font-weight:800;
+  background:linear-gradient(135deg,var(--flesh) 0%,#dd8f2f 100%);color:#3a2708;cursor:pointer;
+  box-shadow:var(--shadow);margin-top:4px
+}
+.btn-go:disabled{opacity:.45;cursor:not-allowed}
+/* ---- result ---- */
+.result{margin-top:22px;display:none}
+.result.show{display:block;animation:fade .35s}
+.verdict{
+  border-radius:16px;padding:18px;color:#fff;box-shadow:var(--shadow);margin-bottom:14px;
+  border:2.5px solid var(--flesh)
+}
+.verdict .vk{font-size:12px;font-weight:700;opacity:.85;letter-spacing:1px;text-transform:uppercase}
+.verdict .vt{font-size:22px;font-weight:800;margin:4px 0 6px}
+.verdict .vd{font-size:14px;opacity:.95}
+.v-tree{background:linear-gradient(135deg,#3f7d55,#2c5140)}
+.v-high{background:linear-gradient(135deg,#c98a2b,#a5641c)}
+.v-std{background:linear-gradient(135deg,#4a6b8a,#2f4a63)}
+.v-early{background:linear-gradient(135deg,#b4482f,#8a3320)}
+.rcard{background:var(--paper);border:1px solid var(--line);border-radius:13px;padding:15px 16px;margin-bottom:13px;box-shadow:var(--shadow)}
+.rcard h4{margin:0 0 9px;font-size:14px;color:var(--shell);display:flex;align-items:center;gap:8px}
+.rcard ul{margin:0;padding-left:18px}
+.rcard li{font-size:13.8px;margin-bottom:6px}
+.matbar{height:12px;border-radius:6px;background:var(--cream-2);overflow:hidden;margin:6px 0 4px}
+.matbar>i{display:block;height:100%;border-radius:6px;transition:width .6s}
+.matlabel{display:flex;justify-content:space-between;font-size:12px;color:var(--ink-soft);font-weight:600}
+.share{
+  width:100%;border:none;border-radius:12px;padding:13px;font-weight:800;font-size:15px;
+  background:#25aa5a;color:#fff;cursor:pointer;margin-top:4px;display:flex;align-items:center;justify-content:center;gap:8px
+}
+.disc{font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:16px;line-height:1.5}
+footer{text-align:center;padding:18px;font-size:11.5px;color:var(--thorn)}
+.en{display:none}
+body.lang-en .zh{display:none}
+body.lang-en .en{display:inline}
+body.lang-en .en.blk{display:block}
+</style>
+</head>
+<body class="lang-zh">
+<div class="wrap">
+<header>
+  <svg class="spikes" width="100%" height="100%" preserveAspectRatio="none" viewBox="0 0 400 120">
+    <g fill="#f4c66d">
+    <polygon points="20,120 30,80 40,120"/><polygon points="60,120 72,70 84,120"/>
+    <polygon points="110,120 120,85 130,120"/><polygon points="160,120 174,68 188,120"/>
+    <polygon points="220,120 230,82 240,120"/><polygon points="270,120 284,72 298,120"/>
+    <polygon points="330,120 340,84 350,120"/><polygon points="370,120 382,74 394,120"/>
+    </g>
+  </svg>
+  <div class="htitle">
+    <svg width="40" height="40" viewBox="0 0 48 48" fill="none">
+      <circle cx="24" cy="26" r="17" fill="#8a9a5b"/>
+      <g fill="#2c5140">
+      <polygon points="24,4 27,14 21,14"/><polygon points="38,9 38,19 31,15"/>
+      <polygon points="10,9 17,15 10,19"/><polygon points="44,24 36,26 44,30"/>
+      <polygon points="4,24 12,26 4,30"/><polygon points="38,41 31,37 38,35"/>
+      <polygon points="10,41 10,35 17,37"/>
+      </g>
+      <path d="M24 18 Q30 26 24 36 Q18 26 24 18Z" fill="#f4c66d"/>
+    </svg>
+    <div>
+      <h1><span class="zh">树熟 · 割果 · 决策</span><span class="en">Tree-drop · Cut · Decide</span></h1>
+      <div class="sub"><span class="zh">榴梿成熟学 · 用科学微调割果时机与风味</span><span class="en">Durian ripening science · tuning cut-timing & flavour</span></div>
+    </div>
+    <button class="langbtn" id="langBtn">EN</button>
+  </div>
+</header>
+
+<div class="tabs">
+  <button class="tab active" data-p="guide"><span class="zh">成熟科学</span><span class="en">The Science</span></button>
+  <button class="tab" data-p="tool"><span class="zh">采收决策</span><span class="en">Harvest Decision</span></button>
+  <button class="tab" data-p="farms"><span class="zh">我的果园</span><span class="en">My Farms</span></button>
+  <button class="tab" data-p="insights"><span class="zh">数据洞察</span><span class="en">Insights</span></button>
+</div>
+
+<main>
+<!-- ============ GUIDE ============ -->
+<section class="panel active" id="guide">
+  <div class="lead">
+    <span class="zh">2026年，「榴莲海啸」来袭 —— 各州同时爆量，园地价一度低过成本价。有人主张改学泰国「割果」保命，有人坚持「树熟」才是马来西亚风味的招牌。本工具不选边。它只用科学告诉你：每个品种能在多接近自然落果的时机安全割下、风味损失多少、货架期换来多少 —— 决定权在你，取决于你的市场与这一季的局势。</span>
+    <span class="en blk">2026: the "durian tsunami" — every state fruiting at once, farm-gate prices briefly falling below cost. Some argue Malaysia should adopt Thai-style cut-harvest to survive; others hold that tree-ripening is the flavour signature that sets Malaysia apart. This tool takes no side. It uses science to show, for each clone, how close to natural drop you can safely cut, how much flavour that costs, and how much shelf life it buys — the decision stays yours, and depends on your market and this season's conditions.</span>
+  </div>
+  <div class="card" style="border-color:var(--flesh);background:#fffaf0">
+    <h3><span class="zh" style="color:#a5641c">为什么这个决定开始变得关键</span><span class="en" style="color:#a5641c">Why this decision is starting to matter</span></h3>
+    <p><span class="zh">树熟果常温下约 1–2 天便会开裂（取肉后冷藏保鲜，或冷冻可存数月）。出口中国有几条路：空运约1天、能卖「树熟」溢价但运费高；冷藏海运约5–9天，成本低走量大；新开的「东盟快铁」（雪兰莪→重庆）约9天、以急冻为主。除空运外都需要提前一点采割来撑过在途 —— 这正是割果时机开始重要的地方。当本地市场被同季爆量淹没，果无处可去只能贱卖。就算没有区域性影响，随着大批规模化果园陆续投产，产量本身也会在国内造成「榴梿海啸」 —— 这不再是偶发，而是结构性的。无论今季价格是否回稳，能把成熟度判断建立在科学、而非猜测上的果农，才更有底气面对下一次爆量。这正是这个工具存在的原因。</span>
+    <span class="en">Tree-drop fruit cracks open in only 1–2 days at room temp (once opened, refrigerate the flesh, or freeze it to keep for months). Export to China runs a few ways: by air (~1 day, sells the tree-ripe premium but costs more); reefer sea (~5–9 days, cheaper and higher-volume); and the new ASEAN Express rail (Selangor→Chongqing, ~9 days, mostly frozen). Every mode but air needs cutting a little earlier to survive transit — which is exactly where harvest timing starts to matter. When the domestic market is flooded by a simultaneous glut, fruit has nowhere to go but a fire-sale. Even without any regional oversupply, as large-scale plantations keep coming into production, sheer volume will trigger a "durian tsunami" domestically — this is no longer a one-off, it's structural. Whether or not prices steady this season, the growers who ground their maturity decisions in science rather than guesswork will be the ones ready for the next glut. That is exactly why this tool exists.</span></p>
+  </div>
+
+  <div class="card">
+    <h3><span class="n">1</span><span class="zh">榴梿是呼吸跃变型水果</span><span class="en">Durian is a climacteric fruit</span><span class="ts">01:16</span></h3>
+    <p><span class="zh">榴梿属<span class="term">呼吸跃变型（climacteric）</span>果实：一旦在树上达到<b>生理成熟</b>，即使离树也能继续<b>后熟</b>。后熟期间，果实呼吸骤升（大量释放二氧化碳），<span class="term">乙烯</span>生成激增。</span>
+    <span class="en">Durian is a <span class="term">climacteric</span> fruit: once it reaches <b>physiological maturity</b> on the tree, it keeps <b>ripening</b> even after detachment. During this, respiration spikes (releasing CO₂) and <span class="term">ethylene</span> production surges.</span></p>
+    <div class="pill-row">
+      <span class="pill"><span class="zh">呼吸骤升</span><span class="en">Respiration spike</span></span>
+      <span class="pill"><span class="zh">乙烯激增</span><span class="en">Ethylene surge</span></span>
+      <span class="pill"><span class="zh">可离树后熟</span><span class="en">Ripens off-tree</span></span>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3><span class="n">2</span><span class="zh">乙烯：成熟的开关</span><span class="en">Ethylene: the ripening switch</span><span class="ts">01:51</span></h3>
+    <p><span class="zh">台湾植物生理学家<span class="term">杨祥发博士</span>在1980年代破解了植物合成乙烯的「<span class="term">杨氏循环（Yang Cycle）</span>」，奠定了果实催熟与保鲜的基础。乙烯这一关键激素，驱动果肉软化、<b>淀粉转化为糖</b>、以及标志性香气的形成。</span>
+    <span class="en">Taiwanese plant physiologist <span class="term">Dr. Shang Fa Yang</span> decoded how plants synthesize ethylene — the <span class="term">Yang Cycle</span> (1980s) — laying the foundation for fruit ripening and preservation. This key hormone drives flesh softening, <b>starch-to-sugar conversion</b>, and signature aroma formation.</span></p>
+    <div class="quote"><span class="zh">「催熟能让果实开裂，但开裂只是外表信号 —— 不代表里面的果肉真的成熟。」</span><span class="en">"Artificial ethylene can force cracking, but cracking is only an external sign — it doesn't mean the flesh inside is truly ripe."</span></div>
+  </div>
+
+  <div class="card">
+    <h3><span class="n">3</span><span class="zh">生理成熟 ≠ 好吃</span><span class="en">Physiological maturity ≠ quality</span><span class="ts">03:31</span></h3>
+    <p><span class="zh">树上达到「生理成熟」，只是果实能正常后熟的<b>最低门槛</b>。若采得太早，采后后熟会<span class="hi">微弱或不完整</span>。1990年代泰国研究已在<span class="term">金枕头（Monthong）</span>与<span class="term">青尼（Chanee）</span>等品种上证实这些跃变特性。</span>
+    <span class="en">Reaching physiological maturity on the tree is only the <b>minimum threshold</b> for proper off-tree ripening. Plucked too early, post-harvest ripening is <span class="hi">weak or incomplete</span>. 1990s Thai research confirmed these climacteric traits in <span class="term">Monthong</span> and <span class="term">Chanee</span>.</span></p>
+  </div>
+
+  <div class="card">
+    <h3><span class="n">4</span><span class="zh">采收方式如何影响风味</span><span class="en">How harvesting affects flavor</span><span class="ts">05:22</span></h3>
+    <p><span class="zh">榴梿的气味来自<span class="term">硫化物</span>（刺鼻味）与<span class="term">酯类化合物</span>（甜果香）。不同品种反应不同：</span>
+    <span class="en">Durian's smell comes from <span class="term">sulfur compounds</span> (pungency) and <span class="term">esters</span> (sweet fruity notes). Varieties react differently:</span></p>
+    <div class="vs">
+      <div class="pluck"><div class="h zh">金枕头 Monthong</div><div class="h en" style="display:none">Monthong</div><span class="zh">采摘后酯类香气与树熟极接近，非常适合出口。</span><span class="en">Plucked ester profile stays close to tree-ripe — excellent for export.</span></div>
+      <div class="mid"><span class="zh">vs</span><span class="en">vs</span></div>
+      <div class="tree"><div class="h zh">青尼 Chanee</div><div class="h en" style="display:none">Chanee</div><span class="zh">若非树熟，会损失部分芳香化合物。</span><span class="en">Loses some aromatic compounds unless tree-ripened.</span></div>
+    </div>
+    <p style="margin-top:12px"><span class="zh"><b>自然熟 vs 催熟：</b>自然成熟的果实始终有更软的果肉、更好的淀粉转糖、更高糖度。<b>越贴近该品种的落果窗口</b>采收，自然与催熟的品质差距就越小。</span>
+    <span class="en"><b>Natural vs artificial:</b> naturally ripened fruit consistently gives softer flesh, better starch-to-sugar conversion, and higher sugar. The <b>closer to that variety's drop window</b> you harvest, the smaller the quality gap becomes.</span></p>
+    <div class="quote" style="border-color:var(--good)"><span class="zh"><b>马来西亚 ≠ 泰国做法：</b>大马榴梿多为<b>树熟落网</b>（约130 DAA 落果），常温约1–2天即开裂；泰国则在生理成熟时<b>剪采</b>（青尼约90、金枕约105 DAA）以利运输出口。每个品种的成熟天数不同 —— 见「采收决策」中各品种的落果窗口。</span>
+    <span class="en"><b>Malaysia ≠ Thailand:</b> Malaysian durians are mostly <b>tree-dropped into nets</b> (~130 DAA), cracking open in ~1–2 days at room temp; Thailand <b>cuts at physiological maturity</b> (Chanee ~90, Monthong ~105 DAA) to enable export. Each clone's maturity differs — see the per-clone drop windows in the Harvest Decision tab.</span></div>
+  </div>
+
+  <div class="card" style="border-left:4px solid var(--good)">
+    <h3><span class="n" style="background:var(--good)">✓</span><span class="zh">关键：存在「安全割果窗口」</span><span class="en">Key: a "safe cut window" exists</span></h3>
+    <p><span class="zh">这是本工具的科学核心。MARDI 对猫山王（D197）的研究显示：在 <b>15 周（约105 DAA）</b>割下的果，其<b>干物质、糖度（约40 °Brix）、果肉颜色、软硬度与感官口味，与自然落果果几乎一致</b>；而更早的 13–14 周则明显不足。</span>
+    <span class="en">This is the tool's scientific core. MARDI's study on Musang King (D197) found that fruit cut at <b>15 weeks (~105 DAA)</b> matched naturally-abscised fruit in <b>dry matter, sugar (~40 °Brix), pulp colour, firmness and sensory taste</b> — while earlier 13–14 week fruit fell clearly short.</span></p>
+    <p><span class="zh">换句话说：<b>并非「割果 = 差」，而是「割得太早 = 差」。</b>贴近落果窗口的<b>迟割</b>，能保住绝大部分风味，同时换来运输所需的货架期。这正是树熟与泰式早割之间的第三条路。</span>
+    <span class="en">In other words: <b>it's not "cutting = worse," it's "cutting too early = worse."</b> A <b>late cut</b> close to the drop window keeps most of the flavour while buying the shelf life transport needs. This is the third path between tree-drop and Thai-style early cutting.</span></p>
+    <div class="quote" style="border-color:var(--good)"><span class="zh">许多果农已在做的「14–17周吊网」正是这个原理：让果留树到接近成熟，落下时由网接住，而非直接落地。本工具把这个判断量化到每个品种。</span><span class="en">The "week 14–17 tie-netting" many growers already practise works on exactly this principle: keep fruit on the tree near maturity, catch it in a net instead of letting it hit the ground. This tool quantifies that judgment per clone.</span></div>
+  </div>
+
+  <div class="card">
+    <h3><span class="n">5</span><span class="zh">核心差异与未来指标</span><span class="en">Core difference & future markers</span><span class="ts">07:56</span></h3>
+    <p><span class="zh">最新研究发现，随着成熟，果柄中的<span class="term">天冬酰胺</span>显著上升 —— 目前虽只是实验室指标，未来或成为检测精确成熟度的生化标记。</span>
+    <span class="en">Recent studies show <span class="term">aspartic acid / asparagine</span> in the stalk rises sharply with maturity — currently a lab metric, but potentially a future biochemical maturity marker.</span></p>
+    <div class="quote"><span class="zh">树熟果在离树前，已从母树累积了<b>最大干物质、淀粉与香气前体</b>；采摘果则只能依赖被切下那一刻已储备的资源。</span><span class="en">Tree-ripe fruit accumulates <b>maximum dry matter, starch, and aroma precursors</b> from the mother tree before peak ripeness; plucked fruit relies only on what it had stored the moment it was cut.</span></div>
+  </div>
+
+  <div class="card" style="background:var(--shell);border-color:var(--shell)">
+    <h3 style="color:var(--flesh-hi)"><span class="zh" style="color:var(--flesh-hi)">这个工具怎么用</span><span class="en" style="color:var(--flesh-hi)">How to use this tool</span></h3>
+    <p style="color:var(--cream)"><span class="zh">在「采收决策」中，依序选：目标市场 → 采收方式（割果／树熟）→ 品种 → 开花（授粉）日期 → 割果成熟度。工具会向前推算<b>预计割果日</b>，并给出<b>成熟度</b>、<b>该割点的风味保留率</b>与<b>换来的货架期</b>。数字是中立的科学参考 —— 是否值得为出口牺牲一点风味，由你的市场和这一季的价格决定。</span>
+    <span class="en">In "Harvest Decision," work through them in order: target market → harvest method (cut/tree-drop) → clone → flowering (anthesis) date → cut ripeness. The tool projects the <b>expected cut date</b> and returns <b>maturity</b>, <b>flavour retained at that cut point</b>, and <b>shelf life gained</b>. The numbers are a neutral scientific reference — whether trading a little flavour for export reach is worth it depends on your market and this season's prices, which only you can weigh.</span></p>
+  <div class="card" style="border-left:4px solid var(--shell);margin-top:18px">
+    <h3><span class="n" style="background:var(--shell)">🔬</span><span class="zh">送验实验室：该看哪些参数</span><span class="en">Lab panel: what to measure</span></h3>
+    <p><span class="zh">Brix（甜度）只是一个维度。榴梿的好吃是<b>干物质、质地、酸度、硫化物、酯类</b>共同决定的。若你把样本送到实验室，请求以下参数，能大幅加快割果时机的校准 —— 把「几天割」对应到「实测品质」，一两季就能建立自己树的基准。</span>
+    <span class="en">Brix alone is one axis. Durian eating quality is set by <b>dry matter, texture, acidity, sulfur volatiles and esters</b> together. If you send samples to a lab, request the parameters below — they let you map "cut day" to "measured quality" and build your own orchard baseline within a season or two.</span></p>
+
+    <div style="margin-top:12px;border:1px solid var(--line);border-radius:12px;overflow:hidden">
+      <div class="labrow" style="background:var(--cream-2);font-weight:800;font-size:12px">
+        <span><span class="zh">参数</span><span class="en">Parameter</span></span>
+        <span><span class="zh">参考范围 / 门槛</span><span class="en">Reference / threshold</span></span>
+      </div>
+      <div class="labrow"><span><b><span class="zh">干物质 DMC</span><span class="en">Dry matter (DMC)</span></b><br><small><span class="zh">最可靠的成熟指标（Codex/TAS 标准）</span><span class="en">Most trusted maturity index (Codex/TAS)</span></small></span>
+        <span><span class="zh">金枕头 ≥32%、青尼 ≥30%、一般 27–30% 为下限；熟果可达 37–40%</span><span class="en">Monthong ≥32%, Chanee ≥30%, others 27–30% floor; ripe up to 37–40%</span></span></div>
+      <div class="labrow"><span><b>TSS (°Brix)</b><br><small><span class="zh">可溶性固形物 / 糖度</span><span class="en">Soluble solids / sugar</span></small></span>
+        <span><span class="zh">随成熟上升；D197 熟果约 28–38（°Brix 或以糖度计）。<b>不可单独判断</b></span><span class="en">Rises with maturity; ripe D197 ~28–38. <b>Not standalone</b></span></span></div>
+      <div class="labrow"><span><b><span class="zh">果肉硬度</span><span class="en">Firmness</span></b><br><small>N/cm²</small></span>
+        <span><span class="zh">高硬度=偏生（质地市场）；成熟后下降。90–105 DAA 硬而不甜，105–120 DAA 软而甜</span><span class="en">High = firm/less sweet (texture markets); falls as it ripens. 90–105 DAA firm/low-sweet; 105–120 DAA soft/sweet</span></span></div>
+      <div class="labrow"><span><b><span class="zh">可滴定酸 TA / pH</span><span class="en">Titratable acidity / pH</span></b></span>
+        <span><span class="zh">平衡甜酸；随成熟与储存变化，追踪风味走向与发酵</span><span class="en">Sweet–acid balance; tracks flavour direction & fermentation onset</span></span></div>
+      <div class="labrow"><span><b><span class="zh">硫化物挥发物</span><span class="en">Sulfur volatiles</span></b><br><small><span class="zh">刺鼻香气</span><span class="en">pungent aroma</span></small></span>
+        <span><span class="zh">乙硫醇、二乙基二硫、二乙基三硫、3,5-二甲基-1,2,4-三硫杂环戊烷（SPME-GC/MS）</span><span class="en">Ethanethiol, diethyl disulfide/trisulfide, 3,5-dimethyl-1,2,4-trithiolane (SPME-GC/MS)</span></span></div>
+      <div class="labrow"><span><b><span class="zh">酯类</span><span class="en">Esters</span></b><br><small><span class="zh">甜果香 · 溢价关键</span><span class="en">sweet/fruity · premium marker</span></small></span>
+        <span><span class="zh">乙基-2-甲基丁酸酯、己酸乙酯。<b>树熟/迟割的招牌香</b>，早割易流失</span><span class="en">Ethyl-2-methylbutanoate, ethyl hexanoate. <b>The tree-ripe signature</b>; lost on early cuts</span></span></div>
+      <div class="labrow"><span><b><span class="zh">抗氧化 / 类胡萝卜素</span><span class="en">Antioxidants / carotenoids</span></b><br><small><span class="zh">选做</span><span class="en">optional</span></small></span>
+        <span><span class="zh">总酚、类黄酮、β-胡萝卜素、番茄红素 —— 随成熟上升，佐证熟度与营养</span><span class="en">Phenolics, flavonoids, β-carotene, lycopene — rise with maturity; corroborate ripeness & nutrition</span></span></div>
+    </div>
+
+    <div class="quote" style="border-color:var(--shell);margin-top:13px"><span class="zh"><b>校准做法：</b>每个割果成熟度（85/90/95%）各留几颗，再留一批树熟落果作 100% 基准；割下当天送验 DMC + TSS + 硬度 + 硫化物/酯类，并配一次小型感官评分。把结果记进表格，一两季后你就能用<b>自己树的实测</b>取代通用参考，割果时机会越来越准。</span>
+    <span class="en"><b>How to calibrate:</b> for each cut target (85/90/95%), plus a batch left to tree-drop as your 100% baseline, set aside a few fruit, send DMC + TSS + firmness + sulfur/esters on cut day, and pair with a small sensory score. Log it — after a season or two you replace the generic reference with <b>your own orchard's measured data</b>, and cut-timing gets sharper each cycle.</span></div>
+
+    <p style="margin-top:11px;font-size:12.5px;color:var(--ink-soft)"><span class="zh">注：DMC 有便携式「干物质计」可现场约 3 分钟测（约 25% 生果 → 40% 熟果）；硫化物与酯类需 SPME-GC/MS，通常送大学或研究机构。</span><span class="en">Note: portable "dry-matter meters" read DMC in ~3 min on-site (~25% immature → 40% ripe); sulfur/ester volatiles need SPME-GC/MS, usually via a university or research lab.</span></p>
+  </div>
+
+  <div class="card" style="border-left:4px solid var(--shell)">
+    <h3><span class="n" style="background:var(--shell)">📚</span><span class="zh">DAA 数字的出处（不只 MARDI）</span><span class="en">Where the DAA numbers come from (not just MARDI)</span></h3>
+    <p><span class="zh">很多果农不认同某个 DAA 数字 —— 这是合理的，因为<b>数字本来就会因树龄、气候、地区、以及「割熟 vs 树熟」而不同</b>。下面列出各品种的独立研究来源，让你看到区间，而非单一权威。</span>
+    <span class="en">Many growers disagree with a given DAA figure — fairly, because <b>the number genuinely shifts with tree age, climate, region, and "cut-mature vs tree-drop."</b> Below are independent research sources per clone so you see the range, not one authority.</span></p>
+
+    <div class="quote" style="border-color:var(--flesh);margin-top:12px"><span class="zh"><b>为什么数字会打架：</b>泰国研究多以<b>「商业成熟即剪采」</b>为准（较早，如青尼约90、金枕约105 DAA）；马来西亚以<b>「自然落果」</b>为准（较迟，如金枕树熟约120–130 DAA）。<b>同一颗果，终点不同，数字自然不同。</b>本工具把「割果窗口」定在两者之间，并让你用目标成熟度自行调整。</span>
+    <span class="en"><b>Why the numbers clash:</b> Thai research measures <b>"cut at commercial maturity"</b> (earlier — Chanee ~90, Monthong ~105 DAA); Malaysia measures <b>"natural drop"</b> (later — Monthong tree-ripe ~120–130 DAA). <b>Same fruit, different endpoint, different number.</b> This tool sets the cut window between the two and lets you tune with the ripeness dial.</span></div>
+
+    <div style="margin-top:13px;border:1px solid var(--line);border-radius:12px;overflow:hidden">
+      <div class="labrow" style="background:var(--cream-2);font-weight:800;font-size:12px">
+        <span><span class="zh">品种</span><span class="en">Clone</span></span>
+        <span><span class="zh">独立来源与 DAA</span><span class="en">Independent sources & DAA</span></span>
+      </div>
+      <div class="labrow"><span><b>D197 Musang King</b></span>
+        <span><span class="zh">MARDI（15 周≈落果品质）；UPM/Pertanika 授粉研究（发育至落果）；越南芹苴大学 2025（果实发育约 90 天，70–90 DAFS 为成熟期）。马来西亚以树熟落果为准。</span><span class="en">MARDI (15 WAA ≈ abscised quality); UPM/Pertanika pollination study; Can Tho Univ. 2025 (dev. ~90 d, ripening 70–90 DAFS). Malaysia = tree-drop endpoint.</span></span></div>
+      <div class="labrow"><span><b>D24 Sultan / XO</b></span>
+        <span><span class="zh">UPM 转录组研究：早 90、成熟 120、后熟 127 DPA；马来西亚农业部：落果 105–115 DAA（中季）。</span><span class="en">UPM transcriptome: early 90, mature 120, ripe 127 DPA; Malaysia DOA: drops 105–115 DAA (mid-season).</span></span></div>
+      <div class="labrow"><span><b>D123 Chanee</b></span>
+        <span><span class="zh">Nature Sci. Reports（Trat 省）：成熟约 90 DAA；DOA / DurianPro：开花到收成约 100–120 天。多来源一致：早熟、快后熟（剪后约3天熟）。</span><span class="en">Nature Sci. Reports (Trat): mature ~90 DAA; DOA/DurianPro: ~100–120 d flower-to-harvest. Sources agree: early, fast-ripening (~3 d after cut).</span></span></div>
+      <div class="labrow"><span><b>D159 Monthong</b></span>
+        <span><span class="zh">Nature（商业成熟约 105 DAA）；Growth &amp; Maturation 研究（授粉至成熟 120–127 天）；棘刺光谱分类跨 106–134 DAA。105 与 120–130 之差＝泰式割采 vs 树熟。</span><span class="en">Nature (commercial mature ~105 DAA); Growth &amp; Maturation study (anthesis→mature 120–127 d); spine-spectroscopy spans 106–134 DAA. The 105 vs 120–130 gap = Thai cut vs tree-drop.</span></span></div>
+      <div class="labrow"><span><b><span class="zh">通用范围</span><span class="en">General range</span></b></span>
+        <span><span class="zh">Lim &amp; Luders、Wisutiamonkul、Thongkum 等综述：<b>坐果至成熟 95–135 天，因品种而异</b>。黑刺、红虾、竹脚等本地种落在此区间偏迟端。</span><span class="en">Lim &amp; Luders, Wisutiamonkul, Thongkum reviews: <b>fruit-set to maturity 95–135 d, cultivar-dependent</b>. Black Thorn, Red Prawn, Tekka sit toward the later end.</span></span></div>
+    </div>
+
+    <div class="quote" style="border-color:var(--good);margin-top:13px"><span class="zh"><b>最重要的一条：</b>这些都是参考区间，不是定律。<b>你自己园地、逐季记录的落果日 ÷ 授粉日，才是最准的 DAA。</b>用久了，就用你的数字覆盖这里的通用值 —— 那时没有果农能再跟你争。</span>
+    <span class="en"><b>The one that matters most:</b> these are reference ranges, not laws. <b>Your own orchard's logged drop-date minus anthesis-date is the most accurate DAA there is.</b> Once you have a season or two, replace these generic figures with yours — then no grower can argue with you.</span></div>
+  </div>
+
+  <div class="card" style="border-left:4px solid var(--flesh)">
+    <h3><span class="n" style="background:var(--flesh);color:#3a2708">%</span><span class="zh">「风味保留率」是怎么算的</span><span class="en">How "flavour retention %" is calculated</span></h3>
+    <p><span class="zh"><b>先说清楚：这是一个模型估算，不是实验室实测。</b>它的<b>形状与锚点有研究依据</b>，但每个百分比是锚点之间的<b>线性插值</b>，方便你直观比较不同割果时机 —— 不代表「割在90%就一定保留84%风味」。真正的校准，靠你自己的感官记录。</span>
+    <span class="en"><b>Up front: this is a model estimate, not a lab measurement.</b> Its <b>shape and anchor points are research-based</b>, but each percentage is a <b>linear interpolation</b> between those anchors — a way to compare cut timings at a glance, not a claim that "cutting at 90% retains exactly 84% of flavour." Real calibration comes from your own sensory log.</span></p>
+
+    <div style="margin-top:12px;background:#fffaf0;border:1.5px solid var(--flesh);border-radius:12px;padding:13px 14px">
+      <div style="font-size:12.5px;font-weight:800;color:var(--shell);margin-bottom:8px"><span class="zh">锚点（相对自然落果 = 100%）</span><span class="en">Anchor points (vs natural drop = 100%)</span></div>
+      <svg viewBox="0 0 300 120" style="width:100%;height:auto;display:block">
+        <line x1="34" y1="8" x2="34" y2="100" stroke="var(--line)" stroke-width="1"/>
+        <line x1="34" y1="100" x2="292" y2="100" stroke="var(--line)" stroke-width="1"/>
+        <polyline points="46,83 130,31 210,19 270,16" fill="none" stroke="var(--flesh)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="46" cy="83" r="3.5" fill="#b4482f"/>
+        <circle cx="130" cy="31" r="3.5" fill="#c98a2b"/>
+        <circle cx="210" cy="19" r="3.5" fill="#3f7d55"/>
+        <circle cx="270" cy="16" r="3.5" fill="#3f7d55"/>
+        <text x="52" y="80" font-size="9" font-weight="700" fill="#b4482f" text-anchor="start">78%</text>
+        <text x="130" y="24" font-size="9" font-weight="700" fill="#c98a2b" text-anchor="middle">95%</text>
+        <text x="204" y="14" font-size="9" font-weight="700" fill="#3f7d55" text-anchor="end">99%</text>
+        <text x="276" y="14" font-size="9" font-weight="700" fill="#3f7d55" text-anchor="start">100%</text>
+        <text x="46" y="112" font-size="8" fill="var(--ink-soft)" text-anchor="middle">min</text>
+        <text x="130" y="112" font-size="8" fill="var(--ink-soft)" text-anchor="middle">dropLo</text>
+        <text x="210" y="112" font-size="8" fill="var(--ink-soft)" text-anchor="middle">dropHi</text>
+        <text x="270" y="112" font-size="8" fill="var(--ink-soft)" text-anchor="middle">drop+</text>
+      </svg>
+      <div style="font-size:11.5px;color:var(--ink-soft);line-height:1.6;margin-top:6px">
+        <span class="zh">· <b>自然落果后</b>（drop+）：<b>100%</b> 风味（峰值基准）<br>· <b>落果窗口内</b>（dropHi）：≈ <b>99%</b><br>· <b>可采下限</b>（dropLo）：≈ <b>95%</b><br>· <b>生理成熟门槛</b>（min）：≈ <b>78%</b>（达标但风味未满）<br>· <b>门槛以下</b>：每早一天约 −4%，急剧下滑（后熟不完整）</span>
+        <span class="en">· <b>After natural drop</b> (drop+): <b>100%</b> flavour (peak baseline)<br>· <b>In drop window</b> (dropHi): ≈ <b>99%</b><br>· <b>Earliest good cut</b> (dropLo): ≈ <b>95%</b><br>· <b>Maturity threshold</b> (min): ≈ <b>78%</b> (mature but not full)<br>· <b>Below threshold</b>: ~−4% per day earlier, steep drop (incomplete ripening)</span>
+      </div>
+    </div>
+
+    <div style="margin-top:12px;font-size:12.5px;color:var(--ink);line-height:1.6">
+      <b><span class="zh">锚点的研究依据：</span><span class="en">What the anchors rest on:</span></b>
+      <span class="zh"><br>① 自然落果 = 风味峰值 —— 大马业界与多份文献一致（落果果「creamy、pungent、peak ripeness」）。<br>② 近落果剪采 ≈ 落果品质 —— MARDI D197：约15周（≈落果）剪采，在干物质、糖度、颜色、硬度、感官上与落果果相当；更早则不足。<br>③ 早割风味显著变差 —— 综述文献：未成熟果「不能正常后熟，风味明显变差」。<br>④ 成熟度可量化 —— 金枕头成熟指数研究（ISHS/Somsri）用感官评级 50%→90%，与干物质高度相关（R²=0.8）。</span>
+      <span class="en"><br>① Natural drop = peak flavour — Malaysian practice + multiple sources (dropped fruit is "creamy, pungent, peak ripeness").<br>② Near-drop cut ≈ abscised quality — MARDI D197: ~15 WAA (≈drop) cut matches dropped fruit in dry matter, TSS, colour, firmness, sensory; earlier falls short.<br>③ Early cutting clearly worse — reviews: immature fruit "won't ripen properly, substantially less flavour."<br>④ Maturity is quantifiable — Monthong maturity-index study (ISHS/Somsri) ranked 50%→90% by sensory, strongly correlated with dry matter (R²=0.8).</span>
+    </div>
+
+    <div class="quote" style="border-color:var(--good);margin-top:13px"><span class="zh"><b>怎么让它更准：</b>用「送验实验室」面板 —— 每个割果目标各留几颗，实测干物质/糖度/硬度并配感官评分。把你的实测覆盖这条通用曲线，风味保留率就从「估算」变成「你园地的实测」。</span>
+    <span class="en"><b>How to make it accurate:</b> use the Lab Panel — for each cut target, set aside a few fruit, measure dry matter/Brix/firmness and add a sensory score. Overlay your data on this generic curve, and flavour retention shifts from "estimate" to "your orchard's measured reality."</span></div>
+  </div>
+  <div class="card" style="border-left:4px solid var(--danger)">
+    <h3><span class="n" style="background:var(--danger)">▶</span><span class="zh">来源视频</span><span class="en">Source video</span></h3>
+    <p><span class="zh">本工具的科学依据整理自 <b>ChangChai NG</b> 的榴梿成熟科普。扫码或点击链接观看原视频。</span><span class="en">The science in this tool is summarized from <b>ChangChai NG</b>’s durian ripening explainer. Scan the QR or tap the link to watch the source video.</span></p>
+    <div style="display:flex;align-items:center;gap:14px;margin-top:12px;flex-wrap:wrap">
+      <a href="https://www.youtube.com/watch?v=5HChSHhUK_k&amp;t=3s" target="_blank" rel="noopener" style="flex:0 0 auto;display:block;width:128px;height:128px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:8px" aria-label="ChangChai NG YouTube video"><svg viewBox="0 0 37 37" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;display:block" shape-rendering="crispEdges" role="img" aria-label="QR code to ChangChai NG durian ripening video"><rect width="37" height="37" fill="#fff"/><path d="M2 2h1v1h-1zM3 2h1v1h-1zM4 2h1v1h-1zM5 2h1v1h-1zM6 2h1v1h-1zM7 2h1v1h-1zM8 2h1v1h-1zM13 2h1v1h-1zM14 2h1v1h-1zM17 2h1v1h-1zM18 2h1v1h-1zM20 2h1v1h-1zM21 2h1v1h-1zM24 2h1v1h-1zM25 2h1v1h-1zM28 2h1v1h-1zM29 2h1v1h-1zM30 2h1v1h-1zM31 2h1v1h-1zM32 2h1v1h-1zM33 2h1v1h-1zM34 2h1v1h-1zM2 3h1v1h-1zM8 3h1v1h-1zM11 3h1v1h-1zM12 3h1v1h-1zM17 3h1v1h-1zM18 3h1v1h-1zM19 3h1v1h-1zM22 3h1v1h-1zM23 3h1v1h-1zM25 3h1v1h-1zM26 3h1v1h-1zM28 3h1v1h-1zM34 3h1v1h-1zM2 4h1v1h-1zM4 4h1v1h-1zM5 4h1v1h-1zM6 4h1v1h-1zM8 4h1v1h-1zM12 4h1v1h-1zM13 4h1v1h-1zM14 4h1v1h-1zM16 4h1v1h-1zM18 4h1v1h-1zM19 4h1v1h-1zM21 4h1v1h-1zM24 4h1v1h-1zM25 4h1v1h-1zM26 4h1v1h-1zM28 4h1v1h-1zM30 4h1v1h-1zM31 4h1v1h-1zM32 4h1v1h-1zM34 4h1v1h-1zM2 5h1v1h-1zM4 5h1v1h-1zM5 5h1v1h-1zM6 5h1v1h-1zM8 5h1v1h-1zM15 5h1v1h-1zM19 5h1v1h-1zM21 5h1v1h-1zM26 5h1v1h-1zM28 5h1v1h-1zM30 5h1v1h-1zM31 5h1v1h-1zM32 5h1v1h-1zM34 5h1v1h-1zM2 6h1v1h-1zM4 6h1v1h-1zM5 6h1v1h-1zM6 6h1v1h-1zM8 6h1v1h-1zM11 6h1v1h-1zM12 6h1v1h-1zM14 6h1v1h-1zM18 6h1v1h-1zM19 6h1v1h-1zM21 6h1v1h-1zM23 6h1v1h-1zM24 6h1v1h-1zM25 6h1v1h-1zM28 6h1v1h-1zM30 6h1v1h-1zM31 6h1v1h-1zM32 6h1v1h-1zM34 6h1v1h-1zM2 7h1v1h-1zM8 7h1v1h-1zM10 7h1v1h-1zM12 7h1v1h-1zM13 7h1v1h-1zM14 7h1v1h-1zM19 7h1v1h-1zM20 7h1v1h-1zM22 7h1v1h-1zM24 7h1v1h-1zM28 7h1v1h-1zM34 7h1v1h-1zM2 8h1v1h-1zM3 8h1v1h-1zM4 8h1v1h-1zM5 8h1v1h-1zM6 8h1v1h-1zM7 8h1v1h-1zM8 8h1v1h-1zM10 8h1v1h-1zM12 8h1v1h-1zM14 8h1v1h-1zM16 8h1v1h-1zM18 8h1v1h-1zM20 8h1v1h-1zM22 8h1v1h-1zM24 8h1v1h-1zM26 8h1v1h-1zM28 8h1v1h-1zM29 8h1v1h-1zM30 8h1v1h-1zM31 8h1v1h-1zM32 8h1v1h-1zM33 8h1v1h-1zM34 8h1v1h-1zM11 9h1v1h-1zM13 9h1v1h-1zM14 9h1v1h-1zM16 9h1v1h-1zM19 9h1v1h-1zM20 9h1v1h-1zM21 9h1v1h-1zM22 9h1v1h-1zM23 9h1v1h-1zM26 9h1v1h-1zM2 10h1v1h-1zM5 10h1v1h-1zM7 10h1v1h-1zM8 10h1v1h-1zM10 10h1v1h-1zM13 10h1v1h-1zM15 10h1v1h-1zM16 10h1v1h-1zM17 10h1v1h-1zM18 10h1v1h-1zM21 10h1v1h-1zM23 10h1v1h-1zM25 10h1v1h-1zM27 10h1v1h-1zM29 10h1v1h-1zM5 11h1v1h-1zM9 11h1v1h-1zM11 11h1v1h-1zM12 11h1v1h-1zM14 11h1v1h-1zM16 11h1v1h-1zM18 11h1v1h-1zM22 11h1v1h-1zM24 11h1v1h-1zM26 11h1v1h-1zM27 11h1v1h-1zM28 11h1v1h-1zM29 11h1v1h-1zM33 11h1v1h-1zM2 12h1v1h-1zM3 12h1v1h-1zM6 12h1v1h-1zM8 12h1v1h-1zM10 12h1v1h-1zM11 12h1v1h-1zM13 12h1v1h-1zM14 12h1v1h-1zM18 12h1v1h-1zM19 12h1v1h-1zM21 12h1v1h-1zM22 12h1v1h-1zM24 12h1v1h-1zM26 12h1v1h-1zM27 12h1v1h-1zM29 12h1v1h-1zM30 12h1v1h-1zM32 12h1v1h-1zM34 12h1v1h-1zM7 13h1v1h-1zM11 13h1v1h-1zM13 13h1v1h-1zM16 13h1v1h-1zM19 13h1v1h-1zM23 13h1v1h-1zM24 13h1v1h-1zM25 13h1v1h-1zM26 13h1v1h-1zM27 13h1v1h-1zM28 13h1v1h-1zM30 13h1v1h-1zM31 13h1v1h-1zM34 13h1v1h-1zM3 14h1v1h-1zM5 14h1v1h-1zM6 14h1v1h-1zM8 14h1v1h-1zM10 14h1v1h-1zM12 14h1v1h-1zM14 14h1v1h-1zM21 14h1v1h-1zM23 14h1v1h-1zM24 14h1v1h-1zM25 14h1v1h-1zM26 14h1v1h-1zM27 14h1v1h-1zM28 14h1v1h-1zM31 14h1v1h-1zM33 14h1v1h-1zM34 14h1v1h-1zM5 15h1v1h-1zM7 15h1v1h-1zM9 15h1v1h-1zM10 15h1v1h-1zM13 15h1v1h-1zM14 15h1v1h-1zM15 15h1v1h-1zM17 15h1v1h-1zM18 15h1v1h-1zM23 15h1v1h-1zM27 15h1v1h-1zM30 15h1v1h-1zM31 15h1v1h-1zM32 15h1v1h-1zM33 15h1v1h-1zM34 15h1v1h-1zM2 16h1v1h-1zM4 16h1v1h-1zM6 16h1v1h-1zM8 16h1v1h-1zM11 16h1v1h-1zM12 16h1v1h-1zM14 16h1v1h-1zM15 16h1v1h-1zM16 16h1v1h-1zM19 16h1v1h-1zM22 16h1v1h-1zM25 16h1v1h-1zM27 16h1v1h-1zM28 16h1v1h-1zM30 16h1v1h-1zM31 16h1v1h-1zM32 16h1v1h-1zM33 16h1v1h-1zM4 17h1v1h-1zM5 17h1v1h-1zM6 17h1v1h-1zM7 17h1v1h-1zM10 17h1v1h-1zM11 17h1v1h-1zM15 17h1v1h-1zM16 17h1v1h-1zM17 17h1v1h-1zM19 17h1v1h-1zM20 17h1v1h-1zM21 17h1v1h-1zM23 17h1v1h-1zM24 17h1v1h-1zM28 17h1v1h-1zM29 17h1v1h-1zM30 17h1v1h-1zM33 17h1v1h-1zM7 18h1v1h-1zM8 18h1v1h-1zM9 18h1v1h-1zM10 18h1v1h-1zM12 18h1v1h-1zM16 18h1v1h-1zM19 18h1v1h-1zM20 18h1v1h-1zM21 18h1v1h-1zM22 18h1v1h-1zM23 18h1v1h-1zM24 18h1v1h-1zM25 18h1v1h-1zM26 18h1v1h-1zM28 18h1v1h-1zM30 18h1v1h-1zM32 18h1v1h-1zM33 18h1v1h-1zM3 19h1v1h-1zM4 19h1v1h-1zM5 19h1v1h-1zM9 19h1v1h-1zM11 19h1v1h-1zM12 19h1v1h-1zM18 19h1v1h-1zM22 19h1v1h-1zM23 19h1v1h-1zM24 19h1v1h-1zM25 19h1v1h-1zM29 19h1v1h-1zM31 19h1v1h-1zM2 20h1v1h-1zM3 20h1v1h-1zM4 20h1v1h-1zM5 20h1v1h-1zM7 20h1v1h-1zM8 20h1v1h-1zM10 20h1v1h-1zM11 20h1v1h-1zM12 20h1v1h-1zM13 20h1v1h-1zM14 20h1v1h-1zM18 20h1v1h-1zM20 20h1v1h-1zM23 20h1v1h-1zM24 20h1v1h-1zM27 20h1v1h-1zM28 20h1v1h-1zM32 20h1v1h-1zM34 20h1v1h-1zM3 21h1v1h-1zM4 21h1v1h-1zM9 21h1v1h-1zM11 21h1v1h-1zM12 21h1v1h-1zM16 21h1v1h-1zM17 21h1v1h-1zM19 21h1v1h-1zM20 21h1v1h-1zM22 21h1v1h-1zM23 21h1v1h-1zM26 21h1v1h-1zM27 21h1v1h-1zM29 21h1v1h-1zM33 21h1v1h-1zM2 22h1v1h-1zM3 22h1v1h-1zM4 22h1v1h-1zM6 22h1v1h-1zM8 22h1v1h-1zM10 22h1v1h-1zM13 22h1v1h-1zM14 22h1v1h-1zM15 22h1v1h-1zM18 22h1v1h-1zM19 22h1v1h-1zM20 22h1v1h-1zM23 22h1v1h-1zM25 22h1v1h-1zM26 22h1v1h-1zM27 22h1v1h-1zM30 22h1v1h-1zM33 22h1v1h-1zM34 22h1v1h-1zM3 23h1v1h-1zM6 23h1v1h-1zM10 23h1v1h-1zM11 23h1v1h-1zM17 23h1v1h-1zM18 23h1v1h-1zM20 23h1v1h-1zM21 23h1v1h-1zM22 23h1v1h-1zM23 23h1v1h-1zM24 23h1v1h-1zM26 23h1v1h-1zM27 23h1v1h-1zM31 23h1v1h-1zM33 23h1v1h-1zM34 23h1v1h-1zM2 24h1v1h-1zM3 24h1v1h-1zM5 24h1v1h-1zM8 24h1v1h-1zM9 24h1v1h-1zM11 24h1v1h-1zM12 24h1v1h-1zM13 24h1v1h-1zM15 24h1v1h-1zM17 24h1v1h-1zM19 24h1v1h-1zM22 24h1v1h-1zM24 24h1v1h-1zM28 24h1v1h-1zM29 24h1v1h-1zM30 24h1v1h-1zM31 24h1v1h-1zM34 24h1v1h-1zM3 25h1v1h-1zM6 25h1v1h-1zM7 25h1v1h-1zM10 25h1v1h-1zM12 25h1v1h-1zM14 25h1v1h-1zM15 25h1v1h-1zM18 25h1v1h-1zM20 25h1v1h-1zM23 25h1v1h-1zM25 25h1v1h-1zM26 25h1v1h-1zM29 25h1v1h-1zM31 25h1v1h-1zM33 25h1v1h-1zM34 25h1v1h-1zM2 26h1v1h-1zM4 26h1v1h-1zM5 26h1v1h-1zM6 26h1v1h-1zM7 26h1v1h-1zM8 26h1v1h-1zM9 26h1v1h-1zM10 26h1v1h-1zM13 26h1v1h-1zM17 26h1v1h-1zM19 26h1v1h-1zM21 26h1v1h-1zM22 26h1v1h-1zM23 26h1v1h-1zM25 26h1v1h-1zM26 26h1v1h-1zM27 26h1v1h-1zM28 26h1v1h-1zM29 26h1v1h-1zM30 26h1v1h-1zM34 26h1v1h-1zM10 27h1v1h-1zM12 27h1v1h-1zM13 27h1v1h-1zM20 27h1v1h-1zM21 27h1v1h-1zM22 27h1v1h-1zM23 27h1v1h-1zM26 27h1v1h-1zM30 27h1v1h-1zM31 27h1v1h-1zM33 27h1v1h-1zM34 27h1v1h-1zM2 28h1v1h-1zM3 28h1v1h-1zM4 28h1v1h-1zM5 28h1v1h-1zM6 28h1v1h-1zM7 28h1v1h-1zM8 28h1v1h-1zM11 28h1v1h-1zM12 28h1v1h-1zM16 28h1v1h-1zM23 28h1v1h-1zM24 28h1v1h-1zM26 28h1v1h-1zM28 28h1v1h-1zM30 28h1v1h-1zM31 28h1v1h-1zM32 28h1v1h-1zM2 29h1v1h-1zM8 29h1v1h-1zM10 29h1v1h-1zM11 29h1v1h-1zM13 29h1v1h-1zM17 29h1v1h-1zM23 29h1v1h-1zM24 29h1v1h-1zM26 29h1v1h-1zM30 29h1v1h-1zM33 29h1v1h-1zM34 29h1v1h-1zM2 30h1v1h-1zM4 30h1v1h-1zM5 30h1v1h-1zM6 30h1v1h-1zM8 30h1v1h-1zM11 30h1v1h-1zM12 30h1v1h-1zM13 30h1v1h-1zM15 30h1v1h-1zM18 30h1v1h-1zM21 30h1v1h-1zM22 30h1v1h-1zM26 30h1v1h-1zM27 30h1v1h-1zM28 30h1v1h-1zM29 30h1v1h-1zM30 30h1v1h-1zM31 30h1v1h-1zM34 30h1v1h-1zM2 31h1v1h-1zM4 31h1v1h-1zM5 31h1v1h-1zM6 31h1v1h-1zM8 31h1v1h-1zM10 31h1v1h-1zM13 31h1v1h-1zM14 31h1v1h-1zM15 31h1v1h-1zM17 31h1v1h-1zM21 31h1v1h-1zM22 31h1v1h-1zM23 31h1v1h-1zM25 31h1v1h-1zM26 31h1v1h-1zM28 31h1v1h-1zM30 31h1v1h-1zM32 31h1v1h-1zM2 32h1v1h-1zM4 32h1v1h-1zM5 32h1v1h-1zM6 32h1v1h-1zM8 32h1v1h-1zM11 32h1v1h-1zM12 32h1v1h-1zM14 32h1v1h-1zM19 32h1v1h-1zM22 32h1v1h-1zM25 32h1v1h-1zM26 32h1v1h-1zM27 32h1v1h-1zM30 32h1v1h-1zM32 32h1v1h-1zM34 32h1v1h-1zM2 33h1v1h-1zM8 33h1v1h-1zM12 33h1v1h-1zM13 33h1v1h-1zM14 33h1v1h-1zM16 33h1v1h-1zM17 33h1v1h-1zM18 33h1v1h-1zM19 33h1v1h-1zM20 33h1v1h-1zM23 33h1v1h-1zM28 33h1v1h-1zM2 34h1v1h-1zM3 34h1v1h-1zM4 34h1v1h-1zM5 34h1v1h-1zM6 34h1v1h-1zM7 34h1v1h-1zM8 34h1v1h-1zM10 34h1v1h-1zM11 34h1v1h-1zM12 34h1v1h-1zM15 34h1v1h-1zM16 34h1v1h-1zM18 34h1v1h-1zM23 34h1v1h-1zM26 34h1v1h-1zM27 34h1v1h-1zM28 34h1v1h-1zM30 34h1v1h-1zM32 34h1v1h-1zM33 34h1v1h-1z" fill="#1f3a2e"/></svg></a>
+      <div style="flex:1;min-width:150px">
+        <div style="font-weight:800;color:var(--shell);font-size:14.5px">ChangChai NG</div>
+        <div style="font-size:12.5px;color:var(--ink-soft);margin-top:2px"><span class="zh">榴梿成熟科普 · YouTube</span><span class="en">Durian ripening explainer · YouTube</span></div>
+        <a href="https://www.youtube.com/watch?v=5HChSHhUK_k&amp;t=3s" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:6px;margin-top:10px;background:#c4302b;color:#fff;border-radius:9px;padding:8px 14px;font-weight:800;font-size:13px;text-decoration:none">▶ <span class="zh">观看视频</span><span class="en">Watch video</span></a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ TOOL ============ -->
+<section class="panel" id="tool">
+  <p class="tool-intro"><span class="zh">输入你的情况，工具用科学给出这批果的<b>成熟度</b>、<b>风味保留率</b>与<b>货架期</b>。它不替你决定割或不割 —— 只把代价与收益摊开，让你依自己的市场判断。</span><span class="en">Enter your situation; the tool uses science to show this batch's <b>maturity</b>, <b>flavour retention</b> and <b>shelf life</b>. It won't decide cut-or-not for you — it lays out the cost and the gain so you can judge against your own market.</span></p>
+
+  <div class="field">
+    <label><span class="zh">1. 目标市场 / 运输距离</span><span class="en">1. Target market / transport</span></label>
+    <div class="opts tiles three" id="q-market">
+      <div class="opt" data-k="local"><div class="dot"></div><div><div class="lbl"><span class="zh">本地即食 / 高端</span><span class="en">Local fresh / premium</span></div><div class="desc"><span class="zh">当天至隔天食用</span><span class="en">Eaten same/next day</span></div></div></div>
+      <div class="opt" data-k="short"><div class="dot"></div><div><div class="lbl"><span class="zh">短程运输</span><span class="en">Short-haul transport</span></div><div class="desc"><span class="zh">国内陆运 · 数小时至隔天到达</span><span class="en">Domestic road · hours to next day</span></div></div></div>
+      <div class="opt" data-k="export"><div class="dot"></div><div><div class="lbl"><span class="zh">长程出口</span><span class="en">Long-haul export</span></div><div class="desc"><span class="zh">需控温延长货架期</span><span class="en">Needs climate control & shelf life</span></div></div></div>
+    </div>
+  </div>
+
+  <div class="field">
+    <label><span class="zh">2. 采收方式</span><span class="en">2. Harvest method</span></label>
+    <div class="opts tiles" id="q-method">
+      <div class="opt" data-m="pluck"><div class="dot"></div><div><div class="lbl"><span class="zh">人工采摘</span><span class="en">Plucked / cut</span></div><div class="desc"><span class="zh">达生理成熟后剪下，离树后熟</span><span class="en">Cut at maturity, ripens off-tree</span></div></div></div>
+      <div class="opt" data-m="tree"><div class="dot"></div><div><div class="lbl"><span class="zh">树熟自然落果</span><span class="en">Tree-ripened (natural drop)</span></div><div class="desc"><span class="zh">在树上后熟至峰值后落果</span><span class="en">Ripens to peak on tree before dropping</span></div></div></div>
+    </div>
+  </div>
+
+  <div class="field">
+    <label><span class="zh">3. 品种</span><span class="en">3. Clone / variety</span>
+      <div class="hint"><span class="zh">每个品种的成熟窗口（授粉后天数 DAA）不同 —— 这是判断的核心。数值取自马来西亚与泰国研究，田间会因气候、树龄、海拔而浮动。</span><span class="en">Each clone has its own maturity window (days after anthesis, DAA) — the core of the judgment. Figures from Malaysian & Thai research; field values shift with climate, tree age, elevation.</span></div>
+    </label>
+    <button id="cloneToggle" style="width:100%;border:1.5px solid var(--line);background:#fff;border-radius:12px;padding:13px 15px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:10px;text-align:left">
+      <span id="cloneSummary" style="font-weight:700;font-size:14.5px;color:var(--ink-soft)"><span class="zh">点击选择品种…</span><span class="en">Tap to choose a clone…</span></span>
+      <span id="cloneChevron" style="flex:0 0 auto;color:var(--thorn);font-size:13px;font-weight:800;transition:.2s">▼</span>
+    </button>
+    <div class="opts tiles clone-tiles" id="q-variety" style="display:none;margin-top:9px">
+      <div class="opt" data-v="d197"><div class="dot"></div><div><div class="lbl"><span class="zh">D197 猫山王 Musang King</span><span class="en">D197 Musang King</span></div><div class="desc"><span class="zh">中季 · 落果约 100–110 DAA（MARDI：15周≈落果品质）</span><span class="en">Mid-season · drops ~100–110 DAA (MARDI: 15 WAA ≈ abscised quality)</span></div></div></div>
+      <div class="opt" data-v="d24"><div class="dot"></div><div><div class="lbl"><span class="zh">D24 苏丹王 Sultan / XO</span><span class="en">D24 Sultan / XO</span></div><div class="desc"><span class="zh">中季 · 落果 105–115 DAA</span><span class="en">Mid-season · drops 105–115 DAA</span></div></div></div>
+      <div class="opt" data-v="d200"><div class="dot"></div><div><div class="lbl"><span class="zh">D200 黑刺 Black Thorn</span><span class="en">D200 Black Thorn</span></div><div class="desc"><span class="zh">迟季 · 落果约 115–128 DAA</span><span class="en">Late-season · drops ~115–128 DAA</span></div></div></div>
+      <div class="opt" data-v="d160"><div class="dot"></div><div><div class="lbl"><span class="zh">D160 竹脚 Tekka</span><span class="en">D160 Tekka</span></div><div class="desc"><span class="zh">中季 · 落果约 110–120 DAA · 果肉带竹青色</span><span class="en">Mid-season · drops ~110–120 DAA · bamboo-green tint</span></div></div></div>
+      <div class="opt" data-v="d168"><div class="dot"></div><div><div class="lbl"><span class="zh">D168 IOI（Mas Muar）</span><span class="en">D168 IOI (Mas Muar)</span></div><div class="desc"><span class="zh">中季 · 落果约 105–115 DAA · 耐储（俗称「101」，勿与红肉 D101 混淆）</span><span class="en">Mid-season · drops ~105–115 DAA · keeps well (also called "101"; not the same as D101 Red Flesh)</span></div></div></div>
+      <div class="opt" data-v="d175"><div class="dot"></div><div><div class="lbl"><span class="zh">D175 红虾 Red Prawn</span><span class="en">D175 Red Prawn</span></div><div class="desc"><span class="zh">中季 · 落果约 110–120 DAA · 果肉较紧实</span><span class="en">Mid-season · drops ~110–120 DAA · firmer pulp</span></div></div></div>
+      <div class="opt" data-v="d101"><div class="dot"></div><div><div class="lbl"><span class="zh">D101 红肉 Red Flesh</span><span class="en">D101 Red Flesh</span></div><div class="desc"><span class="zh">中季 · 落果约 100–112 DAA · 金黄偏红、核小肉厚</span><span class="en">Mid-season · drops ~100–112 DAA · golden-red flesh, small seed</span></div></div></div>
+      <div class="opt" data-v="d123"><div class="dot"></div><div><div class="lbl"><span class="zh">D123 青尼 Chanee（本地）</span><span class="en">D123 Chanee (local)</span></div><div class="desc"><span class="zh">早–中季 · 成熟较快 · 约 90–105 DAA · 非树熟易失香</span><span class="en">Early–mid · fast-ripening · ~90–105 DAA · loses aroma if not tree-ripe</span></div></div></div>
+      <div class="opt" data-v="d159"><div class="dot"></div><div><div class="lbl"><span class="zh">D159 金枕头 Monthong（本地种植）</span><span class="en">D159 Monthong (grown in MY)</span></div><div class="desc"><span class="zh">迟季 · 树熟约 120–130 DAA；泰式做法约 105 DAA 剪采出口</span><span class="en">Late · tree-ripe ~120–130 DAA; Thai practice cuts ~105 DAA for export</span></div></div></div>
+      <div class="opt" data-v="kampung"><div class="dot"></div><div><div class="lbl"><span class="zh">甘榜 / 实生</span><span class="en">Kampung / seedling</span></div><div class="desc"><span class="zh">窗口因树而异 · 一般落果 100–120 DAA</span><span class="en">Window varies by tree · typically drops 100–120 DAA</span></div></div></div>
+      <div class="opt" data-v="other"><div class="dot"></div><div><div class="lbl"><span class="zh">其他 / 不确定</span><span class="en">Other / unsure</span></div><div class="desc"><span class="zh">按通用跃变型果实处理（保守窗口）</span><span class="en">General climacteric handling (conservative window)</span></div></div></div>
+    </div>
+    <div id="customDaaBox" style="display:none;margin-top:11px;background:#eef5ec;border:1.5px solid var(--good);border-radius:12px;padding:12px 14px">
+      <div style="font-size:12.5px;font-weight:800;color:var(--good);margin-bottom:3px"><span class="zh">🌳 用我自己的落果天数（DAA）</span><span class="en">🌳 Use my own natural-drop DAA</span></div>
+      <div style="font-size:11.5px;color:var(--ink-soft);line-height:1.5;margin-bottom:9px"><span class="zh">DAA 一律指<b>自然落果那天</b>（授粉→落果的天数）—— 这是固定基准。若你记录过自己园地的落果天数，填在这里，整个割果窗口会跟着重新校准。留空＝用通用参考值。此设定自动存在本机，下次自动带出。</span><span class="en">DAA always means <b>the natural-drop day</b> (anthesis→drop). That's the fixed benchmark. If you've logged your orchard's own drop day, enter it here and the whole cut window re-centres on it. Blank = use the generic reference. Saved on this device automatically.</span></div>
+      <div style="display:flex;align-items:center;gap:9px">
+        <input type="text" id="customDaa" name="customDaa" aria-label="Custom natural-drop DAA" autocomplete="off" inputmode="numeric" pattern="[0-9]*" maxlength="4" placeholder="—" style="width:88px;border:1.5px solid var(--line);border-radius:10px;padding:10px 12px;font-size:15px;font-weight:800;color:var(--shell);background:#fff;font-family:inherit;text-align:center">
+        <span style="font-size:12.5px;color:var(--ink-soft);font-weight:600">DAA</span>
+        <span id="customDaaGeneric" style="font-size:11.5px;color:var(--ink-soft);margin-left:auto"></span>
+      </div>
+      <button id="customDaaReset" style="display:none;margin-top:9px;border:1.5px solid var(--line);background:#fff;border-radius:9px;padding:7px 12px;font-weight:700;font-size:12px;color:var(--ink-soft);cursor:pointer"><span class="zh">↺ 恢复通用参考值</span><span class="en">↺ Reset to generic reference</span></button>
+    </div>
+  </div>
+
+  <div class="field" id="targetField" style="display:none">
+    <label><span class="stepnum" id="stepRipe">4. </span><span class="zh">割果成熟度（田间实验）</span><span class="en">Cut ripeness (field experiment)</span>
+      <div class="hint"><span class="zh">这是一个田间实验室。95% 已很接近自然落果（约早 1–2 天），风味损失最小；有信心后，再逐季往前推（90%、85%）割得更早、更硬，换取更长货架期。每一季记录数据，慢慢调出最适合自己树与市场的时机。（想要 100% 全熟风味？选「树熟自然落果」即可。）</span><span class="en">This is a field lab. 95% is already very close to natural drop (~1–2 days earlier), least flavour loss; once confident, step earlier season by season (90%, 85%) — firmer, earlier cuts that buy more shelf life. Log it each season and tune to your trees and market. (Want full 100% flavour? Just choose "tree-drop" method.)</span></div>
+    </label>
+    <div class="seg" id="q-target">
+      <button data-t="85"><span class="zh">85%</span><span class="en">85%</span></button>
+      <button data-t="90"><span class="zh">90%</span><span class="en">90%</span></button>
+      <button data-t="95" class="sel"><span class="zh">95%</span><span class="en">95%</span></button>
+    </div>
+  </div>
+
+  <div class="field">
+    <label><span class="stepnum" id="stepDate">5. </span><span class="zh">开花 / 授粉日期（Anthesis）</span><span class="en">Flowering / anthesis date</span>
+      <div class="hint"><span class="zh">看到这批花盛开当天，就记下日期 —— 无需事后回推。工具会<b>向前推算</b>成熟与落果的预计日期。今天或过去的日期都可以。</span><span class="en">Log the date the moment you see this batch bloom — no need to back-count later. The tool projects <b>forward</b> to the expected maturity and drop dates. Today's date or a past one both work.</span></div>
+    </label>
+    <div style="position:relative">
+      <input type="date" id="flowerDate" name="flowerDate" aria-label="Flowering / anthesis date" autocomplete="off" style="width:100%;border:1.5px solid var(--line);border-radius:12px;padding:13px 15px;font-size:15px;font-weight:700;color:var(--shell);background:#fff;font-family:inherit;cursor:pointer">
+    </div>
+    <div id="projBox" style="margin-top:12px;background:#fffaf0;border:1.5px solid var(--flesh);border-radius:12px;padding:14px 15px">
+      <div style="display:flex;align-items:baseline;justify-content:space-between;gap:10px">
+        <span style="font-size:13px;font-weight:700;color:var(--ink-soft)"><span class="zh">预计割果日</span><span class="en">Projected cut date</span></span>
+        <span id="projDate" style="font-size:17px;font-weight:800;color:var(--shell)">—</span>
+      </div>
+      <div id="projCountdown" style="font-size:13px;font-weight:700;margin-top:4px"></div>
+      <div id="projDaa" style="font-size:12px;color:var(--ink-soft);margin-top:5px"></div>
+      <div style="border-top:1px dashed var(--line);margin-top:10px;padding-top:9px;font-size:12px;color:var(--ink-soft);line-height:1.5">
+        <span class="zh">参考落果窗口：<span id="projWindow"></span>。田间实际会因土壤、树龄、气候提前或延后 —— 以你的观察为准，记录后逐季校准。</span>
+        <span class="en">Reference drop window: <span id="projWindowEn"></span>. Real field timing shifts with soil, tree age, and weather — trust your observation and calibrate season by season.</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="result" id="result"></div>
+</section>
+
+<!-- ============ MY FARMS ============ -->
+<section class="panel" id="farms">
+  <p class="tool-intro"><span class="zh">在这里登记你的<b>果园</b>与<b>每棵树</b>（用你自己的树号，方便对接 MyGAP / MyLadang 出口溯源）。记下每棵树的<b>开花日期</b>，工具会推算落果/割果日；落果后回填<b>实际日期</b>，几季后就得出这棵树自己的准确 DAA —— 海啸过后，这套记录会让你的割果时机越来越准。</span><span class="en">Register your <b>farms</b> and <b>each tree</b> here (use your own tree IDs, to line up with MyGAP / MyLadang export traceability). Log each tree's <b>flowering date</b> and the tool projects the drop/cut date; after it drops, fill in the <b>actual date</b>, and within a few seasons you get that tree's own accurate DAA — long after the tsunami, this record keeps your harvest timing sharpening.</span></p>
+
+  <div id="farmsApp"></div>
+
+  <div class="disc" style="margin-top:18px"><span class="zh">数据只存在这台设备（浏览器本地存储）。建议定期「导出」成 Excel（CSV）备份，可用 Excel 打开查看。</span><span class="en">Data is stored only on this device (browser local storage). Back up periodically by exporting an Excel (CSV) file — it opens directly in Excel.</span></div>
+  <div style="display:flex;gap:9px;margin-top:10px">
+    <button id="farmsExport" style="flex:1;border:1.5px solid var(--line);background:#fff;border-radius:10px;padding:10px;font-weight:700;font-size:12.5px;color:var(--ink-soft);cursor:pointer"><span class="zh">⇩ 导出 Excel（CSV）</span><span class="en">⇩ Export (Excel/CSV)</span></button>
+    <button id="farmsImport" style="flex:1;border:1.5px solid var(--line);background:#fff;border-radius:10px;padding:10px;font-weight:700;font-size:12.5px;color:var(--ink-soft);cursor:pointer"><span class="zh">⇧ 导入 Excel（CSV）</span><span class="en">⇧ Import (Excel/CSV)</span></button>
+  </div>
+  <input type="file" id="farmsImportFile" name="farmsImportFile" aria-label="Import backup file" accept=".csv,text/csv,text/comma-separated-values,application/vnd.ms-excel,application/json" style="display:none">
+</section>
+
+<!-- ============ INSIGHTS ============ -->
+<section class="panel" id="insights">
+  <p class="tool-intro"><span class="zh">你在「我的果园」里记的每一笔开花、落果、割果，都在这里变成图表：<b>你自己的落果 DAA 对比通用参考</b>（校准进度）、<b>未来采收负荷</b>（应对爆量的排工参考）、以及<b>历季割果记录</b>。数据越多，这些图越准。</span><span class="en">Every flowering, drop, and cut you log in "My Farms" becomes a chart here: <b>your own drop DAA vs the generic reference</b> (calibration progress), <b>upcoming harvest load</b> (labour planning for a glut), and <b>cut records across seasons</b>. The more you log, the sharper these get.</span></p>
+  <div id="insightsApp"></div>
+</section>
+</main>
+<footer>
+  <span class="zh">离线可用 · 中立决策工具·科学参考 · v</span><span class="en">Works offline · neutral decision tool · scientific reference · v</span><span id="ver"></span>
+</footer>
+</div>
+
+<script>
+const CACHE_VERSION='durianripe-20260708-88';
+document.getElementById('ver').textContent=CACHE_VERSION.split('-').slice(1).join('-');
+
+/* ---- language ---- */
+const langBtn=document.getElementById('langBtn');
+langBtn.addEventListener('click',()=>{
+  const en=document.body.classList.toggle('lang-en');
+  document.body.classList.toggle('lang-zh',!en);
+  document.documentElement.lang=en?'en':'zh';
+  langBtn.textContent=en?'中':'EN';
+  // The result & projection are built with JS T() strings (not .zh/.en spans),
+  // so a language switch must re-render them to stay in sync.
+  updateCustomDaaBox();
+  if(state.variety&&flowerDate.value) project();
+  maybeAutoRun();
+  if(typeof renderFarms==='function') renderFarms();
+  if(typeof renderInsights==='function') renderInsights();
+});
+
+/* ---- tabs ---- */
+document.querySelectorAll('.tab').forEach(t=>{
+  t.addEventListener('click',()=>{
+    document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(x=>x.classList.remove('active'));
+    t.classList.add('active');
+    document.getElementById(t.dataset.p).classList.add('active');
+    if(t.dataset.p==='insights' && typeof renderInsights==='function') renderInsights();
+    window.scrollTo({top:0,behavior:'smooth'});
+  });
+});
+
+/* ---- selections ---- */
+const state={variety:null,method:null,days:null,market:null};
+function wireOpts(id,key,attr){
+  document.querySelectorAll('#'+id+' .opt').forEach(o=>{
+    o.addEventListener('click',()=>{
+      document.querySelectorAll('#'+id+' .opt').forEach(x=>x.classList.remove('sel'));
+      o.classList.add('sel');state[key]=o.dataset[attr];checkReady();
+    });
+  });
+}
+/* ---- clone DAA windows (days after anthesis) ----
+   commercialMin = earliest safe pluck (physiological maturity threshold)
+   dropLo/dropHi = natural tree-drop / full-ripe window
+   overripe = beyond this risks splitting / over-ripe
+   Sources: MARDI D197 post-harvest study (13/14/15 WAA), DurianInfo season classes,
+   Thai research on Chanee/Monthong, Malaysian tree-drop practice (~130 DAA upper). */
+const CLONES={
+  d197:{min:98, dropLo:100, dropHi:112, over:120, fragile:true},
+  d24: {min:100,dropLo:105, dropHi:115, over:123, fragile:false},
+  d200:{min:112,dropLo:115, dropHi:128, over:135, fragile:false},
+  d160:{min:105,dropLo:110, dropHi:120, over:128, fragile:true},
+  d168:{min:100,dropLo:105, dropHi:115, over:123, fragile:false},
+  d175:{min:105,dropLo:110, dropHi:120, over:128, fragile:false},
+  d101:{min:95, dropLo:100, dropHi:112, over:120, fragile:false},
+  d123:{min:88, dropLo:90,  dropHi:105, over:113, fragile:true},   // Chanee, fast
+  d159:{min:105,dropLo:120, dropHi:130, over:138, fragile:true},   // Monthong, cut early in Thai practice
+  kampung:{min:98,dropLo:100,dropHi:120,over:128,fragile:false},
+  other:{min:100,dropLo:105,dropHi:120,over:128,fragile:false}
+};
+
+function T(zh,en){return document.body.classList.contains('lang-en')?en:zh;}
+
+/* ---- farmer's own natural-drop DAA (per clone) ----
+   DAA benchmark = the day the fruit naturally DROPS. That single number is the
+   fixed goalpost; everything else (earliest cut, 85/90/95% points) is derived from
+   it. A grower can override the generic drop-DAA with their own observed value; we
+   shift the whole window (min/dropLo/over) by the same offset so it re-centres on
+   their orchard. Stored per clone in localStorage so it persists on their device. */
+function customDropKey(v){return 'durianripe_dropDAA_'+v;}
+function getCustomDrop(v){
+  try{ const s=localStorage.getItem(customDropKey(v)); return s?parseInt(s,10):null; }
+  catch(e){ return null; }
+}
+function setCustomDrop(v,val){
+  try{ if(val==null) localStorage.removeItem(customDropKey(v)); else localStorage.setItem(customDropKey(v),String(val)); }
+  catch(e){}
+}
+function cloneCfg(){
+  return cloneCfgFor(state.variety);
+}
+// same logic but for an explicit variety (used by the inline farm mini-calc)
+function cloneCfgFor(variety){
+  const base=CLONES[variety]||CLONES.other;
+  const custom=getCustomDrop(variety);
+  if(custom==null || custom===base.dropHi) return base;
+  const shift=custom-base.dropHi;
+  return {
+    min:base.min+shift, dropLo:base.dropLo+shift,
+    dropHi:custom, over:base.over+shift, fragile:base.fragile
+  };
+}
+
+wireOpts('q-variety','variety','v');
+wireOpts('q-method','method','m');
+wireOpts('q-market','market','k');
+
+/* ---- collapsible clone picker ---- */
+const cloneToggle=document.getElementById('cloneToggle');
+const cloneList=document.getElementById('q-variety');
+const cloneSummary=document.getElementById('cloneSummary');
+const cloneChevron=document.getElementById('cloneChevron');
+cloneToggle.addEventListener('click',()=>{
+  const open=cloneList.style.display!=='none';
+  cloneList.style.display=open?'none':'grid';
+  cloneChevron.textContent=open?'▼':'▲';
+});
+document.querySelectorAll('#q-variety .opt').forEach(o=>{
+  o.addEventListener('click',()=>{
+    // reflect selection into the collapsed header, then close
+    const lbl=o.querySelector('.lbl').cloneNode(true);
+    cloneSummary.innerHTML=lbl.innerHTML;
+    cloneSummary.style.color='var(--shell)';
+    cloneList.style.display='none';cloneChevron.textContent='▼';
+    updateCustomDaaBox();
+    if(state.variety) syncFromDate();
+  });
+});
+
+/* ---- custom natural-drop DAA control ---- */
+const customDaaBox=document.getElementById('customDaaBox');
+const customDaa=document.getElementById('customDaa');
+const customDaaGeneric=document.getElementById('customDaaGeneric');
+const customDaaReset=document.getElementById('customDaaReset');
+function updateCustomDaaBox(){
+  if(!state.variety){ customDaaBox.style.display='none'; return; }
+  customDaaBox.style.display='block';
+  const base=CLONES[state.variety]||CLONES.other;
+  const custom=getCustomDrop(state.variety);
+  customDaa.value = custom!=null ? custom : '';
+  customDaa.placeholder = String(base.dropHi); // generic drop day as the hint
+  customDaaGeneric.textContent = T('通用参考：'+base.dropHi+' DAA','generic ref: '+base.dropHi+' DAA');
+  customDaaReset.style.display = custom!=null ? 'inline-block' : 'none';
+}
+function applyCustomDaa(){
+  if(!state.variety) return;
+  // keep only digits (mobile-friendly free typing, no spinner)
+  const cleaned=customDaa.value.replace(/[^0-9]/g,'');
+  if(cleaned!==customDaa.value) customDaa.value=cleaned;
+  const v=parseInt(cleaned,10);
+  if(isNaN(v)){ setCustomDrop(state.variety,null); }
+  else { setCustomDrop(state.variety,v); }
+  customDaaReset.style.display = getCustomDrop(state.variety)!=null ? 'inline-block' : 'none';
+  if(state.variety&&flowerDate.value) syncFromDate();
+}
+customDaa.addEventListener('input',applyCustomDaa);
+customDaa.addEventListener('change',()=>{
+  // on finishing, clamp to sane DAA bounds and re-save
+  if(state.variety && customDaa.value!==''){
+    let v=parseInt(customDaa.value,10);
+    if(!isNaN(v)){ v=Math.max(60,Math.min(180,v)); customDaa.value=String(v); setCustomDrop(state.variety,v); }
+  }
+  updateCustomDaaBox();
+  if(state.variety&&flowerDate.value) syncFromDate();
+});
+customDaaReset.addEventListener('click',()=>{
+  setCustomDrop(state.variety,null);
+  updateCustomDaaBox();
+  if(state.variety&&flowerDate.value) syncFromDate();
+});
+
+/* ---- anthesis date + target ripeness → forward projection ----
+   Ripeness% maps to a target DAA within the clone's window:
+   100% = dropHi (natural full drop). Lower targets map earlier, bounded at min.
+   Basis: MARDI D197 — ~15 WAA cut ≈ abscised quality; earlier cuts lose flavour
+   progressively. We anchor 95% just below the drop window and scale down to ~82%
+   at the maturity threshold, so 85–95% stays in the scientifically-safe cut zone. */
+const flowerDate=document.getElementById('flowerDate');
+const targetField=document.getElementById('targetField');
+const projBox=document.getElementById('projBox');
+const projDate=document.getElementById('projDate');
+const projCountdown=document.getElementById('projCountdown');
+const projDaa=document.getElementById('projDaa');
+const projWindow=document.getElementById('projWindow');
+const projWindowEn=document.getElementById('projWindowEn');
+
+function getSavedTarget(){ try{ const v=parseInt(localStorage.getItem('durianripe_lastTarget'),10); return (v===85||v===90||v===95)?v:95; }catch(e){ return 95; } }
+function setSavedTarget(v){ try{ localStorage.setItem('durianripe_lastTarget',String(v)); }catch(e){} }
+function syncTargetButtons(){ document.querySelectorAll('#q-target button').forEach(x=>{ x.classList.toggle('sel', +x.dataset.t===state.target); }); }
+state.target=getSavedTarget(); // persisted pluck ripeness preference
+
+function daaForTarget(c,pct){
+  // The grower's real experiment axis is "how many days before natural drop to cut".
+  // 100% = dropHi (let it drop). Each 5% step earlier ≈ cutting a few days sooner,
+  // measured back from the top of the drop window. We cap the earliest at the
+  // maturity threshold (min) so 85% never suggests an unripe cut.
+  //   100% → dropHi
+  //    95% → dropHi - 4d   (just inside the drop window)
+  //    90% → dropHi - 8d
+  //    85% → dropHi - 12d  (earliest experiment, but never below min)
+  const back={100:0,95:4,90:8,85:12}[pct];
+  const daa=c.dropHi-back;
+  return Math.max(c.min,daa);
+}
+function fmtDate(d){
+  const wd=T(['周日','周一','周二','周三','周四','周五','周六'],['Sun','Mon','Tue','Wed','Thu','Fri','Sat'])[d.getDay()];
+  const mo=d.getMonth()+1, da=d.getDate(), yr=d.getFullYear();
+  return T(`${yr}年${mo}月${da}日 ${wd}`,`${da} ${['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][d.getMonth()]} ${yr} (${wd})`);
+}
+function project(){
+  if(!state.variety||!flowerDate.value){checkReady();return;}
+  const c=cloneCfg();
+  const d0=new Date(flowerDate.value+'T00:00:00');
+  const now=new Date();now.setHours(0,0,0,0);
+  const targetDaa=daaForTarget(c,state.target);
+  state.daa=targetDaa;state.days='date';
+  // projected cut date = anthesis + targetDaa
+  const cut=new Date(d0);cut.setDate(cut.getDate()+targetDaa);
+  state.cutDateStr=fmtDate(cut);
+  const daysToGo=Math.round((cut-now)/86400000);
+  state.daysToGo=daysToGo;
+  projDate.textContent=fmtDate(cut);
+  projDaa.textContent=T(`目标 ${state.target}% 成熟 ≈ 授粉后 ${targetDaa} 天`,`Target ${state.target}% ripe ≈ ${targetDaa} days after anthesis`);
+  const usingCustom = getCustomDrop(state.variety)!=null;
+  const winTag = usingCustom ? T('（你的记录）',' (your record)') : '';
+  projWindow.textContent=`${c.dropLo}–${c.dropHi} DAA${winTag}`;
+  if(projWindowEn)projWindowEn.textContent=`${c.dropLo}–${c.dropHi} DAA${winTag}`;
+  let cd,col;
+  if(daysToGo>1){cd=T(`还有 <b>${daysToGo}</b> 天`,`<b>${daysToGo}</b> days to go`);col='#3f7d55';}
+  else if(daysToGo===1){cd=T('明天','Tomorrow');col='#c98a2b';}
+  else if(daysToGo===0){cd=T('就是今天','Today');col='#c98a2b';}
+  else {cd=T(`已过 <b>${-daysToGo}</b> 天 —— 尽快检查/采收`,`<b>${-daysToGo}</b> days past — check/harvest soon`);col='#b4482f';}
+  projCountdown.innerHTML=cd;projCountdown.style.color=col;
+  checkReady();
+}
+flowerDate.addEventListener('change',()=>{
+  updateTargetVisibility();
+  project();
+});
+document.querySelectorAll('#q-target button').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('#q-target button').forEach(x=>x.classList.remove('sel'));
+    btn.classList.add('sel');state.target=+btn.dataset.t;
+    setSavedTarget(state.target);
+    project();
+  });
+});
+// Method drives whether the ripeness dial is even relevant:
+//  - tree-drop → fruit ripens 100% on the tree; no cut-ripeness choice, hide the field.
+//  - pluck → show the dial (85–95%, capped below 100% since 100% = tree-drop).
+document.querySelectorAll('#q-method .opt').forEach(o=>{
+  o.addEventListener('click',()=>{ updateTargetVisibility(); project(); });
+});
+function updateTargetVisibility(){
+  // Show the ripeness dial as soon as pluck + clone are chosen — BEFORE the date —
+  // so the farmer deliberately picks 85/90/95% first, rather than seeing it appear
+  // together with an already-computed result.
+  const showTarget = state.method==='pluck' && state.variety;
+  if(state.method==='tree'){
+    targetField.style.display='none';
+    projBox.style.display='none';
+    state.target=100; // tree-drop = full natural ripeness
+  } else if(showTarget){
+    targetField.style.display='block';
+    if(state.target>=100){ state.target=getSavedTarget(); } // restore the grower's saved pick
+    syncTargetButtons();
+    projBox.style.display = flowerDate.value ? 'block' : 'none';
+  } else {
+    targetField.style.display='none';
+    projBox.style.display='none';
+  }
+  updateStepNumbers();
+}
+// Steps are numbered dynamically: the ripeness step (4) only exists for plucking,
+// so when it's hidden the date step slides up from 5 to 4 — no gap in the sequence.
+function updateStepNumbers(){
+  const ripeVisible = targetField.style.display!=='none';
+  const sr=document.getElementById('stepRipe'), sd=document.getElementById('stepDate');
+  if(sr) sr.textContent = ripeVisible ? '4. ' : '';
+  if(sd) sd.textContent = ripeVisible ? '5. ' : '4. ';
+}
+// initial paint: reflect the persisted ripeness pick and number the (hidden-ripeness) steps
+syncTargetButtons(); updateStepNumbers();
+// re-project when clone changes (called from clone-select handler)
+function syncFromDate(){
+  updateTargetVisibility();
+  if(flowerDate.value&&state.variety){ project(); }
+}
+
+// Auto-compute: the moment all required inputs exist, render the result live.
+// No button — every field change re-runs decide() so the answer updates instantly.
+function maybeAutoRun(){
+  const daysOk = (state.days==='date'||state.days==='slider') && state.daa;
+  if(state.variety && state.method && state.market && daysOk){
+    decide();
+  }
+}
+function checkReady(){ maybeAutoRun(); }
+
+/* ---- flavour retention & shelf-life models (grounded, neutral) ----
+   Basis: MARDI D197 — fruit cut at ~15 WAA (near drop) matches abscised fruit in
+   DM, TSS, colour, firmness, sensory; earlier cuts fall short. Flavour is highest
+   at natural drop (dropHi) and declines the earlier you cut before it, steeply
+   below the maturity threshold. Shelf life is the inverse: cutting earlier +
+   climate control buys days before dehiscence (Malaysian tree-drop ~1–2 days
+   ambient; 13–15°C reefer holds ~7–14 days — below 12°C causes chilling injury). Neutral
+   readouts the grower weighs against their market — not a recommendation. */
+function flavourRetention(c,daa,method){
+  if(method==='tree') return 100;           // natural drop = reference peak
+  if(daa==null) return null;
+  if(daa>=c.dropHi) return 99;              // at/after full drop window ≈ peak
+  if(daa>=c.dropLo) return Math.round(95+ (daa-c.dropLo)/(Math.max(1,c.dropHi-c.dropLo))*4); // 95→99
+  if(daa>=c.min)    return Math.round(78+ (daa-c.min)/(Math.max(1,c.dropLo-c.min))*17);      // 78→95
+  return Math.max(35, Math.round(78- (c.min-daa)*4)); // below threshold: steep loss
+}
+function shelfLifeDays(c,daa,method,market){
+  // EVIDENCE-BASED, cross-checked against real Thailand/Vietnam→China export practice:
+  // - Ambient (room temp, unpackaged): ripe/tree-drop fruit dehisces (cracks) in
+  //   ~1–2 days. Cutting earlier buys a little more pre-crack time, but dehiscence is
+  //   driven by ripening + water loss, so the honest gain is modest (cap ~4–5 d).
+  // - Reefer cold chain is 13–15°C, NOT colder: durian suffers CHILLING INJURY below
+  //   ~12°C. DOAE: ripe whole-fruit ~7–14 d at 13–15°C; mature-firmer fruit holds longer.
+  //   Practical trade shelf life is quoted as 5–7 days fresh. We cap cold at 14 d and
+  //   give firmer (earlier-cut) fruit the upper end.
+  // Sources: DOAE storage refs; Laem Chabang→Guangzhou reefer @13°C ~4 d; China-Laos
+  //   rail @13°C (Kunming 3 d, Chengdu 5 d); Vietnam→China protocol "cut at 75–85% ripe
+  //   to withstand transit".
+  let ambient;
+  if(method==='tree'||daa==null){ ambient=2; }
+  else {
+    const daysBeforeDrop=Math.max(0,c.dropHi-daa);
+    ambient=Math.min(5, 2+Math.round(daysBeforeDrop*0.4));
+  }
+  // Cold chain 13–15°C, whole intact fruit. Riper fruit = fewer days; firmer earlier
+  // cut = nearer the ~14 d ceiling. Baseline ripe ≈ 7 d (matches "5–7 d fresh").
+  let cold;
+  if(method==='tree'||daa==null){ cold=7; }
+  else {
+    const daysBeforeDrop=Math.max(0,c.dropHi-daa);
+    cold=Math.min(14, 7+Math.round(daysBeforeDrop*0.6));
+  }
+  return {ambient,cold};
+}
+
+/* ---- real China-market transit routes (door-to-arrival, incl. handling) ----
+   Used to sanity-check whether the chosen cut leaves enough cold-chain life to
+   arrive intact and still auto-ripen at destination. Days are typical, not best-case.
+   IMPORTANT — rail from MALAYSIA is the ASEAN Express (KTMB), not the Thai-origin
+   Laem Chabang→Kunming service. The MY route starts at the Kontena Nasional Inland
+   Clearance Depot (KNICD), a freight terminal in Sungai Way / Setia Jaya, Petaling
+   Jaya, Selangor — NOT the Kelana Jaya LRT station (sources shorthand it "Kelana
+   Jaya" because KNICD sits nearby). Runs → Padang Besar → through Thailand →
+   Thanaleng Dry Port, Laos (manual gauge transfer) → Mohan/Boten → Chongqing, ~3,500 km, quoted ~9 days (KTMB, 2×/week; ~⅕ air cost,
+   ~50% faster than sea). At 9 days it's realistically a FROZEN corridor — fresh
+   whole fruit (~7–14 d at 13–15°C) arrives with little/no ripening reserve. Sources
+   2024–26: Nation/ChinaDaily/Wikipedia/Heinrich-Böll ("frozen durian… just nine days").
+   Sea: exporters quote ~5 d (S. China) / Port Klang→Shanghai 7–12 d; reefer 13–15°C
+   with 15–20% vent. Air KL→Nanning ~48 h, built for 100% tree-ripe. Frozen IQF/LN2
+   at −18°C keeps 18–24 months — lowest-cost, highest-volume path in a glut. */
+const EXPORT_ROUTES=[
+  {zh:'空运 → 广州/深圳/郑州',en:'Air freight → Guangzhou/Shenzhen/Zhengzhou', days:1, air:true},
+  {zh:'陆运 → 凭祥/南宁口岸',en:'Road → Pingxiang/Nanning', days:5},
+  {zh:'冷藏海运 → 广州/深圳 (巴生港)',en:'Reefer sea → Guangzhou/Shenzhen (Pt Klang)', days:5},
+  {zh:'冷藏海运 → 上海',en:'Reefer sea → Shanghai', days:9},
+  {zh:'东盟快铁 → 重庆 (KNICD 双溪威·雪兰莪出发)',en:'ASEAN Express rail → Chongqing (from KNICD, Sg. Way, Selangor)', days:9, rail:true}
+];
+
+/* ---- maturity scoring: relative to THIS clone's window ---- */
+function maturityPct(c,daa,method){
+  if(daa==null){ // unsure — infer from method
+    return method==='tree'?88:62;
+  }
+  // map DAA onto 0–100 where dropLo..dropHi ≈ 82..96, over = ~70 (declining)
+  if(daa<c.min) return Math.max(8, Math.round(35*(daa-(c.min-15))/15));
+  if(daa<c.dropLo) return Math.round(55+ (daa-c.min)/(c.dropLo-c.min)*25); // 55→80
+  if(daa<=c.dropHi) return Math.round(82+ (daa-c.dropLo)/(Math.max(1,c.dropHi-c.dropLo))*14); // 82→96
+  if(daa<=c.over) return Math.round(96- (daa-c.dropHi)/(Math.max(1,c.over-c.dropHi))*24); // 96→72 declining
+  return Math.max(40, Math.round(72- (daa-c.over)*3)); // over-ripe, falls fast
+}
+
+function decide(){
+  const s=state;
+  const c=cloneCfg();
+  const daa=s.daa;
+  let mat=maturityPct(c,daa,s.method);
+  const plucked=s.method==='pluck';
+  const fragile=c.fragile;
+  const tooEarly = daa!=null && daa < c.min;
+  const overRipe = daa!=null && daa > c.over;
+  const flav=flavourRetention(c,daa,s.method);
+  const shelf=shelfLifeDays(c,daa,s.method,s.market);
+
+  const win=T(`落果窗口 ${c.dropLo}–${c.dropHi} DAA · 过熟 >${c.over}`,`Drop window ${c.dropLo}–${c.dropHi} DAA · over-ripe >${c.over}`);
+  let key,cls,title,desc;
+
+  // 1. over-ripe guard (the "dangerously long" case)
+  if(overRipe){
+    key='early';cls='v-early';
+    title=T('过熟风险 · 已超落果期','Over-ripe risk · past drop window');
+    desc=T(`此品种 ${daa} DAA 已超过 ${c.over} 天的过熟线，果肉易软烂、开裂、发酵味重。应立即采下就地即食或加工，不宜运输。`,`At ${daa} DAA this clone is past its ${c.over}-day over-ripe line — flesh turns mushy, splits, ferments. Harvest now for immediate local/processing use, not transport.`);
+  }
+  // 2. too-early / immature guard
+  else if(tooEarly && plucked){
+    key='early';cls='v-early';
+    title=T('过早采摘 · 风险','Plucked too early · risk');
+    desc=T(`此品种生理成熟门槛约 ${c.min} DAA，当前 ${daa} DAA 偏生。后熟会微弱或不完整，即使催熟开裂也难有好风味。`,`This clone's maturity threshold is ~${c.min} DAA; at ${daa} DAA it's under-ripe. Post-harvest ripening will be weak — even forced cracking won't give good flavor.`);
+  }
+  // 3. tree-ripe / natural drop
+  else if(s.method==='tree'){
+    key='tree';cls='v-tree';
+    title=T('树熟即食线','Tree-ripe · fresh line');
+    desc=T('自然落果，已在母树累积最大干物质、淀粉与香气前体，风味峰值最高。走本地或高端即食，常温约1–2天即开裂（开裂/剖开后须冷藏），避免长途。','Natural drop — maximum dry matter, starch & aroma precursors from the mother tree, peak flavor. For local/premium fresh; cracks in ~1–2 days at room temp (refrigerate once opened), avoid long transport.');
+  }
+  // 4. plucked → route by market
+  else if(s.market==='export'){
+    if(fragile){
+      key='high';cls='v-high';
+      title=T('高熟度采摘 · 出口线','High-maturity plucked · export');
+      desc=T('此品种属香气型，酯香与硫化物平衡在树熟时最饱满。出口时尽量贴近落果窗口上限再采，把风味损失降到最低；配合 13–15°C 全程控温，可稳定送达。','This is an aroma-type clone — its ester–sulfur balance is fullest at tree-ripe. For export, harvest near the top of the drop window to keep flavour loss minimal, and hold a full 13–15°C cold chain for a stable arrival.');
+    }else{
+      key='std';cls='v-std';
+      title=T('标准采摘 + 控温出口线','Standard + climate-control export');
+      desc=T('此品种采摘后风味保持较好，配合全程控温可延长货架期，适合长程出口。越贴近落果窗口，自然与催熟差距越小。','This clone holds flavor well after plucking; with full climate control it ships well for export. Closer to the drop window, the natural-vs-forced gap shrinks.');
+    }
+  }else if(s.market==='short'){
+    key='high';cls='v-high';
+    title=T('高熟度采摘线','High-maturity plucked line');
+    desc=T('达高熟度后采摘、短程运输，是风味与耐运的平衡点。目标落在落果窗口内。','Pluck at high maturity for short-haul — the balance of flavor and durability. Aim inside the drop window.');
+  }else{ // local fresh, plucked
+    key='high';cls='v-high';
+    title=T('高熟度采摘 → 本地','High-maturity plucked → local');
+    desc=T('本地即食建议尽量贴近落果窗口，或直接树熟，风味更接近峰值。','For local fresh, harvest near the drop window or let it tree-ripen for peak flavor.');
+  }
+
+  // advice lists
+  const harvest=[],handle=[];
+  harvest.push(win);
+  if(plucked && !overRipe){
+    harvest.push(T(`确认已过 ${c.min} DAA 生理成熟门槛再采，避免后熟不完整。`,`Confirm past the ${c.min}-DAA maturity threshold before cutting to avoid incomplete ripening.`));
+    harvest.push(T('越贴近落果窗口，自然与催熟的品质差距越小。','The closer to the drop window, the smaller the gap between natural and forced ripening.'));
+  }else if(!overRipe){
+    harvest.push(T('树熟自然落果风味峰值最高，但常温约1–2天即开裂，尽快分销。','Tree-drop peaks highest in flavour but cracks in ~1–2 days at room temp — distribute fast.'));
+  }
+  if(fragile&&plucked)harvest.push(T('香气型品种：非树熟会损失酯香与硫化物平衡。','Aroma-type clone: plucking sacrifices the ester–sulfur balance.'));
+
+  if(overRipe){
+    handle.push(T('立即处理：就地即食、冷冻果肉或加工，避免任何运输延误。','Handle now: eat fresh, freeze the pulp, or process — avoid any transport delay.'));
+  }else if(s.market==='export'){
+    handle.push(T('全程控温，抑制呼吸与乙烯，延长货架期。','Climate-control throughout to slow respiration & ethylene and extend shelf life.'));
+    handle.push(T('若催熟：开裂只是外表信号，不等于内部风味成熟。','If forcing: cracking is only an external sign, not internal flavor maturity.'));
+  }else if(s.market==='short'){
+    handle.push(T('短程可轻度控温，抵达后让其自然后熟至峰值。','Light climate control for short-haul; let it ripen naturally to peak on arrival.'));
+  }else{
+    handle.push(T('本地即食：让乙烯自然驱动软化与淀粉转糖，无需催熟。','Local fresh: let ethylene naturally drive softening & starch-to-sugar — no forcing needed.'));
+  }
+
+  // ---- export transit feasibility (China market) ----
+  let transitCheck='';
+  if(s.market==='export' && !overRipe && daa!=null){
+    const coldLife=shelf.cold; // days the whole fruit holds at 13–15°C
+    // reserve ~2 days at destination for auto-ripening + retail before eating
+    const RIPEN_RESERVE=2;
+    const rows=EXPORT_ROUTES.map(r=>{
+      const arriveOk = r.days + RIPEN_RESERVE <= coldLife;
+      const margin = coldLife - r.days; // days of life left on arrival
+      if(r.air){
+        // Air freight is ~1 day: it can carry even 100% tree-ripe fruit. Cutting
+        // early to gain shelf life is pointless here — plane is already fast enough.
+        const airCol = s.target>=100? '#3f7d55' : '#c98a2b';
+        const airNote = s.target>=100
+          ? T('树熟即可 · 最佳选择','Tree-ripe works · ideal')
+          : T(`此路线无需早割（省下运费与风味）`,`no need to cut early here (saves cost & flavour)`);
+        return `<div style="display:flex;justify-content:space-between;gap:8px;padding:5px 0;border-top:1px solid var(--line);font-size:11.5px">
+          <span style="flex:1">✈️ ${T(r.zh,r.en)} <span style="color:var(--ink-soft)">(~24–36${T('小时','h')})</span></span>
+          <span style="color:${airCol};font-weight:800;white-space:nowrap">✓ ${airNote}</span></div>`;
+      }
+      const col = arriveOk? '#3f7d55' : (margin>=0? '#c98a2b' : '#b4482f');
+      const mark = arriveOk? '✓' : (margin>=0? '⚠' : '✕');
+      let note = arriveOk
+        ? T(`到港余 ${margin} 天，够自然后熟`,`${margin}d left on arrival — ripens in time`)
+        : (margin>=0
+            ? T(`仅余 ${margin} 天，勉强/须即售`,`only ${margin}d left — tight, sell immediately`)
+            : T(`超出货架期，会坏果`,`exceeds shelf life — will spoil`));
+      // ASEAN Express (~9 d) is realistically a FROZEN corridor; if fresh doesn't fit,
+      // say so honestly rather than a bare "will spoil".
+      if(r.rail && !arriveOk){
+        note = T('鲜果太紧 —— 此线宜走急冻','fresh too tight — freeze for this line');
+      }
+      const icon = r.rail ? '🚄 ' : '';
+      return `<div style="display:flex;justify-content:space-between;gap:8px;padding:5px 0;border-top:1px solid var(--line);font-size:11.5px">
+        <span style="flex:1">${icon}${T(r.zh,r.en)} <span style="color:var(--ink-soft)">(${r.days}${T('天','d')})</span></span>
+        <span style="color:${col};font-weight:800;white-space:nowrap">${mark} ${note}</span></div>`;
+    }).join('');
+    const airTip = s.target<100
+      ? `<div style="font-size:11.5px;color:var(--warn);font-weight:700;margin-top:8px;line-height:1.5">${T('✈️ 注意：若走空运（约1天到港），榴梿树熟落果也完全来得及 —— 为空运而早割是<b>白白损失风味、还多付运费</b>。空运的价值正是能卖「树熟premium」。早割只对慢速冷链（铁路/海运）才有意义。','✈️ Note: by air (~1 day), even tree-drop fruit arrives fine — cutting early for an air shipment <b>wastes flavour and adds freight cost for nothing</b>. The whole value of air freight is selling the tree-ripe premium. Early cutting only pays off for slower cold chain (rail/sea).')}</div>`
+      : '';
+    // Frozen-sea escape hatch — when the fresh far-routes are tight, freezing removes
+    // the shelf-life clock entirely. Most valuable exactly during a glut.
+    const anyTight = EXPORT_ROUTES.some(r=>!r.air && (coldLife - r.days) < RIPEN_RESERVE);
+    const frozenTip = anyTight
+      ? `<div style="font-size:11.5px;color:var(--good);font-weight:700;margin-top:8px;line-height:1.5;border-top:1px dashed var(--line);padding-top:8px">${T('❄️ 远程/爆量时的另一条路：<b>取肉急冻（IQF / 液氮）走海运</b> —— −18°C 可存 18–24 个月，没有货架期压力，运费最低、可走大批量。适合本地价崩、需要延后或远销时保住价值。','❄️ For long-haul or a glut: <b>freeze the flesh (IQF / LN2) and ship by sea</b> — at −18°C it keeps 18–24 months, no shelf-life clock, lowest freight, high volume. A way to hold value when local prices crash and you need to delay or reach far.')}</div>`
+      : '';
+    // ASEAN Express context — a genuinely new Malaysia-origin option most growers
+    // don't yet know the real numbers for. Shown whenever export is selected.
+    const railTip = `<div style="font-size:11.5px;color:var(--ink-soft);margin-top:8px;line-height:1.5;border-top:1px dashed var(--line);padding-top:8px">${T('🚄 关于「东盟快铁」：从雪兰莪 KNICD 货运场（双溪威／Setia Jaya，非格拉那再也 LRT 站）出发，经泰国、老挝到重庆，约 <b>9 天</b>（KTMB，每周两班；约为空运 1/5 成本、比海运快约一半）。9 天对鲜果偏紧，实务上多走<b>急冻榴梿</b>。这是马来西亚出发的真实数字 —— 不同于泰国（老挝口岸出发）常见的 3–5 天。','🚄 About the ASEAN Express: departs the KNICD freight depot in Selangor (Sungai Way / Setia Jaya — a cargo terminal, not the Kelana Jaya LRT station), via Thailand & Laos to Chongqing, about <b>9 days</b> (KTMB, 2×/week; ~⅕ of air cost, ~50% faster than sea). Nine days is tight for fresh, so in practice it carries <b>frozen durian</b>. These are the real Malaysia-origin figures — different from the 3–5 days often quoted for Thai (Laos-border) origins.')}</div>`;
+    transitCheck=`<div style="margin-top:12px;background:#fff;border:1.5px solid var(--shell);border-radius:12px;padding:12px 13px">
+      <div style="font-size:12.5px;font-weight:800;color:var(--shell);margin-bottom:2px">${T('出口中国：路线可行性','Export to China: route feasibility')}</div>
+      <div style="font-size:11px;color:var(--ink-soft);margin-bottom:4px">${T(`按 13–15°C 冷链整果寿命 ${coldLife} 天，预留 ${RIPEN_RESERVE} 天到港后熟`,`Based on ${coldLife}d reefer whole-fruit life, ${RIPEN_RESERVE}d reserved to auto-ripen on arrival`)}</div>
+      ${rows}
+      ${airTip}
+      ${railTip}
+      ${frozenTip}
+      <div style="font-size:11px;color:var(--ink-soft);margin-top:8px;line-height:1.5">${T('绿=从容 · 黄=勉强，须到港即售 · 红=超期。想走更远的路线，就把目标成熟度调低（割得更早、更硬），换取更多在途天数 —— 代价是风味。','Green = comfortable · Amber = tight, sell on arrival · Red = over. For longer routes, lower the target ripeness (cut earlier/firmer) to gain transit days — at a flavour cost.')}</div>
+    </div>`;
+  }
+
+  render(key,cls,title,desc,mat,harvest,handle,{flav,shelf,method:s.method,market:s.market,overRipe,tooEarly,target:s.target,cutDateStr:s.cutDateStr,daysToGo:s.daysToGo,transitCheck});
+}
+
+function render(key,cls,title,desc,mat,harvest,handle,tr){
+  const matColor=mat>=80?'#3f7d55':mat>=55?'#c98a2b':'#b4482f';
+  const el=document.getElementById('result');
+
+  // ---- lead answer block: the two things a stressed farmer needs first ----
+  // (recommended line + projected cut date + countdown), pulled to the very top.
+  let leadBlock='';
+  {
+    const showCut = tr.cutDateStr && tr.method!=='tree' && !tr.overRipe;
+    const cdText = tr.daysToGo>0 ? T(`还有 ${tr.daysToGo} 天`,`${tr.daysToGo} days to go`)
+                 : tr.daysToGo===0 ? T('就是今天','Today')
+                 : T(`已过 ${-tr.daysToGo} 天`,`${-tr.daysToGo} days past`);
+    leadBlock=`
+    <div class="verdict ${cls}" style="margin-bottom:12px">
+      <div class="vk">${T('建议采收线','Recommended line')}</div>
+      <div class="vt">${title}</div>
+      ${showCut?`
+      <div style="display:flex;align-items:center;gap:10px;margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,.25)">
+        <div style="flex:1">
+          <div style="font-size:11px;opacity:.85;font-weight:700">${T('目标 '+tr.target+'% 成熟 · 预计割果日','Target '+tr.target+'% · projected cut date')}</div>
+          <div style="font-size:16px;font-weight:800">${tr.cutDateStr}</div>
+        </div>
+        <div style="text-align:right;background:rgba(255,255,255,.16);border-radius:9px;padding:6px 11px">
+          <div style="font-size:16px;font-weight:800;line-height:1.1;white-space:nowrap">${cdText}</div>
+        </div>
+      </div>`:''}
+      <div class="vd" style="margin-top:10px">${desc}</div>
+    </div>`;
+  }
+
+  // ---- tradeoff centrepiece ----
+  let tradeoff='';
+  if(tr.flav!=null && !tr.overRipe){
+    const fColor=tr.flav>=95?'#3f7d55':tr.flav>=80?'#c98a2b':'#b4482f';
+    const treeCold=shelfLifeDays(cloneCfg(),cloneCfg().dropHi,'tree',tr.market).cold;
+    const coldGain=tr.shelf.cold-treeCold; // honest extra COLD-STORAGE days vs tree-drop
+    tr.cold_note = coldGain>0 ? T(`冷藏下比树熟果多约 ${coldGain} 天（较硬果实更耐存）`,`~${coldGain} more cold-storage days than tree-drop (firmer fruit keeps better)`) : '';
+    const flavLine = tr.method==='tree'
+      ? T('自然落果 = 风味基准（最高）','Natural drop = flavour baseline (peak)')
+      : T(`此割点保留约 <b style="color:${fColor}">${tr.flav}%</b> 的树熟风味`,`This cut keeps ~<b style="color:${fColor}">${tr.flav}%</b> of tree-ripe flavour`);
+
+    const isLocal = tr.market==='local';
+    const isExport = tr.market==='export';
+    // Shelf tiles: local doesn't need a cold-chain tile (eaten same/next day).
+    const coldTile = isLocal ? '' : `
+        <div style="flex:1;background:#fff;border:1px solid var(--line);border-radius:10px;padding:9px 6px;text-align:center">
+          <div style="font-size:20px;font-weight:800;color:var(--good)">${tr.shelf.cold}${T('天','d')}</div>
+          <div style="font-size:11px;color:var(--ink-soft);font-weight:600;line-height:1.3">${T('冷链整果<br>13–15°C','Reefer whole<br>13–15°C')}</div>
+        </div>`;
+    const ambientLabel = T('常温整果<br>开裂前','Room temp<br>before crack');
+    // Market-appropriate guidance line instead of a one-size export warning.
+    let shelfNote;
+    if(isLocal){
+      shelfNote = T('🏠 本地即食：当天至隔天就吃，树熟风味最高最划算 —— 无需冷链或早割。常温约 '+tr.shelf.ambient+' 天内开裂，尽快分销即可。','🏠 Local fresh: eaten same/next day, so tree-ripe flavour is highest and best — no cold chain or early cutting needed. Cracks within ~'+tr.shelf.ambient+' days at room temp; just distribute promptly.');
+    } else if(isExport){
+      shelfNote = T('⚠️ 常温整果只有约 1–2 天便开裂 —— 割得早一点最多多争取一两天，<b>不会大幅延长</b>。出口真正靠的是 <b>13–15°C 冷链</b>（业界实测约 5–7 天鲜果、上限约14天）。<b>切勿低于 12°C</b> —— 榴梿会冷害（红斑、异味）。要长期保存则取肉<b>冷冻（可存数月）</b>。','⚠️ At room temp a whole fruit cracks in only ~1–2 days — cutting earlier buys at most a day or two, <b>not a big extension</b>. Export relies on a <b>13–15°C reefer cold chain</b> (industry-real ~5–7 days fresh, ~14-day ceiling). <b>Never below 12°C</b> — durian gets chilling injury (red lesions, off-flavour). For long storage, remove the flesh and <b>freeze it (keeps for months)</b>.');
+    } else { // short-haul
+      shelfNote = T('🚚 短程运输：数小时至隔天到货，常温整果约 '+tr.shelf.ambient+' 天内要送到并分销。若行程接近隔天，用一点冷藏（13–15°C）更稳；<b>切勿低于 12°C</b>（会冷害）。','🚚 Short-haul: arrives within hours to next day, so a whole fruit at room temp (~'+tr.shelf.ambient+' days) is usually fine if you deliver and distribute promptly. If the run stretches toward next-day, light chilling (13–15°C) helps; <b>never below 12°C</b> (chilling injury).');
+    }
+    // Transit-route panel is export-only.
+    const transitPanel = isExport ? (tr.transitCheck||'') : '';
+    // Closing neutral line — only mention export/cold-chain when it's actually relevant.
+    const closingNote = isLocal
+      ? T('本地市场看重新鲜与风味 —— 越贴近树熟越好。若哪天本地被爆量压垮、要走远，再回来选「短程」或「出口」看货架期。','Local markets reward freshness and flavour — the closer to tree-ripe, the better. If the local market ever gets crushed by a glut and you need to reach further, come back and pick "short-haul" or "export" to see shelf life.')
+      : T('这些是中立参考。若你的市场只在本地、且价格能覆盖成本，树熟风味最高最划算；若本地已被爆量压垮、需要出口或延后销售，用一点风味换货架期（靠冷链/包装/冷冻，而非常温）可能才是活路。判断权在你。','These are a neutral reference. If your market is local and prices cover costs, tree-drop flavour is highest and best. If the local market is crushed by the glut and you need export or delayed selling, trading a little flavour for shelf life — via cold chain/packaging/freezing, not room temp — may be the way through. The call is yours.');
+
+    tradeoff=`
+    <div class="rcard" style="border:1.5px solid var(--flesh);background:#fffaf0">
+      <h4>⚖️ ${T('风味 ↔ 货架期 权衡','Flavour ↔ shelf-life tradeoff')}</h4>
+      <div style="font-size:14px;margin-bottom:10px">${flavLine}</div>
+      <div class="matbar"><i style="width:${tr.flav}%;background:${fColor}"></i></div>
+      <div class="matlabel"><span>${T('风味保留','Flavour kept')}</span><span style="color:${fColor};font-weight:800">${tr.flav}%</span><span>${T('树熟峰值','Tree-ripe')}</span></div>
+      <div style="font-size:10.5px;color:var(--ink-soft);margin-top:5px;line-height:1.4">${T('※ 模型估算（依据在「成熟科学」页），非实验室实测 —— 以你的感官记录为准。','※ Model estimate (basis in the Science tab), not a lab measurement — trust your own sensory log.')}</div>
+      <div style="display:flex;gap:8px;margin-top:14px">
+        <div style="flex:1;background:#fff;border:1px solid var(--line);border-radius:10px;padding:9px 6px;text-align:center">
+          <div style="font-size:20px;font-weight:800;color:var(--shell)">${tr.shelf.ambient}${T('天','d')}</div>
+          <div style="font-size:11px;color:var(--ink-soft);font-weight:600;line-height:1.3">${ambientLabel}</div>
+        </div>${coldTile}
+      </div>
+      <div style="font-size:11.5px;color:${isLocal?'var(--good)':'var(--danger)'};font-weight:700;margin-top:11px;line-height:1.5">${shelfNote}</div>
+      ${transitPanel}
+      <div style="font-size:11.5px;color:var(--ink-soft);margin-top:10px;line-height:1.5">${closingNote}</div>
+      <div style="font-size:11.5px;color:var(--shell);font-weight:700;margin-top:9px;padding-top:9px;border-top:1px dashed var(--line)">${T('🔬 想加快校准？这一目标割下几颗送验干物质、糖度、硬度、硫化物/酯类 —— 见「成熟科学」页的送验实验室面板。','🔬 Calibrate faster: send a few fruit from this target for dry matter, Brix, firmness, and sulfur/ester volatiles — see the Lab Panel on the Science tab.')}</div>
+    </div>`;
+  }
+
+  el.innerHTML=`
+    ${leadBlock}
+    ${tradeoff}
+    <div class="rcard">
+      <h4>🌡️ ${T('成熟度评估','Maturity estimate')}</h4>
+      <div class="matbar"><i style="width:${mat}%;background:${matColor}"></i></div>
+      <div class="matlabel"><span>${T('偏生 / 风险','Under-ripe')}</span><span style="color:${matColor};font-weight:800">${mat}%</span><span>${T('峰值','Peak')}</span></div>
+    </div>
+    <div class="rcard">
+      <h4>🔪 ${T('采收要点','Harvest notes')}</h4>
+      <ul>${harvest.map(x=>`<li>${x}</li>`).join('')}</ul>
+    </div>
+    <div class="rcard">
+      <h4>📦 ${T('后熟与处理','Ripening & handling')}</h4>
+      <ul>${handle.map(x=>`<li>${x}</li>`).join('')}</ul>
+    </div>
+    <button class="share" id="shareBtn"><svg viewBox="0 0 24 24" width="20" height="20" fill="#fff" aria-hidden="true"><path d="M17.47 14.38c-.3-.15-1.76-.87-2.03-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.95 1.17-.17.2-.35.22-.65.07-.3-.15-1.26-.46-2.4-1.48-.89-.79-1.49-1.77-1.66-2.07-.17-.3-.02-.46.13-.61.13-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.07-.15-.67-1.62-.92-2.22-.24-.58-.49-.5-.67-.51l-.57-.01c-.2 0-.52.07-.79.37-.27.3-1.04 1.02-1.04 2.48 0 1.46 1.06 2.87 1.21 3.07.15.2 2.1 3.2 5.08 4.49.71.31 1.26.49 1.69.62.71.23 1.36.2 1.87.12.57-.09 1.76-.72 2.01-1.41.25-.7.25-1.29.17-1.42-.07-.13-.27-.2-.57-.35zM12.04 21.5h-.01a9.4 9.4 0 0 1-4.8-1.31l-.34-.2-3.57.93.96-3.48-.22-.36a9.38 9.38 0 0 1-1.44-5.01c0-5.19 4.23-9.42 9.43-9.42 2.52 0 4.88.98 6.66 2.76a9.35 9.35 0 0 1 2.76 6.67c0 5.19-4.23 9.42-9.42 9.42zm8.02-17.44A11.32 11.32 0 0 0 12.04.75C5.8.75.72 5.83.72 12.07c0 2 .52 3.95 1.52 5.67L.62 23.25l5.65-1.48a11.28 11.28 0 0 0 5.77 1.58h.01c6.24 0 11.32-5.08 11.32-11.32 0-3.03-1.18-5.87-3.31-8.01z"/></svg>WhatsApp</button>
+    <div class="disc">${T('本工具用科学呈现权衡，中立、不替你决定割或不割 —— 是否值得，取决于你的市场与这一季的价格。数值为参考，田间请结合品种、树龄、气候与买家要求。','This tool presents the tradeoff via science — neutral, and does not decide cut-or-not for you; whether it pays off depends on your market and this season prices. Figures are a reference; in the field, combine with clone, tree age, climate and buyer specs.')}</div>
+  `;
+  const firstReveal = !el.classList.contains('show');
+  el.classList.add('show');
+  if(firstReveal) el.scrollIntoView({behavior:'smooth',block:'start'});
+  document.getElementById('shareBtn').addEventListener('click',()=>share(title,desc,mat,harvest,handle,tr));
+}
+
+function share(title,desc,mat,harvest,handle,tr){
+  const lines=[];
+  lines.push('🌿 '+title);
+  // cut date + countdown (pluck only; tree-drop has no cut date)
+  if(tr && tr.cutDateStr && tr.method!=='tree' && !tr.overRipe){
+    const cd = tr.daysToGo>0 ? T(`还有 ${tr.daysToGo} 天`,`${tr.daysToGo} days to go`)
+             : tr.daysToGo===0 ? T('就是今天','Today')
+             : T('已过期','Overdue');
+    lines.push(T(`预计割果：${tr.cutDateStr}（${cd}）`,`Cut by: ${tr.cutDateStr} (${cd})`));
+    if(tr.target!=null) lines.push(T(`目标成熟度：${tr.target}%`,`Target ripeness: ${tr.target}%`));
+  }
+  lines.push(T(`成熟度：${mat}%`,`Maturity: ${mat}%`));
+  if(tr && tr.flav!=null && !tr.overRipe){
+    lines.push(T(`风味保留：约 ${tr.flav}% · 货架期：${tr.shelf.ambient}天常温 / ${tr.shelf.cold}天冷链`,
+                 `Flavour: ~${tr.flav}% · Shelf: ${tr.shelf.ambient}d room / ${tr.shelf.cold}d reefer`));
+  }
+  lines.push('— '+T('树熟·割果·决策','Tree-drop·Cut·Decide'));
+  openWaPreview(lines.join('\n'));
+}
+
+/* ---- WhatsApp preview modal: farmer sees & edits before sending, can cancel ---- */
+function openWaPreview(text){
+  const modal=document.getElementById('waModal');
+  const ta=document.getElementById('waText');
+  ta.value=text;
+  modal.style.display='flex';
+  ta.focus();
+}
+function wireWaModal(){
+  const modal=document.getElementById('waModal');
+  if(!modal) return;
+  const ta=document.getElementById('waText');
+  document.getElementById('waCancel').addEventListener('click',()=>{ modal.style.display='none'; });
+  document.getElementById('waSend').addEventListener('click',()=>{
+    const msg=ta.value.trim();
+    modal.style.display='none';
+    if(msg) window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank');
+  });
+  // tap the dark backdrop to cancel; taps inside the card do nothing
+  modal.addEventListener('click',(e)=>{ if(e.target===modal) modal.style.display='none'; });
+}
+if(document.readyState==='loading'){ document.addEventListener('DOMContentLoaded',wireWaModal); }
+else { wireWaModal(); }
+
+/* ---- iframe-safe modal (native confirm/prompt are blocked in sandboxed iframes) ---- */
+function fdModalOpen({message, input=false, defaultValue='', okLabel=null}){
+  return new Promise(resolve=>{
+    const modal=document.getElementById('fdModal');
+    const msg=document.getElementById('fdModalMsg');
+    const inp=document.getElementById('fdModalInput');
+    const ok=document.getElementById('fdModalOk');
+    const cancel=document.getElementById('fdModalCancel');
+    if(!modal){ resolve(input?null:false); return; }
+    msg.textContent=message;
+    if(input){ inp.style.display='block'; inp.value=defaultValue; } else { inp.style.display='none'; }
+    modal.style.display='flex';
+    if(input) setTimeout(()=>inp.focus(),30);
+    const cleanup=()=>{
+      modal.style.display='none';
+      ok.onclick=null; cancel.onclick=null; modal.onclick=null; inp.onkeydown=null;
+    };
+    ok.onclick=()=>{ const v=input?inp.value:true; cleanup(); resolve(v); };
+    cancel.onclick=()=>{ cleanup(); resolve(input?null:false); };
+    modal.onclick=(e)=>{ if(e.target===modal){ cleanup(); resolve(input?null:false); } };
+    inp.onkeydown=(e)=>{ if(e.key==='Enter'){ const v=inp.value; cleanup(); resolve(v); } };
+  });
+}
+function fdConfirm(message){ return fdModalOpen({message,input:false}); }
+function fdPrompt(message,defaultValue=''){ return fdModalOpen({message,input:true,defaultValue}); }
+function fdAlert(message){ return fdModalOpen({message,input:false}); } // OK-only style ok
+
+/* ---- customer flavour feedback modal (optional, per harvested batch) ---- */
+function openFeedback(opts){
+  return new Promise(function(resolve){
+    const modal=document.getElementById('fbModal');
+    if(!modal){ resolve(null); return; }
+    const sub=document.getElementById('fbSub');
+    const note=document.getElementById('fbNote');
+    const choices=document.getElementById('fbChoices');
+    const ok=document.getElementById('fbSave'), cancel=document.getElementById('fbCancel'), clr=document.getElementById('fbClear');
+    let rating=(opts.current&&opts.current.rating)||null;
+    sub.textContent=opts.sub||'';
+    note.value=(opts.current&&opts.current.note)||'';
+    note.placeholder=T('备注（选填）：如「太苦／不够甜／回头客」','Comment (optional): e.g. too bitter / not sweet enough / repeat buyer');
+    function paint(){ choices.querySelectorAll('[data-fb]').forEach(function(b){ const on=b.dataset.fb===rating; b.style.background=on?'#fff3df':'#fff'; b.style.borderColor=on?'var(--flesh)':'var(--line)'; b.style.boxShadow=on?'0 0 0 2px rgba(232,169,75,.35)':'none'; }); }
+    paint();
+    modal.style.display='flex';
+    const cleanup=function(){ modal.style.display='none'; choices.onclick=null; ok.onclick=null; cancel.onclick=null; clr.onclick=null; modal.onclick=null; };
+    choices.onclick=function(e){ const b=e.target.closest('[data-fb]'); if(b){ rating=(rating===b.dataset.fb?null:b.dataset.fb); paint(); } };
+    ok.onclick=function(){ const r={rating:rating, note:(note.value||'').trim()}; cleanup(); resolve(r); };
+    cancel.onclick=function(){ cleanup(); resolve(null); };
+    clr.onclick=function(){ cleanup(); resolve({clear:true}); };
+    modal.onclick=function(e){ if(e.target===modal){ cleanup(); resolve(null); } };
+  });
+}
+
+/* ================= MY FARMS: multi-farm, multi-tree season tracking =================
+   Data model (localStorage key 'durianripe_farms'):
+   { farms: [ { id, name, trees: [ { id (grower's own tree ID), variety,
+                logs: [ { flowerDate, targetPct, method, projCutStr, projDaa,
+                          actualDropStr }  ] } ] } ] }
+   Design choices: grower supplies their OWN tree IDs (MyGAP/MyLadang traceability);
+   no auto-numbering. Flowering + actual-drop logging yields each tree's real DAA
+   over seasons — the durable value beyond the price crash. */
+const FARMS_KEY='durianripe_farms';
+function loadFarms(){
+  try{ const s=localStorage.getItem(FARMS_KEY); return s?JSON.parse(s):{farms:[]}; }
+  catch(e){ return {farms:[]}; }
+}
+function saveFarms(d){ try{ localStorage.setItem(FARMS_KEY,JSON.stringify(d)); }catch(e){} }
+/* migration: clean historically-saved bad dates (drop/cut on or before flowering). */
+function sanitizeFarms(d){
+  let changed=false;
+  (d.farms||[]).forEach(f=>(f.trees||[]).forEach(t=>(t.logs||[]).forEach(l=>{
+    if(!l.flowerDate) return;
+    const f0=new Date(l.flowerDate+'T00:00:00');
+    if(l.actualDropStr){
+      const diff=Math.round((new Date(l.actualDropStr+'T00:00:00')-f0)/86400000);
+      if(!(diff>0)){ l.badDropStr=l.actualDropStr; l.actualDropStr=null; changed=true; }
+    }
+    if(l.cutDateStr){
+      const diff=Math.round((new Date(l.cutDateStr+'T00:00:00')-f0)/86400000);
+      if(!(diff>0)){ l.badCutStr=l.cutDateStr; l.cutDateStr=null; changed=true; }
+    }
+  })));
+  return changed;
+}
+let farmsData=loadFarms();
+if(sanitizeFarms(farmsData)) saveFarms(farmsData);
+
+// Clone label lookup, read from the tool's clone options so it stays in sync.
+function cloneLabel(v){
+  const el=document.querySelector(`#q-variety .opt[data-v="${v}"] .lbl`);
+  if(!el) return v;
+  const zh=el.querySelector('.zh'), en=el.querySelector('.en');
+  return document.body.classList.contains('lang-en') ? (en?en.textContent:v) : (zh?zh.textContent:v);
+}
+function cloneOptionsHTML(sel){
+  const opts=[...document.querySelectorAll('#q-variety .opt')].map(o=>{
+    const v=o.dataset.v;
+    const zh=o.querySelector('.lbl .zh').textContent;
+    const en=o.querySelector('.lbl .en').textContent;
+    const label=document.body.classList.contains('lang-en')?en:zh;
+    return `<option value="${v}" ${sel===v?'selected':''}>${label}</option>`;
+  }).join('');
+  return opts;
+}
+function cloneTilePicker(fid){
+  const sel=(window.__fdTreeClone&&window.__fdTreeClone[fid])||'d197';
+  const open=!!(window.__fdCloneOpen&&window.__fdCloneOpen.has(fid));
+  let tiles='';
+  document.querySelectorAll('#q-variety .opt').forEach(function(o){
+    const v=o.dataset.v, wrap=o.querySelector('.lbl').parentElement;
+    tiles+='<div class="opt'+(v===sel?' sel':'')+'" data-clonepickopt="'+fid+'|'+v+'">'+wrap.outerHTML+'</div>';
+  });
+  return '<button type="button" data-clonepick="'+fid+'" style="width:100%;margin-top:6px;border:1.5px solid var(--line);background:#fff;border-radius:9px;padding:9px 12px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:8px;text-align:left">'
+    +'<span style="font-weight:700;font-size:12.5px;color:var(--shell)">'+cloneLabel(sel)+'</span>'
+    +'<span style="flex:0 0 auto;color:var(--thorn);font-size:12px;font-weight:800">'+(open?'▲':'▼')+'</span></button>'
+    +'<div class="opts tiles clone-tiles" style="display:'+(open?'grid':'none')+';margin-top:6px">'+tiles+'</div>';
+}
+function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,6); }
+
+// ---- DAA learned from a tree's own logs (actual drop − flowering) ----
+function treeLearnedDaa(tree){
+  const daas=(tree.logs||[]).filter(l=>l.flowerDate&&l.actualDropStr).map(l=>{
+    const f=new Date(l.flowerDate+'T00:00:00'), d=new Date(l.actualDropStr+'T00:00:00');
+    return Math.round((d-f)/86400000);
+  }).filter(n=>n>40&&n<200);
+  if(!daas.length) return null;
+  return Math.round(daas.reduce((a,b)=>a+b,0)/daas.length);
+}
+
+// ---- render the whole farms UI ----
+function renderFarms(){
+  const app=document.getElementById('farmsApp');
+  if(!app) return;
+  const d=farmsData;
+  if(!window.__fdOpenMenus) window.__fdOpenMenus=new Set();
+  const openMenus=window.__fdOpenMenus;
+  // inline harvest-calc state per tree (plucking only): { market, target }
+  if(!window.__fdCalc) window.__fdCalc={};
+  const calcState=window.__fdCalc;
+  let html='';
+  // add-farm row
+  html+=`<div style="display:flex;gap:8px;margin-bottom:14px">
+    <input id="newFarmName" name="farmName" aria-label="Farm name" autocomplete="off" type="text" placeholder="${T('果园名称','Farm name')}" style="flex:1;border:1.5px solid var(--line);border-radius:10px;padding:10px 12px;font-size:14px;font-family:inherit">
+    <button id="addFarmBtn" style="border:none;background:var(--shell);color:#fff;border-radius:10px;padding:10px 15px;font-weight:800;font-size:14px;cursor:pointer">${T('+ 果园','+ Farm')}</button>
+  </div>`;
+
+  const activeFarms=d.farms.filter(f=>!f.deletedAt);
+  if(!activeFarms.length){
+    html+=`<div style="text-align:center;color:var(--ink-soft);font-size:13px;padding:24px 10px;line-height:1.7">${T('还没有果园。先加一个果园，再往里加树。','No farms yet. Add a farm, then add trees to it.')}</div>`;
+  }
+
+  // ---- harvest-approaching summary: the daily "what needs attention" view ----
+  const upcoming=[];
+  d.farms.filter(f=>!f.deletedAt).forEach(farm=>farm.trees.filter(t=>!t.deletedAt).forEach(tree=>{
+    const open=(tree.logs||[]).filter(l=>l.flowerDate&&!l.actualDropStr&&!l.cutDateStr).pop();
+    if(open&&open.projCutISO){
+      const cut=new Date(open.projCutISO+'T00:00:00');
+      const now=new Date();now.setHours(0,0,0,0);
+      const days=Math.round((cut-now)/86400000);
+      upcoming.push({farm:farm.name, tree:tree.id, variety:tree.variety, days, cutStr:open.projCutStr});
+    }
+  }));
+  upcoming.sort((a,b)=>a.days-b.days);
+  if(upcoming.length){
+    const CAP=8;
+    const rows=upcoming.slice(0,CAP).map(u=>{
+      const col = u.days<0?'#b4482f':u.days<=3?'#c98a2b':u.days<=10?'#3f7d55':'var(--ink-soft)';
+      const cd = u.days<0?T(`已过 ${-u.days} 天`,`${-u.days}d past`):u.days===0?T('就是今天','today'):T(`还有 ${u.days} 天`,`in ${u.days}d`);
+      return `<div style="display:flex;justify-content:space-between;gap:8px;padding:5px 0;border-top:1px solid rgba(255,255,255,.12);font-size:12px">
+        <span style="color:var(--cream)">${escapeHtml(u.tree)} <span style="opacity:.7">· ${escapeHtml(u.farm)}</span></span>
+        <span style="color:${u.days<0||u.days<=3?'#f4c66d':'#cfe0c6'};font-weight:800;white-space:nowrap">${cd}</span></div>`;
+    }).join('');
+    const moreQueued=upcoming.length-CAP;
+    html+=`<div style="background:var(--shell);border-radius:14px;padding:14px 16px;margin-bottom:14px">
+      <div style="color:var(--flesh-hi);font-weight:800;font-size:14px;margin-bottom:4px">🗓️ ${T('接近采收的树','Trees approaching harvest')} <span style="opacity:.75;font-weight:700">(${upcoming.length})</span></div>
+      <div style="color:rgba(246,239,223,.7);font-size:11px;margin-bottom:6px">${T('按预计落果/割果日排序 · 黄=3天内 · 红=已过','By projected drop/cut date · amber = within 3d · red = past')}</div>
+      ${rows}
+      ${moreQueued>0?`<div style="color:rgba(246,239,223,.72);font-size:11.5px;font-weight:700;margin-top:8px;padding-top:7px;border-top:1px solid rgba(255,255,255,.12)">${T('＋ 还有 '+moreQueued+' 棵在后面排队 —— 记录了前面这些的落果/割果后，下一批会自动补上。','＋ '+moreQueued+' more in the queue — the next ones appear here as you log the drop/cut for these.')}</div>`:''}
+    </div>`;
+  }
+
+  d.farms.filter(f=>!f.deletedAt).forEach(farm=>{
+    const activeTrees=farm.trees.filter(t=>!t.deletedAt);
+    const treeCount=activeTrees.length;
+    html+=`<div class="rcard" style="margin-bottom:13px">
+      <div style="font-weight:800;font-size:15.5px;color:var(--shell);word-break:break-word;overflow-wrap:anywhere">🌳 ${escapeHtml(farm.name)} <span style="font-weight:600;font-size:12px;color:var(--ink-soft);white-space:nowrap">· ${treeCount} ${T('棵','trees')}</span></div>
+      <div style="margin-top:11px">
+        <div style="display:flex;gap:6px">
+          <input data-treeid-for="${farm.id}" name="treeId" aria-label="Tree ID" autocomplete="off" type="text" value="${escapeHtml((window.__fdTreeId&&window.__fdTreeId[farm.id])||'')}" placeholder="${T('树号，如 A-12','Tree ID, e.g. A-12')}" style="flex:1;min-width:0;border:1.5px solid var(--line);border-radius:9px;padding:9px 11px;font-size:13px;font-family:inherit">
+          <button data-addtree="${farm.id}" style="flex:none;border:none;background:var(--thorn);color:#fff;border-radius:9px;padding:9px 14px;font-weight:800;font-size:13px;cursor:pointer;white-space:nowrap">${T('+ 加树','+ Add')}</button>
+        </div>
+        ${cloneTilePicker(farm.id)}
+      </div>`;
+
+    activeTrees.forEach(tree=>{
+      const learned=treeLearnedDaa(tree);
+      const lastLog=(tree.logs||[])[tree.logs.length-1];
+      html+=`<div style="border-top:1px solid var(--line);margin-top:10px;padding-top:10px">
+        <div style="display:flex;align-items:baseline;justify-content:space-between;gap:8px">
+          <div style="font-weight:800;font-size:14px;color:var(--ink)">${escapeHtml(tree.id)} <span style="font-weight:600;font-size:11.5px;color:var(--ink-soft)">${cloneLabel(tree.variety)}</span></div>
+          <button data-menutree="${farm.id}|${tree.id}" style="flex:none;border:none;background:none;color:var(--ink-soft);font-size:18px;line-height:1;cursor:pointer;padding:0 6px" aria-label="${T('更多','More')}">⋯</button>
+        </div>`;
+      if(learned!=null){
+        html+=`<div style="font-size:11.5px;color:var(--good);font-weight:700;margin-top:3px">${T('本树实测落果 DAA：约 '+learned+' 天','Measured drop DAA for this tree: ~'+learned+'d')}</div>`;
+      }
+      if(lastLog){
+        const proj = lastLog.projCutStr? T('预计割果 '+lastLog.projCutStr,'cut ~'+lastLog.projCutStr):'';
+        const drop = lastLog.actualDropStr? T(' · 实际落果 '+lastLog.actualDropStr,' · dropped '+lastLog.actualDropStr):'';
+        html+=`<div style="font-size:11.5px;color:var(--ink-soft);margin-top:3px">${T('开花 '+lastLog.flowerDate,'flowered '+lastLog.flowerDate)}${proj?' · '+proj:''}${drop}</div>`;
+        // live countdown if still waiting (no drop, no cut yet)
+        if(lastLog.projCutISO && !lastLog.actualDropStr && !lastLog.cutDateStr){
+          const cut=new Date(lastLog.projCutISO+'T00:00:00'); const now=new Date();now.setHours(0,0,0,0);
+          const days=Math.round((cut-now)/86400000);
+          const col = days<0?'#b4482f':days<=3?'#c98a2b':'#3f7d55';
+          const cd = days<0?T(`已过 ${-days} 天 —— 尽快检查`,`${-days}d past — check soon`):days===0?T('就是今天','today'):T(`还有 ${days} 天`,`${days}d to go`);
+          html+=`<div style="font-size:12px;font-weight:800;color:${col};margin-top:2px">⏳ ${cd}</div>`;
+        }
+        // cut/outcome record, if logged
+        if(lastLog.cutDateStr){
+          const oc = lastLog.outcome? ' · '+escapeHtml(lastLog.outcome):'';
+          html+=`<div style="font-size:11.5px;color:var(--warn);font-weight:700;margin-top:3px">${T('已割 '+lastLog.cutDateStr+'（'+lastLog.cutPct+'%）','cut '+lastLog.cutDateStr+' ('+lastLog.cutPct+'%)')}${oc}</div>`;
+        }
+        if(lastLog.feedback && (lastLog.feedback.rating||lastLog.feedback.note)){
+          const fm={happy:{t:T('顾客满意','Customer happy'),c:'#3f7d55',e:'😊'},ok:{t:T('反应一般','Mixed reaction'),c:'#c98a2b',e:'😐'},unhappy:{t:T('顾客不满','Customer unhappy'),c:'#b4482f',e:'🙁'}};
+          const fmm=fm[lastLog.feedback.rating]||{t:T('顾客反馈','Feedback'),c:'var(--ink-soft)',e:'💬'};
+          const fnote=lastLog.feedback.note? ' · '+escapeHtml(lastLog.feedback.note):'';
+          html+=`<div style="font-size:11.5px;color:${fmm.c};font-weight:700;margin-top:3px">${fmm.e} ${fmm.t}${fnote}</div>`;
+        }
+        if(lastLog.badDropStr || lastLog.badCutStr){
+          const bad=lastLog.badDropStr||lastLog.badCutStr;
+          const what=lastLog.badDropStr?T('落果日','drop date'):T('割果日','cut date');
+          html+=`<div style="font-size:11.5px;color:var(--danger);font-weight:700;margin-top:4px;line-height:1.5;background:#faeae6;border:1px solid var(--danger);border-radius:8px;padding:6px 9px">⚠ ${T('已清除无效'+what+'（原填 '+bad+'，未晚于开花日 '+lastLog.flowerDate+'）——请用下方按钮重新填写正确日期。','Cleared an invalid '+what+' (was '+bad+', not after flowering '+lastLog.flowerDate+') — please re-enter a correct date with the button below.')}</div>`;
+        }
+      }
+      // per-tree actions — buttons show recorded state and stay editable (tap to update)
+      const hasFlower=!!(lastLog&&lastLog.flowerDate);
+      const hasDrop=!!(lastLog&&lastLog.actualDropStr);
+      const hasCut=!!(lastLog&&lastLog.cutDateStr);
+      html+=`<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px">`;
+      // flowering: always present; ✎ if already recorded
+      html+=`<button data-logflower="${farm.id}|${tree.id}" style="border:1.5px solid var(--line);background:${hasFlower?'#f3efe6':'#fff'};border-radius:8px;padding:6px 10px;font-size:11.5px;font-weight:700;color:var(--shell);cursor:pointer">${hasFlower?T('✎ 开花','✎ Flowering'):T('＋ 记录开花','＋ Log flowering')}</button>`;
+      // drop: show once flowering exists; ✎ if recorded (so it stays editable)
+      if(hasFlower && !hasCut){
+        html+=`<button data-logdrop="${farm.id}|${tree.id}" style="border:1.5px solid var(--good);background:${hasDrop?'#e3ecdf':'#eef5ec'};border-radius:8px;padding:6px 10px;font-size:11.5px;font-weight:700;color:var(--good);cursor:pointer">${hasDrop?T('✎ 落果日','✎ Drop date'):T('＋ 回填落果日','＋ Log actual drop')}</button>`;
+      }
+      // cut: show once flowering exists and no natural drop; ✎ if recorded
+      if(hasFlower && !hasDrop){
+        html+=`<button data-logcut="${farm.id}|${tree.id}" style="border:1.5px solid var(--warn);background:${hasCut?'#f6e8d2':'#fdf3e4'};border-radius:8px;padding:6px 10px;font-size:11.5px;font-weight:700;color:var(--warn);cursor:pointer">${hasCut?T('✎ 割果日','✎ Cut date'):T('＋ 记录割果日','＋ Log cut date')}</button>`;
+      }
+      const calcOpen=openMenus.has('calc:'+farm.id+'|'+tree.id);
+      html+=`<button data-runtree="${farm.id}|${tree.id}" style="border:1.5px solid var(--flesh);background:${calcOpen?'#f6e8d2':'#fffaf0'};border-radius:8px;padding:6px 10px;font-size:11.5px;font-weight:700;color:var(--warn);cursor:pointer">${calcOpen?T('▲ 收起决策','▲ Close calc'):T('用采收决策算','Run harvest calc')}</button>`;
+      if(hasFlower){
+        const fbv=lastLog.feedback;
+        const emap={happy:'😊',ok:'😐',unhappy:'🙁'};
+        const hasFb=!!(fbv&&(fbv.rating||fbv.note));
+        const fbLabel = hasFb ? (fbv.rating?emap[fbv.rating]+' ':'✎ ')+T('反馈','Feedback') : T('＋ 顾客反馈','＋ Customer feedback');
+        html+=`<button data-feedback="${farm.id}|${tree.id}" style="margin-left:auto;border:1.5px solid var(--shell);background:${hasFb?'#eef1f7':'#fff'};border-radius:8px;padding:6px 10px;font-size:11.5px;font-weight:700;color:var(--shell);cursor:pointer">${fbLabel}</button>`;
+      }
+      html+=`</div>`; // close actions row
+      // ---- inline harvest calc (plucking only) — expands here, no page jump ----
+      const calcKey=farm.id+'|'+tree.id;
+      if(openMenus.has('calc:'+calcKey)){
+        html+=renderInlineCalc(farm, tree, calcKey);
+      }
+      // collapsible delete (revealed via ⋯) — prevents accidental taps
+      if(openMenus.has('tree:'+farm.id+'|'+tree.id)){
+        html+=`<div style="margin-top:9px;padding-top:9px;border-top:1px dashed var(--line);display:flex;align-items:center;gap:10px">
+          <span style="font-size:11.5px;color:var(--ink-soft);flex:1">${T('把这棵树移到回收站？可还原。','Move this tree to the recycle bin? Restorable.')}</span>
+          <button data-deltree="${farm.id}|${tree.id}" style="flex:none;border:1.5px solid var(--danger);background:#fff;color:var(--danger);border-radius:8px;padding:6px 12px;font-size:11.5px;font-weight:700;cursor:pointer">${T('删除','Delete')}</button>
+        </div>`;
+      }
+      html+=`</div>`; // close tree row
+    });
+
+    // farm-level delete lives at the BOTTOM, behind its own toggle, away from + Add
+    html+=`<div style="margin-top:12px;padding-top:9px;border-top:1px solid var(--line);text-align:right">
+      <button data-menufarm="${farm.id}" style="border:none;background:none;color:var(--ink-soft);font-size:11.5px;font-weight:700;cursor:pointer">${openMenus.has('farm:'+farm.id)?T('收起','Close'):T('⋯ 管理果园','⋯ Manage farm')}</button>`;
+    if(openMenus.has('farm:'+farm.id)){
+      const warn = treeCount>0
+        ? T('删除将把此果园及其 <b>'+treeCount+'</b> 棵树的记录一起移到回收站。因数量较多，需输入确认码。可还原。','Deleting moves this farm and all <b>'+treeCount+'</b> trees to the recycle bin together. Because it holds many trees, you will enter a confirmation code. Restorable.')
+        : T('这是空果园，可移到回收站。可还原。','This farm is empty — move it to the recycle bin. Restorable.');
+      html+=`<div style="margin-top:9px;text-align:left">
+        <div style="font-size:11.5px;color:var(--ink-soft);line-height:1.5;margin-bottom:8px">${warn}</div>
+        <div style="text-align:right"><button data-delfarm="${farm.id}" style="border:1.5px solid var(--danger);background:#fff;color:var(--danger);border-radius:8px;padding:6px 12px;font-size:11.5px;font-weight:700;cursor:pointer">${T('删除果园','Delete farm')}</button></div>
+      </div>`;
+    }
+    html+=`</div>`;
+
+    html+=`</div>`; // close farm card
+  });
+
+  // ---- Recycle bin: soft-deleted farms & trees, with Restore / Purge ----
+  const deletedFarms=d.farms.filter(f=>f.deletedAt);
+  const deletedTrees=[];
+  d.farms.filter(f=>!f.deletedAt).forEach(farm=>{
+    farm.trees.filter(t=>t.deletedAt).forEach(tree=>deletedTrees.push({farm,tree}));
+  });
+  if(deletedFarms.length || deletedTrees.length){
+    let bin='';
+    deletedFarms.forEach(farm=>{
+      const n=farm.trees.filter(t=>!t.deletedAt).length;
+      bin+=`<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 0;border-top:1px solid var(--line)">
+        <div style="min-width:0;flex:1"><span style="font-weight:700;font-size:13px;color:var(--ink);word-break:break-word;overflow-wrap:anywhere">🌳 ${escapeHtml(farm.name)}</span> <span style="font-size:11px;color:var(--ink-soft)">· ${n} ${T('棵','trees')}</span></div>
+        <div style="flex:none;display:flex;gap:6px">
+          <button data-restorefarm="${farm.id}" style="border:1.5px solid var(--good);background:#eef5ec;color:var(--good);border-radius:8px;padding:5px 10px;font-size:11.5px;font-weight:700;cursor:pointer">${T('还原','Restore')}</button>
+          <button data-purgefarm="${farm.id}" style="border:1.5px solid var(--danger);background:#fff;color:var(--danger);border-radius:8px;padding:5px 10px;font-size:11.5px;font-weight:700;cursor:pointer">${T('永久删除','Purge')}</button>
+        </div>
+      </div>`;
+    });
+    deletedTrees.forEach(({farm,tree})=>{
+      bin+=`<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 0;border-top:1px solid var(--line)">
+        <div style="min-width:0;flex:1"><span style="font-weight:700;font-size:13px;color:var(--ink)">${escapeHtml(tree.id)}</span> <span style="font-size:11px;color:var(--ink-soft)">${cloneLabel(tree.variety)} · ${escapeHtml(farm.name)}</span></div>
+        <div style="flex:none;display:flex;gap:6px">
+          <button data-restoretree="${farm.id}|${tree.id}" style="border:1.5px solid var(--good);background:#eef5ec;color:var(--good);border-radius:8px;padding:5px 10px;font-size:11.5px;font-weight:700;cursor:pointer">${T('还原','Restore')}</button>
+          <button data-purgetree="${farm.id}|${tree.id}" style="border:1.5px solid var(--danger);background:#fff;color:var(--danger);border-radius:8px;padding:5px 10px;font-size:11.5px;font-weight:700;cursor:pointer">${T('永久删除','Purge')}</button>
+        </div>
+      </div>`;
+    });
+    html+=`<div class="rcard" style="margin-bottom:13px;background:#faf6ee;border:1.5px dashed var(--line)">
+      <div style="font-weight:800;font-size:14px;color:var(--ink-soft);margin-bottom:2px">🗑️ ${T('回收站','Recycle bin')}</div>
+      <div style="font-size:11px;color:var(--ink-soft);margin-bottom:4px;line-height:1.5">${T('删除的果园与树暂存在这里，随时可「还原」。「永久删除」才会真正抹除记录，无法复原 —— 一季的记录来之不易，请谨慎。','Deleted farms and trees rest here — "Restore" anytime. Only "Purge" truly erases the records and cannot be undone — a season of records is hard-won, so purge with care.')}</div>
+      ${bin}
+    </div>`;
+  }
+
+  app.innerHTML=html;
+  wireFarmEvents();
+}
+function escapeHtml(s){ return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+// ---- inline harvest calc for a tree (plucking only) ----
+function renderInlineCalc(farm, tree, calcKey){
+  const cs=window.__fdCalc[calcKey] || (window.__fdCalc[calcKey]={market:null, target:95});
+  const open=(tree.logs||[]).filter(l=>l.flowerDate).pop();
+  const flowerDate=open?open.flowerDate:null;
+  const wrap=(inner)=>`<div style="margin-top:10px;padding:12px 13px;background:#fffaf0;border:1.5px solid var(--flesh);border-radius:12px">${inner}</div>`;
+
+  if(!flowerDate){
+    return wrap(`<div style="font-size:12px;color:var(--ink-soft);line-height:1.5">${T('先「记录开花」，才能算出这棵树的采收决策。','Log the flowering date first, then this tree can compute its harvest decision.')}</div>`);
+  }
+
+  const c=cloneCfgFor(tree.variety);
+  const target=cs.target||95;
+  const targetDaa=daaForTarget(c,target);
+  const d0=new Date(flowerDate+'T00:00:00');
+  const cut=new Date(d0); cut.setDate(cut.getDate()+targetDaa);
+  const now=new Date(); now.setHours(0,0,0,0);
+  const days=Math.round((cut-now)/86400000);
+  const mat=maturityPct(c,targetDaa,'pluck');
+  const flav=flavourRetention(c,targetDaa,'pluck');
+
+  // market + ripeness pickers
+  const mkBtn=(k,zh,en)=>`<button data-calcmarket="${calcKey}|${k}" style="flex:1;border:1.5px solid ${cs.market===k?'var(--flesh)':'var(--line)'};background:${cs.market===k?'#fff3df':'#fff'};border-radius:8px;padding:7px 4px;font-size:11px;font-weight:700;color:var(--shell);cursor:pointer;line-height:1.3">${T(zh,en)}</button>`;
+  const rpBtn=(v)=>`<button data-calctarget="${calcKey}|${v}" style="flex:1;border:1.5px solid ${target===v?'var(--flesh)':'var(--line)'};background:${target===v?'#fff3df':'#fff'};border-radius:8px;padding:7px 4px;font-size:12px;font-weight:800;color:var(--shell);cursor:pointer">${v}%</button>`;
+
+  let out=`<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:2px"><div style="font-size:12px;font-weight:800;color:var(--warn)">🔪 ${T('采收决策（人工采摘）','Harvest decision (plucked)')}</div><button data-runtree="${calcKey}" style="flex:none;border:none;background:none;color:var(--ink-soft);font-size:15px;line-height:1;cursor:pointer;padding:0 2px" aria-label="${T('收起','Close')}">✕</button></div>
+    <div style="font-size:11px;color:var(--ink-soft);margin-bottom:8px">${T('已带入：'+cloneLabel(tree.variety)+' · 开花 '+flowerDate,'Carried in: '+cloneLabel(tree.variety)+' · flowered '+flowerDate)}</div>
+    <div style="font-size:11px;font-weight:700;color:var(--ink-soft);margin-bottom:4px">${T('目标市场 / 运输','Target market / transport')}</div>
+    <div style="display:flex;gap:5px;margin-bottom:9px">
+      ${mkBtn('local','本地即食','Local fresh')}${mkBtn('short','短程运输','Short-haul')}${mkBtn('export','长程出口','Export')}
+    </div>
+    <div style="font-size:11px;font-weight:700;color:var(--ink-soft);margin-bottom:4px">${T('割果成熟度','Cut ripeness')}</div>
+    <div style="display:flex;gap:5px;margin-bottom:10px">${rpBtn(85)}${rpBtn(90)}${rpBtn(95)}</div>`;
+
+  if(!cs.market){
+    out+=`<div style="font-size:11.5px;color:var(--ink-soft);line-height:1.5;padding-top:6px;border-top:1px dashed var(--line)">${T('选一个目标市场，即可看到风味保留与货架期建议。','Pick a target market to see flavour retention and shelf-life advice.')}</div>`;
+    return wrap(out);
+  }
+
+  const shelf=shelfLifeDays(c,targetDaa,'pluck',cs.market);
+  const cd = days<0?T(`已过 ${-days} 天`,`${-days}d past`):days===0?T('就是今天','today'):T(`还有 ${days} 天`,`${days}d to go`);
+  const cdCol = days<0?'#b4482f':days<=3?'#c98a2b':'#3f7d55';
+  const fColor=flav>=95?'#3f7d55':flav>=80?'#c98a2b':'#b4482f';
+  const isLocal=cs.market==='local', isExport=cs.market==='export';
+
+  out+=`<div style="padding-top:9px;border-top:1px dashed var(--line)">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px">
+      <div><div style="font-size:11px;color:var(--ink-soft);font-weight:700">${T('预计割果日','Projected cut date')}</div>
+      <div style="font-size:14px;font-weight:800;color:var(--shell)">${fmtDate(cut)}</div></div>
+      <div style="font-size:13px;font-weight:800;color:${cdCol};white-space:nowrap">${cd}</div>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:9px;font-size:11.5px">
+      <div style="flex:1"><span style="color:var(--ink-soft)">${T('成熟度','Maturity')}</span> <b style="color:var(--shell)">${mat}%</b></div>
+      <div style="flex:1"><span style="color:var(--ink-soft)">${T('风味','Flavour')}</span> <b style="color:${fColor}">${flav}%</b></div>
+    </div>
+    <div style="margin-top:7px;font-size:11.5px;color:var(--ink-soft);line-height:1.5">`;
+  if(isLocal){
+    out+=T('🏠 本地即食：常温约 '+shelf.ambient+' 天内开裂，尽快分销；越贴近树熟风味越高。','🏠 Local: cracks within ~'+shelf.ambient+'d at room temp — distribute promptly; closer to tree-ripe = more flavour.');
+  } else if(isExport){
+    out+=T('📦 出口：13–15°C 冷链整果约 '+shelf.cold+' 天。越贴近落果窗口，自然与催熟差距越小；远程可考虑取肉急冻。','📦 Export: ~'+shelf.cold+'d whole fruit at 13–15°C reefer. Closer to the drop window narrows the natural-vs-forced gap; for long-haul consider frozen flesh.');
+  } else {
+    out+=T('🚚 短程：常温整果约 '+shelf.ambient+' 天，或 13–15°C 冷链约 '+shelf.cold+' 天，及时分销即可。','🚚 Short-haul: ~'+shelf.ambient+'d whole fruit at room temp, or ~'+shelf.cold+'d at 13–15°C reefer — distribute promptly.');
+  }
+  out+=`</div>
+    <div style="margin-top:8px;font-size:10.5px;color:var(--ink-soft);line-height:1.4">${T('※ 模型估算 —— 详见「采收决策」页与「成熟科学」。','※ Model estimate — see the Harvest Decision & Science tabs for full detail.')}</div>
+  </div>`;
+  return wrap(out);
+}
+
+function wireFarmEvents(){
+  const app=document.getElementById('farmsApp');
+  const addFarm=document.getElementById('addFarmBtn');
+  if(addFarm){
+    addFarm.onclick=()=>{
+      const inp=document.getElementById('newFarmName');
+      const name=(inp.value||'').trim();
+      if(!name) return;
+      farmsData.farms.push({id:uid(),name,trees:[]});
+      saveFarms(farmsData); renderFarms();
+    };
+  }
+  app.querySelectorAll('[data-addtree]').forEach(b=>b.onclick=async()=>{
+    const fid=b.dataset.addtree;
+    const idInp=app.querySelector(`[data-treeid-for="${fid}"]`);
+    const variety=(window.__fdTreeClone&&window.__fdTreeClone[fid])||'d197';
+    const tid=(idInp.value||'').trim();
+    if(!tid) return;
+    const farm=farmsData.farms.find(f=>f.id===fid);
+    const existing=farm.trees.find(t=>t.id===tid);
+    if(existing && !existing.deletedAt){ await fdAlert(T('这个树号已存在','That tree ID already exists')); return; }
+    if(existing && existing.deletedAt){
+      if(await fdConfirm(T('树号「'+tid+'」在回收站里。还原它（保留原有记录）？','Tree "'+tid+'" is in the recycle bin. Restore it (keeps its records)?'))){
+        delete existing.deletedAt; saveFarms(farmsData); renderFarms();
+      }
+      return;
+    }
+    farm.trees.push({id:tid, variety:variety, logs:[]});
+    if(window.__fdTreeId) delete window.__fdTreeId[fid];
+    saveFarms(farmsData); renderFarms();
+  });
+  function _keepTreeId(fid){ const inp=app.querySelector('[data-treeid-for="'+fid+'"]'); if(inp){ if(!window.__fdTreeId)window.__fdTreeId={}; window.__fdTreeId[fid]=inp.value; } }
+  app.querySelectorAll('[data-clonepick]').forEach(b=>b.onclick=()=>{
+    const fid=b.dataset.clonepick; _keepTreeId(fid);
+    if(!window.__fdCloneOpen) window.__fdCloneOpen=new Set();
+    if(window.__fdCloneOpen.has(fid)) window.__fdCloneOpen.delete(fid); else window.__fdCloneOpen.add(fid);
+    renderFarms();
+  });
+  app.querySelectorAll('[data-clonepickopt]').forEach(o=>o.onclick=()=>{
+    const parts=o.dataset.clonepickopt.split('|'); const v=parts.pop(); const fid=parts.join('|');
+    _keepTreeId(fid);
+    if(!window.__fdTreeClone) window.__fdTreeClone={};
+    window.__fdTreeClone[fid]=v;
+    if(window.__fdCloneOpen) window.__fdCloneOpen.delete(fid);
+    renderFarms();
+  });
+  // menu toggles (reveal delete) — a mistap only opens/closes, never deletes
+  app.querySelectorAll('[data-menutree]').forEach(b=>b.onclick=()=>{
+    const key='tree:'+b.dataset.menutree;
+    if(window.__fdOpenMenus.has(key)) window.__fdOpenMenus.delete(key);
+    else window.__fdOpenMenus.add(key);
+    renderFarms();
+  });
+  app.querySelectorAll('[data-menufarm]').forEach(b=>b.onclick=()=>{
+    const key='farm:'+b.dataset.menufarm;
+    if(window.__fdOpenMenus.has(key)) window.__fdOpenMenus.delete(key);
+    else window.__fdOpenMenus.add(key);
+    renderFarms();
+  });
+  app.querySelectorAll('[data-delfarm]').forEach(b=>b.onclick=async()=>{
+    const farm=farmsData.farms.find(f=>f.id===b.dataset.delfarm);
+    if(!farm) return;
+    const activeTrees=farm.trees.filter(t=>!t.deletedAt).length;
+    if(activeTrees>0){
+      // type-to-confirm: a 4-digit random code the farmer must re-enter
+      const code=String(Math.floor(1000+Math.random()*9000));
+      const entered=await fdPrompt(
+        T('这将把「'+farm.name+'」及其 '+activeTrees+' 棵树的记录一起移到回收站（可还原）。\n请输入确认码 '+code+' 以继续：',
+          'This moves "'+farm.name+'" and its '+activeTrees+' trees to the recycle bin (restorable).\nType the code '+code+' to continue:'),
+        '');
+      if(entered===null) return;               // cancelled
+      if((entered||'').trim()!==code){
+        await fdAlert(T('确认码不符，已取消删除。','Code did not match — deletion cancelled.'));
+        return;
+      }
+    } else {
+      if(!await fdConfirm(T('把这个空果园移到回收站？可随时还原。','Move this empty farm to the recycle bin? You can restore it anytime.'))) return;
+    }
+    farm.deletedAt=Date.now();
+    saveFarms(farmsData); renderFarms();
+  });
+  app.querySelectorAll('[data-deltree]').forEach(b=>b.onclick=async()=>{
+    const [fid,tid]=b.dataset.deltree.split('|');
+    if(!await fdConfirm(T('把这棵树移到回收站？可随时还原。','Move this tree to the recycle bin? You can restore it anytime.'))) return;
+    const farm=farmsData.farms.find(f=>f.id===fid);
+    const tree=farm&&farm.trees.find(t=>t.id===tid);
+    if(tree){ tree.deletedAt=Date.now(); }
+    saveFarms(farmsData); renderFarms();
+  });
+  // ---- restore ----
+  app.querySelectorAll('[data-restorefarm]').forEach(b=>b.onclick=()=>{
+    const farm=farmsData.farms.find(f=>f.id===b.dataset.restorefarm);
+    if(farm){ delete farm.deletedAt; }
+    saveFarms(farmsData); renderFarms();
+  });
+  app.querySelectorAll('[data-restoretree]').forEach(b=>b.onclick=()=>{
+    const [fid,tid]=b.dataset.restoretree.split('|');
+    const farm=farmsData.farms.find(f=>f.id===fid);
+    const tree=farm&&farm.trees.find(t=>t.id===tid);
+    if(tree){ delete tree.deletedAt; }
+    saveFarms(farmsData); renderFarms();
+  });
+  // ---- purge (permanent, the only irreversible action) ----
+  app.querySelectorAll('[data-purgefarm]').forEach(b=>b.onclick=async()=>{
+    const farm=farmsData.farms.find(f=>f.id===b.dataset.purgefarm);
+    const nm=farm?farm.name:'';
+    if(!await fdConfirm(T('永久删除果园「'+nm+'」及其所有树与记录？此操作无法还原。','Permanently delete farm "'+nm+'" with all its trees and records? This cannot be undone.'))) return;
+    farmsData.farms=farmsData.farms.filter(f=>f.id!==b.dataset.purgefarm);
+    saveFarms(farmsData); renderFarms();
+  });
+  app.querySelectorAll('[data-purgetree]').forEach(b=>b.onclick=async()=>{
+    const [fid,tid]=b.dataset.purgetree.split('|');
+    if(!await fdConfirm(T('永久删除这棵树及其所有记录？此操作无法还原。','Permanently delete this tree and all its records? This cannot be undone.'))) return;
+    const farm=farmsData.farms.find(f=>f.id===fid);
+    if(farm){ farm.trees=farm.trees.filter(t=>t.id!==tid); }
+    saveFarms(farmsData); renderFarms();
+  });
+  app.querySelectorAll('[data-logflower]').forEach(b=>b.onclick=async()=>{
+    const [fid,tid]=b.dataset.logflower.split('|');
+    const today=new Date().toISOString().slice(0,10);
+    const farm=farmsData.farms.find(f=>f.id===fid);
+    const tree=farm.trees.find(t=>t.id===tid);
+    // is there an open (un-dropped, un-cut) log already? then we UPDATE it, not add a new one
+    const open=(tree.logs||[]).filter(l=>l.flowerDate&&!l.actualDropStr&&!l.cutDateStr).pop();
+    const existing=open?open.flowerDate:'';
+    const msg=existing
+      ? T('已记录开花日：'+existing+'。修改后将重算预计割果日。','Flowering already recorded: '+existing+'. Changing it will recompute the projected cut.')
+      : T('开花（授粉）日期 YYYY-MM-DD：','Flowering (anthesis) date YYYY-MM-DD:');
+    const dateStr=await fdPrompt(msg, existing||today);
+    if(!dateStr) return;
+    if(!/^\d{4}-\d{2}-\d{2}$/.test(dateStr)){ await fdAlert(T('日期格式：YYYY-MM-DD','Format: YYYY-MM-DD')); return; }
+    // project cut using this tree's clone + learned/generic window at drop
+    const cfg=CLONES[tree.variety]||CLONES.other;
+    const learned=treeLearnedDaa(tree);
+    const dropDaa=learned!=null?learned:cfg.dropHi;
+    const f=new Date(dateStr+'T00:00:00'); const cut=new Date(f); cut.setDate(cut.getDate()+dropDaa);
+    const cutISO=cut.toISOString().slice(0,10);
+    if(open){
+      // update the existing open record — no duplicate
+      open.flowerDate=dateStr; open.projDaa=dropDaa; open.projCutStr=fmtDate(cut); open.projCutISO=cutISO;
+    } else {
+      tree.logs.push({flowerDate:dateStr, projDaa:dropDaa, projCutStr:fmtDate(cut), projCutISO:cutISO, actualDropStr:null});
+    }
+    saveFarms(farmsData); renderFarms();
+  });
+  app.querySelectorAll('[data-logdrop]').forEach(b=>b.onclick=async()=>{
+    const [fid,tid]=b.dataset.logdrop.split('|');
+    const today=new Date().toISOString().slice(0,10);
+    const farm=farmsData.farms.find(f=>f.id===fid);
+    const tree=farm.trees.find(t=>t.id===tid);
+    // the log we'd write to: most recent one without a drop yet, else the latest (to edit its drop)
+    let target=(tree.logs||[]).filter(l=>!l.actualDropStr&&!l.cutDateStr).pop();
+    if(!target) target=(tree.logs||[])[tree.logs.length-1];
+    const existing=target&&target.actualDropStr?target.actualDropStr:'';
+    const msg=existing
+      ? T('已记录落果日：'+existing+'。修改后将重算本树 DAA。','Drop already recorded: '+existing+'. Changing it recomputes this tree DAA.')
+      : T('实际自然落果日期 YYYY-MM-DD：','Actual natural-drop date YYYY-MM-DD:');
+    const dateStr=await fdPrompt(msg, existing||today);
+    if(!dateStr) return;
+    if(!/^\d{4}-\d{2}-\d{2}$/.test(dateStr)){ await fdAlert(T('日期格式：YYYY-MM-DD','Format: YYYY-MM-DD')); return; }
+    const fdate=target&&target.flowerDate;
+    if(fdate){
+      const diff=Math.round((new Date(dateStr+'T00:00:00')-new Date(fdate+'T00:00:00'))/86400000);
+      if(diff<=0){ await fdAlert(T('落果日必须晚于开花日（开花：'+fdate+'）。榴梿从开花到落果一般约 90–135 天。','Drop date must be after the flowering date (flowered: '+fdate+'). Flower-to-drop is normally ~90–135 days.')); return; }
+      if(diff<60){ if(!await fdConfirm(T('从开花到落果只有 '+diff+' 天，对榴梿偏早（一般约 90–135 天）。确定这个日期没记错？','Only '+diff+' days from flowering to drop — very early for durian (usually ~90–135). Is this date correct?'))) return; }
+    }
+    if(target){ target.actualDropStr=dateStr; delete target.badDropStr; }
+    saveFarms(farmsData); renderFarms();
+  });
+  app.querySelectorAll('[data-logcut]').forEach(b=>b.onclick=async()=>{
+    const [fid,tid]=b.dataset.logcut.split('|');
+    const today=new Date().toISOString().slice(0,10);
+    const farm=farmsData.farms.find(f=>f.id===fid);
+    const tree=farm.trees.find(t=>t.id===tid);
+    let target=(tree.logs||[]).filter(l=>!l.actualDropStr&&!l.cutDateStr).pop();
+    if(!target) target=(tree.logs||[])[tree.logs.length-1];
+    const had=target&&target.cutDateStr;
+    const dMsg=had
+      ? T('已记录割果：'+target.cutDateStr+'（'+target.cutPct+'%）。可修改。','Cut already recorded: '+target.cutDateStr+' ('+target.cutPct+'%). You can update it.')
+      : T('割果日期 YYYY-MM-DD：','Cut date YYYY-MM-DD:');
+    const dateStr=await fdPrompt(dMsg, (had&&target.cutDateStr)||today);
+    if(!dateStr) return;
+    if(!/^\d{4}-\d{2}-\d{2}$/.test(dateStr)){ await fdAlert(T('日期格式：YYYY-MM-DD','Format: YYYY-MM-DD')); return; }
+    const cfdate=target&&target.flowerDate;
+    if(cfdate){
+      const cdiff=Math.round((new Date(dateStr+'T00:00:00')-new Date(cfdate+'T00:00:00'))/86400000);
+      if(cdiff<=0){ await fdAlert(T('割果日必须晚于开花日（开花：'+cfdate+'）。','Cut date must be after the flowering date (flowered: '+cfdate+').')); return; }
+      if(cdiff<60){ if(!await fdConfirm(T('从开花到割果只有 '+cdiff+' 天，对榴梿偏早（一般约 90–135 天）。确定这个日期没记错？','Only '+cdiff+' days from flowering to cut — very early for durian (usually ~90–135). Is this date correct?'))) return; }
+    }
+    const pctRaw=await fdPrompt(T('割果成熟度 %（85 / 90 / 95）：','Cut ripeness % (85 / 90 / 95):'), (had&&target.cutPct)?String(target.cutPct):'95');
+    if(pctRaw===null) return;
+    const pct=Math.max(60,Math.min(100,parseInt(pctRaw,10)||95));
+    if(target){ target.cutDateStr=dateStr; target.cutPct=pct; delete target.badCutStr; }
+    saveFarms(farmsData); renderFarms();
+  });
+  app.querySelectorAll('[data-runtree]').forEach(b=>b.onclick=()=>{
+    const key='calc:'+b.dataset.runtree;
+    if(window.__fdOpenMenus.has(key)) window.__fdOpenMenus.delete(key);
+    else window.__fdOpenMenus.add(key);
+    renderFarms();
+  });
+  app.querySelectorAll('[data-feedback]').forEach(b=>b.onclick=async()=>{
+    const [fid,tid]=b.dataset.feedback.split('|');
+    const farm=farmsData.farms.find(f=>f.id===fid);
+    const tree=farm&&farm.trees.find(t=>t.id===tid);
+    if(!tree) return;
+    let target=(tree.logs||[]).filter(l=>l.actualDropStr||l.cutDateStr).pop();
+    if(!target) target=(tree.logs||[])[tree.logs.length-1];
+    if(!target) return;
+    const sub=T(tid+' · '+cloneLabel(tree.variety)+' · 这批果的顾客风味反馈', tid+' · '+cloneLabel(tree.variety)+' · flavour feedback for this batch');
+    const res=await openFeedback({sub:sub, current:target.feedback});
+    if(res===null) return;
+    if(res.clear || (!res.rating && !res.note)){ delete target.feedback; }
+    else { target.feedback={rating:res.rating||null, note:res.note||''}; }
+    saveFarms(farmsData); renderFarms();
+  });
+  // inline calc: market & ripeness pickers
+  app.querySelectorAll('[data-calcmarket]').forEach(b=>b.onclick=()=>{
+    const parts=b.dataset.calcmarket.split('|');
+    const market=parts.pop(); const ck=parts.join('|');
+    if(!window.__fdCalc[ck]) window.__fdCalc[ck]={market:null,target:95};
+    window.__fdCalc[ck].market=market;
+    renderFarms();
+  });
+  app.querySelectorAll('[data-calctarget]').forEach(b=>b.onclick=()=>{
+    const parts=b.dataset.calctarget.split('|');
+    const target=parseInt(parts.pop(),10); const ck=parts.join('|');
+    if(!window.__fdCalc[ck]) window.__fdCalc[ck]={market:null,target:95};
+    window.__fdCalc[ck].target=target;
+    renderFarms();
+  });
+}
+
+// switch tabs programmatically (reuse the tab click)
+function switchTab(name){
+  const t=document.querySelector(`.tab[data-p="${name}"]`);
+  if(t) t.click();
+}
+// pre-select a clone in the tool
+function preselectClone(v){
+  const opt=document.querySelector(`#q-variety .opt[data-v="${v}"]`);
+  if(opt){ opt.click(); }
+}
+// carry a tree's known data into the calculator so nothing is retyped
+function prefillFromTree(variety, flowerDateVal, learnedDaa){
+  // 1) select the clone (this sets state.variety and reveals the DAA box)
+  preselectClone(variety);
+  // 2) apply the tree's own measured DAA as the custom drop window, if we have one
+  if(learnedDaa!=null && variety){
+    setCustomDrop(variety, learnedDaa);
+    if(typeof updateCustomDaaBox==='function') updateCustomDaaBox();
+  }
+  // 3) fill the flowering date and trigger the forward projection + auto-compute
+  if(flowerDateVal){
+    const fd=document.getElementById('flowerDate');
+    if(fd){
+      fd.value=flowerDateVal;
+      fd.dispatchEvent(new Event('change',{bubbles:true}));
+    }
+  }
+  // 4) make sure the result recomputes with everything applied
+  if(typeof syncFromDate==='function') syncFromDate();
+  if(typeof maybeAutoRun==='function') maybeAutoRun();
+  // 5) bring the result into view
+  setTimeout(()=>{
+    const r=document.getElementById('result');
+    if(r && r.textContent.trim()) r.scrollIntoView({behavior:'smooth',block:'center'});
+  },120);
+}
+
+// export / import backups — one clean, human-readable sheet (opens in Excel; UTF-8 BOM
+// keeps Chinese intact). One row per tree-season with plain headers; internal/derived
+// fields (IDs, projections, flags) are recomputed on import, not shown. Import also
+// still reads older exports (sectioned #SHEET, flat farm_id) and legacy JSON.
+(function(){
+  const exp=document.getElementById('farmsExport');
+  const imp=document.getElementById('farmsImport');
+  const impFile=document.getElementById('farmsImportFile');
+  const HEAD=['Farm 果园','Tree ID 树号','Variety 品种','Flowering 开花日','Projected cut 预计割果日','Actual drop 实际落果日','Cut date 割果日','Ripeness % 成熟度','Outcome 记录','Feedback 顾客反馈','Feedback note 反馈备注'];
+
+  function csvEsc(v){ v=(v==null?'':String(v)); return /[",\n\r]/.test(v) ? '"'+v.replace(/"/g,'""')+'"' : v; }
+  function parseCsv(text){
+    if(text.charCodeAt(0)===0xFEFF) text=text.slice(1);
+    const rows=[]; let row=[], field='', inQ=false, i=0; const n=text.length;
+    while(i<n){
+      const c=text[i];
+      if(inQ){ if(c==='"'){ if(text[i+1]==='"'){ field+='"'; i+=2; continue; } inQ=false; i++; continue; } field+=c; i++; continue; }
+      if(c==='"'){ inQ=true; i++; continue; }
+      if(c===','){ row.push(field); field=''; i++; continue; }
+      if(c==='\r'){ i++; continue; }
+      if(c==='\n'){ row.push(field); rows.push(row); row=[]; field=''; i++; continue; }
+      field+=c; i++;
+    }
+    if(field!=='' || row.length){ row.push(field); rows.push(row); }
+    return rows;
+  }
+
+  function fbToLabel(rating){ return {happy:T('满意','Happy'),ok:T('一般','So-so'),unhappy:T('不满意','Unhappy')}[rating]||''; }
+  function fbCode(s){ s=(s||'').trim().toLowerCase(); if(!s) return null;
+    if(s.indexOf('happy')>=0||s.indexOf('满意')>=0) return 'happy';
+    if(s.indexOf('unhappy')>=0||s.indexOf('不满')>=0) return 'unhappy';
+    if(s.indexOf('so-so')>=0||s.indexOf('so so')>=0||s.indexOf('一般')>=0||s==='ok') return 'ok';
+    return null;
+  }
+  function varietyCode(label){
+    label=(label||'').trim(); if(!label) return 'other';
+    const opts=document.querySelectorAll('#q-variety .opt');
+    for(const o of opts){ const zh=o.querySelector('.lbl .zh').textContent.trim(), en=o.querySelector('.lbl .en').textContent.trim();
+      if(label===zh||label===en) return o.dataset.v; }
+    const low=label.toLowerCase();
+    for(const o of opts){ if(low.indexOf(o.dataset.v)===0) return o.dataset.v; }
+    return 'other';
+  }
+
+  function readableToCsv(data){
+    const rows=[HEAD.map(csvEsc).join(',')];
+    (data.farms||[]).filter(f=>!f.deletedAt).forEach(function(f){
+      const trees=(f.trees||[]).filter(t=>!t.deletedAt);
+      if(!trees.length){ rows.push([f.name||'','','','','','','','','','',''].map(csvEsc).join(',')); return; }
+      trees.forEach(function(t){
+        const vlabel=cloneLabel(t.variety); const logs=t.logs||[];
+        if(!logs.length){ rows.push([f.name||'',t.id||'',vlabel,'','','','','','','',''].map(csvEsc).join(',')); return; }
+        logs.forEach(function(l){
+          const fbk=l.feedback||{};
+          rows.push([f.name||'',t.id||'',vlabel,l.flowerDate||'',l.projCutISO||'',l.actualDropStr||'',l.cutDateStr||'',(l.cutPct!=null?l.cutPct:''),l.outcome||'',fbToLabel(fbk.rating),(fbk.note||'')].map(csvEsc).join(','));
+        });
+      });
+    });
+    return rows.join('\r\n');
+  }
+
+  function recomputeProjections(farms){
+    farms.forEach(f=>(f.trees||[]).forEach(t=>{
+      (t.logs||[]).forEach(l=>{
+        if(l.flowerDate && !l.actualDropStr && !l.cutDateStr){
+          const cfg=CLONES[t.variety]||CLONES.other;
+          const learned=(typeof treeLearnedDaa==='function')?treeLearnedDaa(t):null;
+          const dropDaa=learned!=null?learned:cfg.dropHi;
+          const f0=new Date(l.flowerDate+'T00:00:00'); const cut=new Date(f0); cut.setDate(cut.getDate()+dropDaa);
+          if(!isNaN(cut)){ l.projDaa=dropDaa; l.projCutISO=cut.toISOString().slice(0,10); l.projCutStr=fmtDate(cut); }
+        }
+      });
+    }));
+  }
+
+  function readableToFarms(rows){
+    if(!rows.length) return null;
+    const header=rows[0].map(h=>String(h).trim().toLowerCase());
+    const find=(preds)=>{ for(let i=0;i<header.length;i++){ if(preds.some(p=>header[i].indexOf(p)>=0)) return i; } return -1; };
+    const iFarm=find(['farm','果园']);
+    const iTree=find(['tree','树号']);
+    const iVar=find(['variety','品种']);
+    const iFlower=find(['flower','开花']);
+    const iDrop=find(['drop','落果']);
+    const iProj=find(['projected','预计']);
+    let iCutDate=-1; for(let i=0;i<header.length;i++){ if(i===iProj) continue; if(header[i].indexOf('cut date')>=0||header[i].indexOf('割果日')>=0){ iCutDate=i; break; } }
+    const iRipe=find(['ripeness','成熟']);
+    const iOutcome=find(['outcome','结果']);
+    const iNote=find(['note','反馈备注']);
+    let iFb=-1; for(let i=0;i<header.length;i++){ if(i===iNote) continue; if(header[i].indexOf('feedback')>=0||header[i].indexOf('顾客')>=0||header[i].indexOf('反馈')>=0){ iFb=i; break; } }
+    if(iFarm<0 && iTree<0) return null;
+    const get=(r,i)=> (i>=0 && r[i]!==undefined)? String(r[i]).trim() : '';
+    const fmap={}, order=[];
+    for(let r=1;r<rows.length;r++){
+      const row=rows[r]; if(!row||!row.length) continue;
+      const fname=get(row,iFarm), tid=get(row,iTree);
+      if(fname==='' && tid==='') continue;
+      const key=fname||('__row'+r);
+      let farm=fmap[key];
+      if(!farm){ farm={id:uid(),name:fname,trees:[],_t:{}}; fmap[key]=farm; order.push(key); }
+      if(tid!==''){
+        let tree=farm._t[tid];
+        if(!tree){ tree={id:tid,variety:varietyCode(get(row,iVar)),logs:[]}; farm._t[tid]=tree; farm.trees.push(tree); }
+        const flower=get(row,iFlower), drop=get(row,iDrop), cutd=get(row,iCutDate), ripe=get(row,iRipe), outc=get(row,iOutcome), fbr=get(row,iFb), fbn=get(row,iNote);
+        if(flower||drop||cutd||ripe||outc||fbr||fbn){
+          const log={};
+          if(flower) log.flowerDate=flower;
+          if(drop) log.actualDropStr=drop;
+          if(cutd) log.cutDateStr=cutd;
+          const rp=parseInt(ripe,10); if(!isNaN(rp)) log.cutPct=rp;
+          if(outc) log.outcome=outc;
+          const fc=fbCode(fbr); if(fc||fbn) log.feedback={rating:fc, note:fbn||''};
+          tree.logs.push(log);
+        }
+      }
+    }
+    const farms=order.map(k=>{ const f=fmap[k]; delete f._t; return f; });
+    recomputeProjections(farms);
+    return {farms:farms};
+  }
+
+  // ---- legacy import parsers (older exports) ----
+  function buildLog(g){
+    const log={};
+    const fdt=g('flowerDate'); if(fdt) log.flowerDate=fdt;
+    const ps=g('projCutStr'); if(ps) log.projCutStr=ps;
+    const pi=g('projCutISO'); if(pi) log.projCutISO=pi;
+    const pd=g('projDaa'); if(pd!=='' && !isNaN(parseInt(pd,10))) log.projDaa=parseInt(pd,10);
+    const ad=g('actualDropStr'); if(ad) log.actualDropStr=ad;
+    const cd=g('cutDateStr'); if(cd) log.cutDateStr=cd;
+    const cp=g('cutPct'); if(cp!=='' && !isNaN(parseInt(cp,10))) log.cutPct=parseInt(cp,10);
+    const oc=g('outcome'); if(oc) log.outcome=oc;
+    const fr=g('feedback_rating'), fn=g('feedback_note'); if(fr||fn) log.feedback={rating:fr||null, note:fn||''};
+    const bd=g('badDropStr'); if(bd) log.badDropStr=bd;
+    const bc=g('badCutStr'); if(bc) log.badCutStr=bc;
+    return log;
+  }
+  function sectionsToFarms(rows){
+    const sec={}; let cur=null;
+    rows.forEach(function(row){ if(!row.length||(row.length===1&&row[0]==='')) return; if(row[0]==='#SHEET'){ cur=(row[1]||'').trim(); sec[cur]=[]; return; } if(cur) sec[cur].push(row); });
+    if(!sec.Farms && !sec.Trees && !sec.Logs) return null;
+    const hIndex=(arr)=>{ const h=arr.shift().map(x=>x.trim()); const idx={}; h.forEach((k,i)=>idx[k]=i); return idx; };
+    const byId={}, order=[];
+    function ensureFarm(id){ if(!byId[id]){ byId[id]={id:id||uid(),name:'',trees:[],_t:{}}; order.push(id); } return byId[id]; }
+    if(sec.Farms&&sec.Farms.length){ const idx=hIndex(sec.Farms); sec.Farms.forEach(r=>{ const id=idx.farm_id!=null?(r[idx.farm_id]||''):''; const name=idx.farm_name!=null?(r[idx.farm_name]||''):''; if(id===''&&name==='') return; const f=ensureFarm(id); f.name=name; const del=idx.farm_deleted!=null?r[idx.farm_deleted]:''; if(del) f.deletedAt=parseInt(del,10)||Date.now(); }); }
+    if(sec.Trees&&sec.Trees.length){ const idx=hIndex(sec.Trees); sec.Trees.forEach(r=>{ const fid=idx.farm_id!=null?(r[idx.farm_id]||''):''; const tid=idx.tree_id!=null?(r[idx.tree_id]||''):''; if(tid==='') return; const f=ensureFarm(fid); if(!f._t[tid]){ const t={id:tid,variety:(idx.variety!=null?r[idx.variety]:'')||'other',logs:[]}; const td=idx.tree_deleted!=null?r[idx.tree_deleted]:''; if(td) t.deletedAt=parseInt(td,10)||Date.now(); f._t[tid]=t; f.trees.push(t); } }); }
+    if(sec.Logs&&sec.Logs.length){ const idx=hIndex(sec.Logs); sec.Logs.forEach(r=>{ const g=(k)=>(idx[k]!=null&&r[idx[k]]!==undefined)?r[idx[k]]:''; const fid=g('farm_id'), tid=g('tree_id'); if(tid==='') return; const f=ensureFarm(fid); let t=f._t[tid]; if(!t){ t={id:tid,variety:'other',logs:[]}; f._t[tid]=t; f.trees.push(t); } t.logs.push(buildLog(g)); }); }
+    return {farms: order.map(id=>{ const f=byId[id]; if(f) delete f._t; return f; }).filter(Boolean)};
+  }
+  function flatToFarms(rows){
+    const header=rows[0].map(h=>h.trim()); const idx={}; header.forEach((h,i)=>idx[h]=i);
+    if(idx.farm_id==null && idx.farm_name==null) return null;
+    const get=(r,k)=>(idx[k]!=null&&r[idx[k]]!==undefined)?r[idx[k]]:'';
+    const fmap={}, order=[];
+    for(let r=1;r<rows.length;r++){ const row=rows[r]; if(!row||!row.length) continue;
+      const fid=get(row,'farm_id'), fname=get(row,'farm_name'); if(fid===''&&fname==='') continue;
+      const key=fid||('__'+fname); let farm=fmap[key];
+      if(!farm){ farm={id:fid||uid(),name:fname,trees:[],_t:{}}; const fd=get(row,'farm_deleted'); if(fd) farm.deletedAt=parseInt(fd,10)||Date.now(); fmap[key]=farm; order.push(key); }
+      const tid=get(row,'tree_id');
+      if(tid!==''){ let tree=farm._t[tid]; if(!tree){ tree={id:tid,variety:get(row,'variety')||'other',logs:[]}; const td=get(row,'tree_deleted'); if(td) tree.deletedAt=parseInt(td,10)||Date.now(); farm._t[tid]=tree; farm.trees.push(tree); }
+        const g=(k)=>get(row,k); if(['flowerDate','actualDropStr','cutDateStr','outcome','feedback_rating','feedback_note','projCutISO','cutPct'].some(k=>g(k)!=='')) tree.logs.push(buildLog(g)); }
+    }
+    return {farms: order.map(k=>{ const f=fmap[k]; delete f._t; return f; })};
+  }
+  function csvToFarms(rows){
+    if(!rows.length) return null;
+    if(rows.some(r=>r[0]==='#SHEET')) return sectionsToFarms(rows);
+    const h0=(rows[0]||[]).map(x=>String(x).trim().toLowerCase());
+    if(h0.indexOf('farm_id')>=0) return flatToFarms(rows);
+    return readableToFarms(rows);
+  }
+
+  if(exp) exp.onclick=()=>{
+    const csv='\uFEFF'+readableToCsv(farmsData);
+    const blob=new Blob([csv],{type:'text/csv;charset=utf-8'});
+    const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
+    a.download='durianripe-farms-'+new Date().toISOString().slice(0,10)+'.csv';
+    a.click(); URL.revokeObjectURL(a.href);
+  };
+  if(imp) imp.onclick=()=>impFile&&impFile.click();
+  if(impFile) impFile.onchange=(e)=>{
+    const file=e.target.files[0]; if(!file) return;
+    const r=new FileReader();
+    r.onload=async()=>{
+      try{
+        const raw=String(r.result||'').replace(/^\uFEFF/,'');
+        let d = raw.trimStart().charAt(0)==='{' ? JSON.parse(raw) : csvToFarms(parseCsv(raw));
+        if(d&&Array.isArray(d.farms)){
+          if(await fdConfirm(T('导入将覆盖当前记录，确定？','Import will replace current records. Continue?'))){
+            farmsData=d; sanitizeFarms(farmsData); saveFarms(farmsData); renderFarms(); if(typeof renderInsights==='function') renderInsights();
+          }
+        } else await fdAlert(T('文件格式不对（需为本工具导出的 CSV 或 JSON）','Invalid file (use a CSV or JSON exported by this tool)'));
+      }catch(err){ await fdAlert(T('无法读取文件','Could not read file')); }
+      impFile.value='';
+    };
+    r.readAsText(file);
+  };
+})();
+
+
+
+
+
+// render when the farms tab is first shown and on language switch
+function initFarms(){ renderFarms(); if(typeof renderInsights==='function') renderInsights(); }
+if(document.readyState==='loading'){ document.addEventListener('DOMContentLoaded',initFarms); }
+else { initFarms(); }
+
+/* ================= INSIGHTS: turn logged records into charts =================
+   Reads the same farmsData used by My Farms. Everything is derived (nothing new is
+   stored). Three panels the grower actually needs:
+   1) Calibration — your measured drop DAA (actualDrop - flowering) vs the generic
+      reference per clone. Replace generic numbers with your orchard's own.
+   2) Harvest load — open (projected, not-yet-dropped/cut) records binned by week,
+      so labour & logistics can be planned before a glut hits all at once.
+   3) Cut outcomes — the running log of what each cut actually produced.
+   All charts are plain HTML/CSS bars (no external libs -> stays fully offline). */
+function renderInsights(){
+  const app=document.getElementById('insightsApp');
+  if(!app) return;
+  const activeFarms=(farmsData.farms||[]).filter(f=>!f.deletedAt);
+  const trees=[];
+  activeFarms.forEach(f=>f.trees.filter(t=>!t.deletedAt).forEach(t=>trees.push({farm:f,tree:t})));
+
+  const perClone={};            // variety -> [measured DAA,...]
+  const cuts=[];                // {clone,cutStr,pct,outcome,farm,tree}
+  let floweredTrees=0, completedSeasons=0;
+  const fb={happy:0,ok:0,unhappy:0,total:0,notes:[]};
+  const openLogs=[];            // projected, not yet dropped/cut
+  trees.forEach(function(rec){
+    const farm=rec.farm, tree=rec.tree;
+    let hasFlower=false;
+    (tree.logs||[]).forEach(function(l){
+      if(l.flowerDate){ hasFlower=true; }
+      if(l.flowerDate && l.actualDropStr){
+        const f=new Date(l.flowerDate+'T00:00:00'), dd=new Date(l.actualDropStr+'T00:00:00');
+        const daa=Math.round((dd-f)/86400000);
+        if(daa>40 && daa<200){ (perClone[tree.variety]=perClone[tree.variety]||[]).push(daa); }
+      }
+      if(l.actualDropStr || l.cutDateStr) completedSeasons++;
+      if(l.cutDateStr){
+        cuts.push({clone:tree.variety, cutStr:l.cutDateStr, iso:l.cutISO||'', pct:l.cutPct, outcome:l.outcome||'', tree:tree.id, farm:farm.name});
+      }
+      if(l.feedback && (l.feedback.rating||l.feedback.note)){
+        fb.total++;
+        if(l.feedback.rating==='happy') fb.happy++;
+        else if(l.feedback.rating==='ok') fb.ok++;
+        else if(l.feedback.rating==='unhappy') fb.unhappy++;
+        if(l.feedback.note) fb.notes.push({note:l.feedback.note, rating:l.feedback.rating||'', tree:tree.id, clone:tree.variety});
+      }
+      if(l.projCutISO && !l.actualDropStr && !l.cutDateStr){
+        const cut=new Date(l.projCutISO+'T00:00:00'); const now=new Date(); now.setHours(0,0,0,0);
+        openLogs.push({days:Math.round((cut-now)/86400000), clone:tree.variety, tree:tree.id, farm:farm.name});
+      }
+    });
+    if(hasFlower) floweredTrees++;
+  });
+
+  const nMeasuredClones=Object.keys(perClone).length;
+  const totalMeasured=Object.values(perClone).reduce(function(a,b){return a+b.length;},0);
+
+  if(!trees.length || (!totalMeasured && !openLogs.length && !cuts.length)){
+    app.innerHTML='<div class="rcard" style="text-align:center;padding:26px 16px">'
+      +'<div style="font-size:34px;margin-bottom:6px">&#128202;</div>'
+      +'<div style="font-weight:800;font-size:15px;color:var(--shell);margin-bottom:6px">'+T('还没有可分析的记录','No records to analyse yet')+'</div>'
+      +'<div style="font-size:13px;color:var(--ink-soft);line-height:1.6;max-width:340px;margin:0 auto">'+T('到「我的果园」加一棵树，记下开花日期；落果后回填实际落果日 —— 你的第一条校准数据就会出现在这里。','Add a tree in "My Farms" and log its flowering date; after it drops, fill in the actual drop date — your first calibration point will appear here.')+'</div>'
+      +'<button id="insToFarms" style="margin-top:14px;border:none;background:var(--shell);color:#fff;border-radius:11px;padding:11px 20px;font-weight:800;font-size:14px;cursor:pointer">'+T('前往「我的果园」','Go to My Farms')+'</button>'
+      +'</div>';
+    const b=document.getElementById('insToFarms'); if(b) b.onclick=function(){switchTab('farms');};
+    return;
+  }
+
+  let html='';
+
+  // ---- summary strip ----
+  const stat=function(v,zh,en){ return '<div style="flex:1;min-width:0;background:#fff;border:1px solid var(--line);border-radius:11px;padding:10px 6px;text-align:center">'
+    +'<div style="font-size:21px;font-weight:800;color:var(--shell);line-height:1.1">'+v+'</div>'
+    +'<div style="font-size:10.5px;color:var(--ink-soft);font-weight:600;line-height:1.3;margin-top:2px">'+T(zh,en)+'</div></div>'; };
+  html+='<div style="display:flex;gap:8px;margin-bottom:14px">'
+    +stat(trees.length,'棵树','trees')
+    +stat(floweredTrees,'已记开花','flowered')
+    +stat(completedSeasons,'完成季次','seasons done')
+    +stat(totalMeasured,'落果实测','drops measured')
+    +'</div>';
+
+  // ---- 1. calibration: measured drop DAA vs generic ----
+  html+='<div class="rcard"><h4>&#127919; '+T('校准：你的落果 DAA vs 通用参考','Calibration: your drop DAA vs generic')+'</h4>';
+  if(!nMeasuredClones){
+    html+='<div style="font-size:12.5px;color:var(--ink-soft);line-height:1.6">'+T('还没有「实际落果日」记录。回填落果日后，这里会按品种显示你的实测落果天数，并和通用参考对比 —— 差多少一目了然。','No "actual drop date" records yet. Once you log drop dates, this shows your measured days-to-drop per clone against the generic reference — the gap at a glance.')+'</div>';
+  } else {
+    const allVals=[]; Object.keys(perClone).forEach(function(v){ perClone[v].forEach(function(x){allVals.push(x);}); allVals.push((CLONES[v]||CLONES.other).dropHi); });
+    const lo=Math.min.apply(null,allVals)-4, hi=Math.max.apply(null,allVals)+4, span=Math.max(1,hi-lo);
+    const pos=function(x){ return (x-lo)/span*100; };
+    html+='<div style="font-size:11.5px;color:var(--ink-soft);margin-bottom:12px;line-height:1.5">'+T('○ 通用参考（落果 DAA） · ● 你的实测均值 · 细线为实测范围。你的值越稳定、样本越多，就越该用它覆盖通用参考（在「采收决策」的品种设定里填入）。','○ generic reference (drop DAA) · ● your measured average · thin line = your measured range. The steadier your values and the more samples, the more you should override the generic (enter it in the clone settings on the Harvest Decision tab).')+'</div>';
+    Object.keys(perClone).sort(function(a,b){return perClone[b].length-perClone[a].length;}).forEach(function(v){
+      const arr=perClone[v];
+      const gen=(CLONES[v]||CLONES.other).dropHi;
+      const avg=Math.round(arr.reduce(function(a,b){return a+b;},0)/arr.length);
+      const mn=Math.min.apply(null,arr), mx=Math.max.apply(null,arr);
+      const diff=avg-gen;
+      const diffTxt = diff===0 ? T('与参考一致','matches ref')
+        : (diff>0 ? T('比参考迟 '+diff+' 天',diff+'d later than ref') : T('比参考早 '+(-diff)+' 天',(-diff)+'d earlier than ref'));
+      const diffCol = Math.abs(diff)<=2?'#3f7d55':Math.abs(diff)<=5?'#c98a2b':'#b4482f';
+      html+='<div style="margin-bottom:15px">'
+        +'<div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:6px">'
+        +'<span style="font-weight:800;font-size:13px;color:var(--ink)">'+escapeHtml(cloneLabel(v))+'</span>'
+        +'<span style="font-size:11px;color:var(--ink-soft);white-space:nowrap">n='+arr.length+' · <b style="color:'+diffCol+'">'+diffTxt+'</b></span>'
+        +'</div>'
+        +'<div style="position:relative;height:26px;background:var(--cream-2);border-radius:7px">'
+        +'<div style="position:absolute;left:'+pos(mn)+'%;right:'+(100-pos(mx))+'%;top:11px;height:4px;background:var(--thorn);border-radius:2px;opacity:.55"></div>'
+        +'<div style="position:absolute;left:calc('+pos(gen)+'% - 7px);top:5px;width:14px;height:14px;border:2.5px solid var(--ink-soft);border-radius:50%;background:#fff"></div>'
+        +'<div style="position:absolute;left:calc('+pos(avg)+'% - 8px);top:4px;width:16px;height:16px;border-radius:50%;background:var(--flesh);border:2px solid #fff;box-shadow:0 0 0 1.5px var(--flesh)"></div>'
+        +'</div>'
+        +'<div style="display:flex;justify-content:space-between;font-size:10px;color:var(--ink-soft);margin-top:3px">'
+        +'<span>'+Math.round(lo)+' DAA</span>'
+        +'<span>'+T('参考','ref')+' '+gen+' · '+T('你','you')+' '+avg+(arr.length>1?' ('+mn+'–'+mx+')':'')+'</span>'
+        +'<span>'+Math.round(hi)+' DAA</span>'
+        +'</div></div>';
+    });
+  }
+  html+='</div>';
+
+  // ---- 2. harvest load: open records binned by week ----
+  html+='<div class="rcard"><h4>&#128197; '+T('未来采收负荷','Upcoming harvest load')+'</h4>';
+  if(!openLogs.length){
+    html+='<div style="font-size:12.5px;color:var(--ink-soft);line-height:1.6">'+T('没有「等待中」的树（已记开花、尚未落果/割果）。记录开花后，这里会按周显示预计采收数量，帮你提前排工。','No trees currently "waiting" (flowering logged, not yet dropped/cut). After you log flowering, this bins projected harvests by week so you can plan labour ahead.')+'</div>';
+  } else {
+    const past=openLogs.filter(function(o){return o.days<0;}).length;
+    const WEEKS=10;
+    const buckets=new Array(WEEKS).fill(0); let later=0;
+    openLogs.forEach(function(o){ if(o.days<0) return; const w=Math.floor(o.days/7); if(w<WEEKS) buckets[w]++; else later++; });
+    const maxV=Math.max.apply(null,[1,past,later].concat(buckets));
+    const row=function(label,val,col){
+      if(val===0) return '';
+      const w=Math.round(val/maxV*100);
+      return '<div style="display:flex;align-items:center;gap:8px;margin-bottom:5px">'
+        +'<span style="flex:0 0 74px;font-size:11px;color:var(--ink-soft);text-align:right">'+label+'</span>'
+        +'<div style="flex:1;background:var(--cream-2);border-radius:5px;height:18px;position:relative">'
+        +'<div style="width:'+w+'%;height:100%;background:'+col+';border-radius:5px;min-width:22px"></div>'
+        +'<span style="position:absolute;left:6px;top:0;line-height:18px;font-size:11px;font-weight:800;color:#fff">'+val+'</span>'
+        +'</div></div>';
+    };
+    let bars='';
+    bars+=row(T('已过期','overdue'),past,'#b4482f');
+    for(let i=0;i<WEEKS;i++){
+      const label = i===0?T('本周','this wk'):T('第 '+(i+1)+' 周','wk '+(i+1));
+      const col = i===0?'#c98a2b':'#3f7d55';
+      bars+=row(label,buckets[i],col);
+    }
+    bars+=row(T('10周后','10+ wks'),later,'var(--thorn)');
+    html+='<div style="font-size:11.5px;color:var(--ink-soft);margin-bottom:10px;line-height:1.5">'+T('按每棵树的预计落果/割果日分周统计（'+openLogs.length+' 棵等待中）。红=已过期须尽快查看，黄=本周。','Binned by projected drop/cut date ('+openLogs.length+' waiting). Red = overdue, check soon; amber = this week.')+'</div>'+bars;
+  }
+  html+='</div>';
+
+  // ---- customer flavour feedback summary ----
+  html+='<div class="rcard"><h4>&#128172; '+T('顾客风味反馈','Customer flavour feedback')+'</h4>';
+  if(!fb.total){
+    html+='<div style="font-size:12.5px;color:var(--ink-soft);line-height:1.6">'+T('还没有反馈记录。在「我的果园」为已采收/落果的树点「顾客反馈」，记下满意 / 一般 / 不满意（可加备注）——把「割果时机」对上「顾客反应」。','No feedback yet. Tap "Customer feedback" on a harvested/dropped tree in "My Farms" to note happy / so-so / unhappy (with an optional comment) — this links cut timing to how customers actually responded.')+'</div>';
+  } else {
+    const rate=Math.round(fb.happy/fb.total*100);
+    const tile=function(v,zh,en,col){return '<div style="flex:1;background:#fff;border:1px solid var(--line);border-radius:10px;padding:9px 6px;text-align:center"><div style="font-size:20px;font-weight:800;color:'+col+'">'+v+'</div><div style="font-size:10.5px;color:var(--ink-soft);font-weight:600;line-height:1.3">'+T(zh,en)+'</div></div>';};
+    html+='<div style="display:flex;gap:8px;margin-bottom:11px">'+tile(fb.happy,'😊 满意','😊 Happy','#3f7d55')+tile(fb.ok,'😐 一般','😐 So-so','#c98a2b')+tile(fb.unhappy,'🙁 不满意','🙁 Unhappy','#b4482f')+'</div>';
+    html+='<div class="matbar"><i style="width:'+rate+'%;background:#3f7d55"></i></div><div class="matlabel"><span>'+T('满意率','Satisfaction')+'</span><span style="color:#3f7d55;font-weight:800">'+rate+'%</span><span>'+T('共 '+fb.total+' 条','of '+fb.total)+'</span></div>';
+    if(fb.notes.length){
+      const emap={happy:'😊',ok:'😐',unhappy:'🙁'};
+      html+=fb.notes.slice(-8).reverse().map(function(n){return '<div style="border-top:1px solid var(--line);padding:7px 0;font-size:12px;color:var(--ink-soft);line-height:1.5"><b style="color:var(--ink)">'+(emap[n.rating]||'💬')+' '+escapeHtml(n.tree)+'</b> <span style="font-size:11px">'+escapeHtml(cloneLabel(n.clone))+'</span> — “'+escapeHtml(n.note)+'”</div>';}).join('');
+    }
+  }
+  html+='</div>';
+
+  // ---- 3. cut outcomes log ----
+  html+='<div class="rcard" style="margin-bottom:6px"><h4>&#128298; '+T('历季割果记录','Cut log')+'</h4>';
+  if(!cuts.length){
+    html+='<div style="font-size:12.5px;color:var(--ink-soft);line-height:1.6">'+T('还没有割果记录。在「我的果园」为割下的树填「割果日」（日期、成熟度），逐季积累就是你最值钱的经验库。','No cut records yet. Log the cut date and ripeness for harvested trees in "My Farms" — season by season this becomes your most valuable experience base.')+'</div>';
+  } else {
+    const sorted=cuts.slice().sort(function(a,b){return (b.iso||'').localeCompare(a.iso||'');});
+    html+=sorted.slice(0,20).map(function(c){
+      const pc=c.pct!=null?c.pct+'%':'—';
+      const pcCol=c.pct>=95?'#3f7d55':c.pct>=90?'#c98a2b':'#b4482f';
+      return '<div style="border-top:1px solid var(--line);padding:8px 0;font-size:12px">'
+        +'<div style="display:flex;justify-content:space-between;gap:8px;align-items:baseline">'
+        +'<span style="font-weight:800;color:var(--ink)">'+escapeHtml(c.tree)+' <span style="font-weight:600;color:var(--ink-soft);font-size:11px">'+escapeHtml(cloneLabel(c.clone))+' · '+escapeHtml(c.farm)+'</span></span>'
+        +'<span style="white-space:nowrap;color:var(--ink-soft)">'+escapeHtml(c.cutStr)+' · <b style="color:'+pcCol+'">'+pc+'</b></span>'
+        +'</div>'
+        +(c.outcome?'<div style="color:var(--ink-soft);margin-top:3px;line-height:1.5">“'+escapeHtml(c.outcome)+'”</div>':'')
+        +'</div>';
+    }).join('');
+    if(sorted.length>20) html+='<div style="font-size:11px;color:var(--ink-soft);margin-top:8px;text-align:center">'+T('仅显示最近 20 条','showing latest 20')+'</div>';
+  }
+  html+='</div>';
+
+  app.innerHTML=html;
+}
+
+
+
+/* ---- service worker ---- */
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('sw.js').catch(()=>{});
+}
+</script>
+
+<!-- WhatsApp share preview modal -->
+<div id="waModal" style="display:none;position:fixed;inset:0;z-index:100;background:rgba(20,30,24,.55);padding:18px;align-items:center;justify-content:center">
+  <div style="background:var(--paper);border-radius:16px;max-width:460px;width:100%;max-height:88vh;display:flex;flex-direction:column;box-shadow:0 10px 40px rgba(0,0,0,.3);overflow:hidden">
+    <div style="padding:15px 17px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:9px">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="#25aa5a" aria-hidden="true"><path d="M17.47 14.38c-.3-.15-1.76-.87-2.03-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.95 1.17-.17.2-.35.22-.65.07-.3-.15-1.26-.46-2.4-1.48-.89-.79-1.49-1.77-1.66-2.07-.17-.3-.02-.46.13-.61.13-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.07-.15-.67-1.62-.92-2.22-.24-.58-.49-.5-.67-.51l-.57-.01c-.2 0-.52.07-.79.37-.27.3-1.04 1.02-1.04 2.48 0 1.46 1.06 2.87 1.21 3.07.15.2 2.1 3.2 5.08 4.49.71.31 1.26.49 1.69.62.71.23 1.36.2 1.87.12.57-.09 1.76-.72 2.01-1.41.25-.7.25-1.29.17-1.42-.07-.13-.27-.2-.57-.35zM12.04 21.5h-.01a9.4 9.4 0 0 1-4.8-1.31l-.34-.2-3.57.93.96-3.48-.22-.36a9.38 9.38 0 0 1-1.44-5.01c0-5.19 4.23-9.42 9.43-9.42 2.52 0 4.88.98 6.66 2.76a9.35 9.35 0 0 1 2.76 6.67c0 5.19-4.23 9.42-9.42 9.42zm8.02-17.44A11.32 11.32 0 0 0 12.04.75C5.8.75.72 5.83.72 12.07c0 2 .52 3.95 1.52 5.67L.62 23.25l5.65-1.48a11.28 11.28 0 0 0 5.77 1.58h.01c6.24 0 11.32-5.08 11.32-11.32 0-3.03-1.18-5.87-3.31-8.01z"/></svg>
+      <span style="font-weight:800;font-size:15px;color:var(--shell)"><span class="zh">发送前预览 · 可修改</span><span class="en">Preview · edit before sending</span></span>
+    </div>
+    <div style="padding:14px 17px;overflow-y:auto">
+      <textarea id="waText" name="waText" aria-label="WhatsApp message text" style="width:100%;min-height:180px;border:1.5px solid var(--line);border-radius:12px;padding:12px 13px;font-size:14px;line-height:1.6;color:var(--ink);background:#fff;font-family:inherit;resize:vertical"></textarea>
+    </div>
+    <div style="padding:13px 17px;border-top:1px solid var(--line);display:flex;gap:10px">
+      <button id="waCancel" style="flex:1;border:1.5px solid var(--line);background:#fff;border-radius:11px;padding:12px;font-weight:700;font-size:14px;color:var(--ink-soft);cursor:pointer"><span class="zh">取消</span><span class="en">Cancel</span></button>
+      <button id="waSend" style="flex:2;border:none;background:#25aa5a;color:#fff;border-radius:11px;padding:12px;font-weight:800;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px"><svg viewBox="0 0 24 24" width="18" height="18" fill="#fff" aria-hidden="true"><path d="M17.47 14.38c-.3-.15-1.76-.87-2.03-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.95 1.17-.17.2-.35.22-.65.07-.3-.15-1.26-.46-2.4-1.48-.89-.79-1.49-1.77-1.66-2.07-.17-.3-.02-.46.13-.61.13-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.07-.15-.67-1.62-.92-2.22-.24-.58-.49-.5-.67-.51l-.57-.01c-.2 0-.52.07-.79.37-.27.3-1.04 1.02-1.04 2.48 0 1.46 1.06 2.87 1.21 3.07.15.2 2.1 3.2 5.08 4.49.71.31 1.26.49 1.69.62.71.23 1.36.2 1.87.12.57-.09 1.76-.72 2.01-1.41.25-.7.25-1.29.17-1.42-.07-.13-.27-.2-.57-.35zM12.04 21.5h-.01a9.4 9.4 0 0 1-4.8-1.31l-.34-.2-3.57.93.96-3.48-.22-.36a9.38 9.38 0 0 1-1.44-5.01c0-5.19 4.23-9.42 9.43-9.42 2.52 0 4.88.98 6.66 2.76a9.35 9.35 0 0 1 2.76 6.67c0 5.19-4.23 9.42-9.42 9.42zm8.02-17.44A11.32 11.32 0 0 0 12.04.75C5.8.75.72 5.83.72 12.07c0 2 .52 3.95 1.52 5.67L.62 23.25l5.65-1.48a11.28 11.28 0 0 0 5.77 1.58h.01c6.24 0 11.32-5.08 11.32-11.32 0-3.03-1.18-5.87-3.31-8.01z"/></svg><span class="zh">发送</span><span class="en">Send</span></button>
+    </div>
+  </div>
+</div>
+
+<!-- Customer flavour feedback modal -->
+<div id="fbModal" style="display:none;position:fixed;inset:0;z-index:130;background:rgba(20,30,24,.55);padding:18px;align-items:center;justify-content:center">
+  <div style="background:var(--paper);border-radius:16px;max-width:420px;width:100%;box-shadow:0 10px 40px rgba(0,0,0,.3);overflow:hidden">
+    <div style="padding:16px 18px 6px">
+      <div style="font-size:15px;font-weight:800;color:var(--shell)"><span class="zh">顾客风味反馈（选填）</span><span class="en">Customer flavour feedback (optional)</span></div>
+      <div id="fbSub" style="font-size:12px;color:var(--ink-soft);margin:3px 0 12px"></div>
+      <div id="fbChoices" style="display:flex;gap:8px">
+        <button type="button" data-fb="happy" style="flex:1;border:1.5px solid var(--line);background:#fff;border-radius:11px;padding:11px 4px;font-size:13px;font-weight:700;color:var(--good);cursor:pointer">😊 <span class="zh">满意</span><span class="en">Happy</span></button>
+        <button type="button" data-fb="ok" style="flex:1;border:1.5px solid var(--line);background:#fff;border-radius:11px;padding:11px 4px;font-size:13px;font-weight:700;color:var(--warn);cursor:pointer">😐 <span class="zh">一般</span><span class="en">So-so</span></button>
+        <button type="button" data-fb="unhappy" style="flex:1;border:1.5px solid var(--line);background:#fff;border-radius:11px;padding:11px 4px;font-size:13px;font-weight:700;color:var(--danger);cursor:pointer">🙁 <span class="zh">不满意</span><span class="en">Unhappy</span></button>
+      </div>
+      <textarea id="fbNote" name="feedbackNote" aria-label="Customer feedback note" rows="3" style="width:100%;margin-top:12px;border:1.5px solid var(--line);border-radius:10px;padding:10px 12px;font-size:13px;font-family:inherit;box-sizing:border-box;resize:vertical"></textarea>
+    </div>
+    <div style="padding:8px 18px 16px;display:flex;gap:10px">
+      <button id="fbClear" style="flex:1;border:1.5px solid var(--line);background:#fff;border-radius:11px;padding:10px;font-weight:700;font-size:13px;color:var(--ink-soft);cursor:pointer"><span class="zh">清除</span><span class="en">Clear</span></button>
+      <button id="fbCancel" style="flex:1;border:1.5px solid var(--line);background:#fff;border-radius:11px;padding:10px;font-weight:700;font-size:13px;color:var(--ink-soft);cursor:pointer"><span class="zh">取消</span><span class="en">Cancel</span></button>
+      <button id="fbSave" style="flex:1.4;border:none;background:var(--shell);color:#fff;border-radius:11px;padding:10px;font-weight:800;font-size:13px;cursor:pointer"><span class="zh">保存</span><span class="en">Save</span></button>
+    </div>
+  </div>
+</div>
+
+<!-- Reusable modal: iframe-safe replacement for confirm()/prompt() -->
+<div id="fdModal" style="display:none;position:fixed;inset:0;z-index:120;background:rgba(20,30,24,.55);padding:18px;align-items:center;justify-content:center">
+  <div style="background:var(--paper);border-radius:16px;max-width:400px;width:100%;box-shadow:0 10px 40px rgba(0,0,0,.3);overflow:hidden">
+    <div style="padding:16px 18px 6px">
+      <div id="fdModalMsg" style="font-size:14.5px;font-weight:700;color:var(--shell);line-height:1.5;white-space:pre-line"></div>
+      <input id="fdModalInput" name="dialogInput" aria-label="Dialog input" autocomplete="off" type="text" style="display:none;width:100%;margin-top:12px;border:1.5px solid var(--line);border-radius:10px;padding:11px 12px;font-size:14px;font-family:inherit;box-sizing:border-box">
+    </div>
+    <div style="padding:12px 18px 16px;display:flex;gap:10px">
+      <button id="fdModalCancel" style="flex:1;border:1.5px solid var(--line);background:#fff;border-radius:11px;padding:11px;font-weight:700;font-size:14px;color:var(--ink-soft);cursor:pointer"><span class="zh">取消</span><span class="en">Cancel</span></button>
+      <button id="fdModalOk" style="flex:1.4;border:none;background:var(--shell);color:#fff;border-radius:11px;padding:11px;font-weight:800;font-size:14px;cursor:pointer"><span class="zh">确定</span><span class="en">OK</span></button>
+    </div>
+  </div>
+</div>
+</body>
+</html>
