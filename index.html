@@ -119,7 +119,7 @@ main{padding:18px 16px 40px}
 /* ---- decision tool ---- */
 .tool-intro{font-size:14px;color:var(--ink-soft);margin-bottom:16px}
 .field{margin-bottom:18px}
-.field>label{display:block;font-weight:800;font-size:14.5px;margin-bottom:9px;color:var(--shell)}
+.field>label,.field>.flabel{display:block;font-weight:800;font-size:14.5px;margin-bottom:9px;color:var(--shell)}
 .field .hint{font-weight:400;color:var(--ink-soft);font-size:12.5px;margin-top:3px}
 /* Make the ENTIRE date field open the picker on tap (not just the icon). The
    WebKit calendar-picker-indicator is stretched to cover the whole input, so any
@@ -430,7 +430,7 @@ body.lang-en .en.blk{display:block}
   <p class="tool-intro"><span class="zh">输入你的情况，工具用科学给出这批果的<b>成熟度</b>、<b>风味保留率</b>与<b>货架期</b>。它不替你决定割或不割 —— 只把代价与收益摊开，让你依自己的市场判断。</span><span class="en">Enter your situation; the tool uses science to show this batch's <b>maturity</b>, <b>flavour retention</b> and <b>shelf life</b>. It won't decide cut-or-not for you — it lays out the cost and the gain so you can judge against your own market.</span></p>
 
   <div class="field">
-    <label><span class="zh">1. 目标市场 / 运输距离</span><span class="en">1. Target market / transport</span></label>
+    <div class="flabel"><span class="zh">1. 目标市场 / 运输距离</span><span class="en">1. Target market / transport</span></div>
     <div class="opts tiles three" id="q-market">
       <div class="opt" data-k="local"><div class="dot"></div><div><div class="lbl"><span class="zh">本地即食 / 高端</span><span class="en">Local fresh / premium</span></div><div class="desc"><span class="zh">当天至隔天食用</span><span class="en">Eaten same/next day</span></div></div></div>
       <div class="opt" data-k="short"><div class="dot"></div><div><div class="lbl"><span class="zh">短程运输</span><span class="en">Short-haul transport</span></div><div class="desc"><span class="zh">国内陆运 · 数小时至隔天到达</span><span class="en">Domestic road · hours to next day</span></div></div></div>
@@ -439,7 +439,7 @@ body.lang-en .en.blk{display:block}
   </div>
 
   <div class="field">
-    <label><span class="zh">2. 采收方式</span><span class="en">2. Harvest method</span></label>
+    <div class="flabel"><span class="zh">2. 采收方式</span><span class="en">2. Harvest method</span></div>
     <div class="opts tiles" id="q-method">
       <div class="opt" data-m="pluck"><div class="dot"></div><div><div class="lbl"><span class="zh">人工采摘</span><span class="en">Plucked / cut</span></div><div class="desc"><span class="zh">达生理成熟后剪下，离树后熟</span><span class="en">Cut at maturity, ripens off-tree</span></div></div></div>
       <div class="opt" data-m="tree"><div class="dot"></div><div><div class="lbl"><span class="zh">树熟自然落果</span><span class="en">Tree-ripened (natural drop)</span></div><div class="desc"><span class="zh">在树上后熟至峰值后落果</span><span class="en">Ripens to peak on tree before dropping</span></div></div></div>
@@ -447,9 +447,9 @@ body.lang-en .en.blk{display:block}
   </div>
 
   <div class="field">
-    <label><span class="zh">3. 品种</span><span class="en">3. Clone / variety</span>
+    <div class="flabel"><span class="zh">3. 品种</span><span class="en">3. Clone / variety</span>
       <div class="hint"><span class="zh">每个品种的成熟窗口（授粉后天数 DAA）不同 —— 这是判断的核心。数值取自马来西亚与泰国研究，田间会因气候、树龄、海拔而浮动。</span><span class="en">Each clone has its own maturity window (days after anthesis, DAA) — the core of the judgment. Figures from Malaysian & Thai research; field values shift with climate, tree age, elevation.</span></div>
-    </label>
+    </div>
     <button id="cloneToggle" style="width:100%;border:1.5px solid var(--line);background:#fff;border-radius:12px;padding:13px 15px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:10px;text-align:left">
       <span id="cloneSummary" style="font-weight:700;font-size:14.5px;color:var(--ink-soft)"><span class="zh">点击选择品种…</span><span class="en">Tap to choose a clone…</span></span>
       <span id="cloneChevron" style="flex:0 0 auto;color:var(--thorn);font-size:13px;font-weight:800;transition:.2s">▼</span>
@@ -480,9 +480,9 @@ body.lang-en .en.blk{display:block}
   </div>
 
   <div class="field" id="targetField" style="display:none">
-    <label><span class="stepnum" id="stepRipe">4. </span><span class="zh">割果成熟度（田间实验）</span><span class="en">Cut ripeness (field experiment)</span>
+    <div class="flabel"><span class="stepnum" id="stepRipe">4. </span><span class="zh">割果成熟度（田间实验）</span><span class="en">Cut ripeness (field experiment)</span>
       <div class="hint"><span class="zh">这是一个田间实验室。95% 已很接近自然落果（约早 1–2 天），风味损失最小；有信心后，再逐季往前推（90%、85%）割得更早、更硬，换取更长货架期。每一季记录数据，慢慢调出最适合自己树与市场的时机。（想要 100% 全熟风味？选「树熟自然落果」即可。）</span><span class="en">This is a field lab. 95% is already very close to natural drop (~1–2 days earlier), least flavour loss; once confident, step earlier season by season (90%, 85%) — firmer, earlier cuts that buy more shelf life. Log it each season and tune to your trees and market. (Want full 100% flavour? Just choose "tree-drop" method.)</span></div>
-    </label>
+    </div>
     <div class="seg" id="q-target">
       <button data-t="85"><span class="zh">85%</span><span class="en">85%</span></button>
       <button data-t="90"><span class="zh">90%</span><span class="en">90%</span></button>
@@ -491,9 +491,9 @@ body.lang-en .en.blk{display:block}
   </div>
 
   <div class="field">
-    <label><span class="stepnum" id="stepDate">5. </span><span class="zh">开花 / 授粉日期（Anthesis）</span><span class="en">Flowering / anthesis date</span>
+    <div class="flabel"><span class="stepnum" id="stepDate">5. </span><span class="zh">开花 / 授粉日期（Anthesis）</span><span class="en">Flowering / anthesis date</span>
       <div class="hint"><span class="zh">看到这批花盛开当天，就记下日期 —— 无需事后回推。工具会<b>向前推算</b>成熟与落果的预计日期。今天或过去的日期都可以。</span><span class="en">Log the date the moment you see this batch bloom — no need to back-count later. The tool projects <b>forward</b> to the expected maturity and drop dates. Today's date or a past one both work.</span></div>
-    </label>
+    </div>
     <div style="position:relative">
       <input type="date" id="flowerDate" name="flowerDate" aria-label="Flowering / anthesis date" autocomplete="off" style="width:100%;border:1.5px solid var(--line);border-radius:12px;padding:13px 15px;font-size:15px;font-weight:700;color:var(--shell);background:#fff;font-family:inherit;cursor:pointer">
     </div>
@@ -540,7 +540,7 @@ body.lang-en .en.blk{display:block}
 </div>
 
 <script>
-const CACHE_VERSION='durianripe-20260708-88';
+const CACHE_VERSION='durianripe-20260708-89';
 document.getElementById('ver').textContent=CACHE_VERSION.split('-').slice(1).join('-');
 
 /* ---- language ---- */

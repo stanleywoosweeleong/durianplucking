@@ -1,4 +1,4 @@
-const CACHE='durianripe-20260708-88';
+const CACHE='durianripe-20260708-89';
 const ASSETS=[
   './','./index.html','./manifest.json',
   './icon-192.png','./icon-512.png',
