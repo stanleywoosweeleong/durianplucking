@@ -89,6 +89,18 @@ main{padding:18px 16px 40px}
 .mtile:active{transform:scale(.97)}
 .mtile .ic{font-size:20px;line-height:1}
 @media (max-width:360px){.mtile{font-size:11.5px}.mtile .ic{font-size:18px}}
+/* Inline harvest-calc pickers (market / ripeness) as square tiles to match the
+   action tiles above. Slightly smaller since they sit in a nested panel. */
+.ctile-row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-bottom:9px}
+.ctile{
+  aspect-ratio:1/1;border:1.5px solid var(--line);background:#fff;border-radius:10px;
+  display:flex;align-items:center;justify-content:center;text-align:center;
+  font-weight:800;color:var(--shell);cursor:pointer;line-height:1.25;padding:6px 4px;
+  font-size:12px;transition:.15s
+}
+.ctile.sel{border-color:var(--flesh);background:#fff3df}
+.ctile:active{transform:scale(.97)}
+.ctile.big{font-size:15px}
 /* ---- guide cards ---- */
 .lead{
   background:linear-gradient(135deg,var(--flesh) 0%,var(--flesh-hi) 100%);
@@ -573,7 +585,7 @@ body.lang-en .en.blk{display:block}
 </div>
 
 <script>
-const CACHE_VERSION='durianripe-20260709-98';
+const CACHE_VERSION='durianripe-20260709-99';
 document.getElementById('ver').textContent=CACHE_VERSION.split('-').slice(1).join('-');
 
 /* ---- language ---- */
@@ -1600,18 +1612,18 @@ function renderInlineCalc(farm, tree, calcKey){
   const mat=maturityPct(c,targetDaa,'pluck');
   const flav=flavourRetention(c,targetDaa,'pluck');
 
-  // market + ripeness pickers
-  const mkBtn=(k,zh,en)=>`<button data-calcmarket="${calcKey}|${k}" style="flex:1;border:1.5px solid ${cs.market===k?'var(--flesh)':'var(--line)'};background:${cs.market===k?'#fff3df':'#fff'};border-radius:8px;padding:7px 4px;font-size:11px;font-weight:700;color:var(--shell);cursor:pointer;line-height:1.3">${T(zh,en)}</button>`;
-  const rpBtn=(v)=>`<button data-calctarget="${calcKey}|${v}" style="flex:1;border:1.5px solid ${target===v?'var(--flesh)':'var(--line)'};background:${target===v?'#fff3df':'#fff'};border-radius:8px;padding:7px 4px;font-size:12px;font-weight:800;color:var(--shell);cursor:pointer">${v}%</button>`;
+  // market + ripeness pickers — square tiles (match the action tiles above)
+  const mkBtn=(k,zh,en)=>`<button data-calcmarket="${calcKey}|${k}" class="ctile${cs.market===k?' sel':''}">${T(zh,en)}</button>`;
+  const rpBtn=(v)=>`<button data-calctarget="${calcKey}|${v}" class="ctile big${target===v?' sel':''}">${v}%</button>`;
 
   let out=`<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:2px"><div style="font-size:12px;font-weight:800;color:var(--warn)">🔪 ${T('采收决策（人工采摘）','Harvest decision (plucked)')}</div><button data-runtree="${calcKey}" style="flex:none;border:none;background:none;color:var(--ink-soft);font-size:15px;line-height:1;cursor:pointer;padding:0 2px" aria-label="${T('收起','Close')}">✕</button></div>
     <div style="font-size:11px;color:var(--ink-soft);margin-bottom:8px">${T('已带入：'+cloneLabel(tree.variety)+' · 开花 '+flowerDate,'Carried in: '+cloneLabel(tree.variety)+' · flowered '+flowerDate)}</div>
     <div style="font-size:11px;font-weight:700;color:var(--ink-soft);margin-bottom:4px">${T('目标市场 / 运输','Target market / transport')}</div>
-    <div style="display:flex;gap:5px;margin-bottom:9px">
+    <div class="ctile-row">
       ${mkBtn('local','本地即食','Local fresh')}${mkBtn('short','短程运输','Short-haul')}${mkBtn('export','长程出口','Export')}
     </div>
     <div style="font-size:11px;font-weight:700;color:var(--ink-soft);margin-bottom:4px">${T('割果成熟度','Cut ripeness')}</div>
-    <div style="display:flex;gap:5px;margin-bottom:10px">${rpBtn(85)}${rpBtn(90)}${rpBtn(95)}</div>`;
+    <div class="ctile-row">${rpBtn(85)}${rpBtn(90)}${rpBtn(95)}</div>`;
 
   if(!cs.market){
     out+=`<div style="font-size:11.5px;color:var(--ink-soft);line-height:1.5;padding-top:6px;border-top:1px dashed var(--line)">${T('选一个目标市场，即可看到风味保留与货架期建议。','Pick a target market to see flavour retention and shelf-life advice.')}</div>`;
