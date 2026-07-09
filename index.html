@@ -76,6 +76,19 @@ main{padding:18px 16px 40px}
 .panel{display:none;animation:fade .3s}
 .panel.active{display:block}
 @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@keyframes toastIn{from{opacity:0;transform:translateX(-50%) translateY(10px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+/* Per-tree action tiles (My Farms): square, uniform, 3-per-row grid. Icon stacks
+   above the label so each tile reads as an equal square regardless of text length. */
+.tacts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:10px}
+.mtile{
+  border:1.5px solid var(--line);border-radius:12px;background:#fff;cursor:pointer;
+  aspect-ratio:1/1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:5px;padding:8px 6px;text-align:center;font-weight:700;line-height:1.2;
+  font-size:12.5px;transition:.15s
+}
+.mtile:active{transform:scale(.97)}
+.mtile .ic{font-size:20px;line-height:1}
+@media (max-width:360px){.mtile{font-size:11.5px}.mtile .ic{font-size:18px}}
 /* ---- guide cards ---- */
 .lead{
   background:linear-gradient(135deg,var(--flesh) 0%,var(--flesh-hi) 100%);
@@ -117,6 +130,25 @@ main{padding:18px 16px 40px}
 .labrow:first-child{border-top:none}
 .labrow small{color:var(--ink-soft);font-size:11px;font-weight:400}
 .labrow b{color:var(--shell)}
+/* Mobile: stack the two columns vertically. The fixed 38/62 split forces long
+   labels and values to wrap into tall, half-empty rows on a phone. Stacking puts
+   the label on its own line and lets the value use the full width — far less
+   wasted space. The header row (.labrow-head) keeps its two-column look. */
+@media (max-width:560px){
+  .labrow{grid-template-columns:1fr;gap:3px;padding:10px 12px}
+  .labrow>span:first-child{padding-bottom:1px}
+  .labrow-head{grid-template-columns:1fr 1fr !important;gap:8px}
+}
+/* Export route rows: on a phone the route name and its status verdict each wrap
+   independently, leaving a tall ragged gap between them. Stack them instead —
+   route on top, verdict below, indented — so no side fights for width. */
+.routerow{display:flex;justify-content:space-between;gap:8px;padding:6px 0;font-size:11.5px}
+.routerow .rr-name{flex:1}
+.routerow .rr-stat{font-weight:800;white-space:nowrap}
+@media (max-width:560px){
+  .routerow{flex-direction:column;gap:2px;padding:7px 0}
+  .routerow .rr-stat{white-space:normal;padding-left:16px}
+}
 /* ---- decision tool ---- */
 .tool-intro{font-size:14px;color:var(--ink-soft);margin-bottom:16px}
 .field{margin-bottom:18px}
@@ -318,7 +350,7 @@ body.lang-en .en.blk{display:block}
     <span class="en">Brix alone is one axis. Durian eating quality is set by <b>dry matter, texture, acidity, sulfur volatiles and esters</b> together. If you send samples to a lab, request the parameters below — they let you map "cut day" to "measured quality" and build your own orchard baseline within a season or two.</span></p>
 
     <div style="margin-top:12px;border:1px solid var(--line);border-radius:12px;overflow:hidden">
-      <div class="labrow" style="background:var(--cream-2);font-weight:800;font-size:12px">
+      <div class="labrow labrow-head" style="background:var(--cream-2);font-weight:800;font-size:12px">
         <span><span class="zh">参数</span><span class="en">Parameter</span></span>
         <span><span class="zh">参考范围 / 门槛</span><span class="en">Reference / threshold</span></span>
       </div>
@@ -353,7 +385,7 @@ body.lang-en .en.blk{display:block}
     <span class="en"><b>Why the numbers clash:</b> Thai research measures <b>"cut at commercial maturity"</b> (earlier — Chanee ~90, Monthong ~105 DAA); Malaysia measures <b>"natural drop"</b> (later — Monthong tree-ripe ~120–130 DAA). <b>Same fruit, different endpoint, different number.</b> This tool sets the cut window between the two and lets you tune with the ripeness dial.</span></div>
 
     <div style="margin-top:13px;border:1px solid var(--line);border-radius:12px;overflow:hidden">
-      <div class="labrow" style="background:var(--cream-2);font-weight:800;font-size:12px">
+      <div class="labrow labrow-head" style="background:var(--cream-2);font-weight:800;font-size:12px">
         <span><span class="zh">品种</span><span class="en">Clone</span></span>
         <span><span class="zh">独立来源与 DAA</span><span class="en">Independent sources & DAA</span></span>
       </div>
@@ -541,7 +573,7 @@ body.lang-en .en.blk{display:block}
 </div>
 
 <script>
-const CACHE_VERSION='durianripe-20260709-96';
+const CACHE_VERSION='durianripe-20260709-97';
 document.getElementById('ver').textContent=CACHE_VERSION.split('-').slice(1).join('-');
 
 /* ---- language ---- */
@@ -1010,9 +1042,9 @@ function decide(){
         const airNote = s.target>=100
           ? T('树熟即可 · 最佳选择','Tree-ripe works · ideal')
           : T(`此路线无需早割（省下运费与风味）`,`no need to cut early here (saves cost & flavour)`);
-        return `<div style="display:flex;justify-content:space-between;gap:8px;padding:5px 0;border-top:1px solid var(--line);font-size:11.5px">
-          <span style="flex:1">✈️ ${T(r.zh,r.en)} <span style="color:var(--ink-soft)">(~24–36${T('小时','h')})</span></span>
-          <span style="color:${airCol};font-weight:800;white-space:nowrap">✓ ${airNote}</span></div>`;
+        return `<div class="routerow" style="border-top:1px solid var(--line)">
+          <span class="rr-name">✈️ ${T(r.zh,r.en)} <span style="color:var(--ink-soft)">(~24–36${T('小时','h')})</span></span>
+          <span class="rr-stat" style="color:${airCol}">✓ ${airNote}</span></div>`;
       }
       const col = arriveOk? '#3f7d55' : (margin>=0? '#c98a2b' : '#b4482f');
       const mark = arriveOk? '✓' : (margin>=0? '⚠' : '✕');
@@ -1027,9 +1059,9 @@ function decide(){
         note = T('鲜果太紧 —— 此线宜走急冻','fresh too tight — freeze for this line');
       }
       const icon = r.rail ? '🚄 ' : '';
-      return `<div style="display:flex;justify-content:space-between;gap:8px;padding:5px 0;border-top:1px solid var(--line);font-size:11.5px">
-        <span style="flex:1">${icon}${T(r.zh,r.en)} <span style="color:var(--ink-soft)">(${r.days}${T('天','d')})</span></span>
-        <span style="color:${col};font-weight:800;white-space:nowrap">${mark} ${note}</span></div>`;
+      return `<div class="routerow" style="border-top:1px solid var(--line)">
+        <span class="rr-name">${icon}${T(r.zh,r.en)} <span style="color:var(--ink-soft)">(${r.days}${T('天','d')})</span></span>
+        <span class="rr-stat" style="color:${col}">${mark} ${note}</span></div>`;
     }).join('');
     const airTip = s.target<100
       ? `<div style="font-size:11.5px;color:var(--warn);font-weight:700;margin-top:8px;line-height:1.5">${T('✈️ 注意：若走空运（约1天到港），榴梿树熟落果也完全来得及 —— 为空运而早割是<b>白白损失风味、还多付运费</b>。空运的价值正是能卖「树熟premium」。早割只对慢速冷链（铁路/海运）才有意义。','✈️ Note: by air (~1 day), even tree-drop fruit arrives fine — cutting early for an air shipment <b>wastes flavour and adds freight cost for nothing</b>. The whole value of air freight is selling the tree-ripe premium. Early cutting only pays off for slower cold chain (rail/sea).')}</div>`
@@ -1448,31 +1480,34 @@ function renderFarms(){
           html+=`<div style="font-size:11.5px;color:var(--danger);font-weight:700;margin-top:4px;line-height:1.5;background:#faeae6;border:1px solid var(--danger);border-radius:8px;padding:6px 9px">⚠ ${T('已清除无效'+what+'（原填 '+bad+'，未晚于开花日 '+lastLog.flowerDate+'）——请用下方按钮重新填写正确日期。','Cleared an invalid '+what+' (was '+bad+', not after flowering '+lastLog.flowerDate+') — please re-enter a correct date with the button below.')}</div>`;
         }
       }
-      // per-tree actions — buttons show recorded state and stay editable (tap to update)
+      // per-tree actions — square tiles; icon over label. Order: flowering, drop,
+      // cut, feedback … and the harvest calculator ALWAYS last.
       const hasFlower=!!(lastLog&&lastLog.flowerDate);
       const hasDrop=!!(lastLog&&lastLog.actualDropStr);
       const hasCut=!!(lastLog&&lastLog.cutDateStr);
-      html+=`<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:10px">`;
+      const calcOpen=openMenus.has('calc:'+farm.id+'|'+tree.id);
+      const tiles=[];
       // flowering: always present; ✎ if already recorded
-      html+=`<button data-logflower="${farm.id}|${tree.id}" style="border:1.5px solid var(--line);background:${hasFlower?'#f3efe6':'#fff'};border-radius:12px;padding:16px 10px;font-size:13.5px;font-weight:700;text-align:center;min-height:58px;display:flex;align-items:center;justify-content:center;line-height:1.25;color:var(--shell);cursor:pointer">${hasFlower?T('✎ 开花','✎ Flowering'):T('＋ 记录开花','＋ Log flowering')}</button>`;
-      // drop: show once flowering exists; ✎ if recorded (so it stays editable)
+      tiles.push(`<button data-logflower="${farm.id}|${tree.id}" class="mtile" style="border-color:var(--line);background:${hasFlower?'#f3efe6':'#fff'};color:var(--shell)"><span class="ic">${hasFlower?'✎':'✚'}</span><span>${hasFlower?T('开花','Flowering'):T('记录开花','Log flowering')}</span></button>`);
+      // drop: show once flowering exists and not yet cut; ✎ if recorded
       if(hasFlower && !hasCut){
-        html+=`<button data-logdrop="${farm.id}|${tree.id}" style="border:1.5px solid var(--good);background:${hasDrop?'#e3ecdf':'#eef5ec'};border-radius:12px;padding:16px 10px;font-size:13.5px;font-weight:700;text-align:center;min-height:58px;display:flex;align-items:center;justify-content:center;line-height:1.25;color:var(--good);cursor:pointer">${hasDrop?T('✎ 落果日','✎ Drop date'):T('＋ 回填落果日','＋ Log actual drop')}</button>`;
+        tiles.push(`<button data-logdrop="${farm.id}|${tree.id}" class="mtile" style="border-color:var(--good);background:${hasDrop?'#e3ecdf':'#eef5ec'};color:var(--good)"><span class="ic">${hasDrop?'✎':'✚'}</span><span>${hasDrop?T('落果日','Drop date'):T('回填落果日','Log actual drop')}</span></button>`);
       }
       // cut: show once flowering exists and no natural drop; ✎ if recorded
       if(hasFlower && !hasDrop){
-        html+=`<button data-logcut="${farm.id}|${tree.id}" style="border:1.5px solid var(--warn);background:${hasCut?'#f6e8d2':'#fdf3e4'};border-radius:12px;padding:16px 10px;font-size:13.5px;font-weight:700;text-align:center;min-height:58px;display:flex;align-items:center;justify-content:center;line-height:1.25;color:var(--warn);cursor:pointer">${hasCut?T('✎ 割果日','✎ Cut date'):T('＋ 记录割果日','＋ Log cut date')}</button>`;
+        tiles.push(`<button data-logcut="${farm.id}|${tree.id}" class="mtile" style="border-color:var(--warn);background:${hasCut?'#f6e8d2':'#fdf3e4'};color:var(--warn)"><span class="ic">${hasCut?'✎':'✚'}</span><span>${hasCut?T('割果日','Cut date'):T('记录割果日','Log cut date')}</span></button>`);
       }
-      const calcOpen=openMenus.has('calc:'+farm.id+'|'+tree.id);
-      html+=`<button data-runtree="${farm.id}|${tree.id}" style="border:1.5px solid var(--flesh);background:${calcOpen?'#f6e8d2':'#fffaf0'};border-radius:12px;padding:16px 10px;font-size:13.5px;font-weight:700;text-align:center;min-height:58px;display:flex;align-items:center;justify-content:center;line-height:1.25;color:var(--warn);cursor:pointer">${calcOpen?T('▲ 收起决策','▲ Close calc'):T('用采收决策算','Run harvest calc')}</button>`;
+      // feedback: once flowering exists
       if(hasFlower){
         const fbv=lastLog.feedback;
         const emap={happy:'😊',ok:'😐',unhappy:'🙁'};
         const hasFb=!!(fbv&&(fbv.rating||fbv.note));
-        const fbLabel = hasFb ? (fbv.rating?emap[fbv.rating]+' ':'✎ ')+T('反馈','Feedback') : T('＋ 顾客反馈','＋ Customer feedback');
-        html+=`<button data-feedback="${farm.id}|${tree.id}" style="grid-column:1/-1;border:1.5px solid var(--shell);background:${hasFb?'#eef1f7':'#fff'};border-radius:12px;padding:16px 10px;font-size:13.5px;font-weight:700;text-align:center;min-height:58px;display:flex;align-items:center;justify-content:center;line-height:1.25;color:var(--shell);cursor:pointer">${fbLabel}</button>`;
+        const fbIcon = hasFb ? (fbv.rating?emap[fbv.rating]:'✎') : '✚';
+        tiles.push(`<button data-feedback="${farm.id}|${tree.id}" class="mtile" style="border-color:var(--shell);background:${hasFb?'#eef1f7':'#fff'};color:var(--shell)"><span class="ic">${fbIcon}</span><span>${T('顾客反馈','Feedback')}</span></button>`);
       }
-      html+=`</div>`; // close actions row
+      // harvest calculator — ALWAYS the last tile
+      tiles.push(`<button data-runtree="${farm.id}|${tree.id}" class="mtile" style="border-color:var(--flesh);background:${calcOpen?'#f6e8d2':'#fffaf0'};color:var(--warn)"><span class="ic">${calcOpen?'▲':'🧮'}</span><span>${calcOpen?T('收起决策','Close calc'):T('采收决策算','Harvest calc')}</span></button>`);
+      html+=`<div class="tacts">${tiles.join('')}</div>`;
       // ---- inline harvest calc (plucking only) — expands here, no page jump ----
       const calcKey=farm.id+'|'+tree.id;
       if(openMenus.has('calc:'+calcKey)){
@@ -2286,8 +2321,60 @@ function renderInsights(){
   if(p && p!=='guide'){ const el=document.querySelector(`.tab[data-p="${p}"]`); if(el) el.click(); }
 })();
 
+/* ---- service worker + intelligent update prompt ----
+   A new sw.js stays in the "waiting" state (it no longer calls skipWaiting on
+   install). We watch for it, show a small toast, and only reload once the user
+   taps update — so their work is never interrupted by a surprise refresh. */
 if('serviceWorker' in navigator){
-  navigator.serviceWorker.register('sw.js').catch(()=>{});
+  let refreshing=false;
+  // When the new worker takes control, reload once to pick up fresh assets.
+  navigator.serviceWorker.addEventListener('controllerchange',()=>{
+    if(refreshing) return; refreshing=true; window.location.reload();
+  });
+
+  function showUpdateToast(worker){
+    if(document.getElementById('updateToast')) return; // already shown
+    const t=document.createElement('div');
+    t.id='updateToast';
+    t.style.cssText='position:fixed;left:50%;bottom:22px;transform:translateX(-50%);z-index:200;'
+      +'background:var(--shell);color:var(--cream);border-radius:14px;padding:11px 13px 11px 15px;'
+      +'box-shadow:0 8px 28px rgba(0,0,0,.28);display:flex;align-items:center;gap:12px;'
+      +'font-size:13.5px;max-width:calc(100% - 28px);animation:toastIn .28s ease';
+    const msg=document.createElement('span');
+    msg.style.cssText='line-height:1.35;font-weight:600';
+    msg.textContent=T('有新版本可用','A new version is available');
+    const btn=document.createElement('button');
+    btn.style.cssText='flex:0 0 auto;border:none;background:var(--flesh);color:var(--shell);'
+      +'font-weight:800;font-size:13.5px;border-radius:10px;padding:8px 14px;cursor:pointer';
+    btn.textContent=T('更新','Update');
+    btn.onclick=()=>{ btn.disabled=true; btn.style.opacity=.6;
+      btn.textContent=T('更新中…','Updating…');
+      worker.postMessage({type:'SKIP_WAITING'}); };
+    const close=document.createElement('button');
+    close.setAttribute('aria-label',T('关闭','Dismiss'));
+    close.style.cssText='flex:0 0 auto;border:none;background:transparent;color:var(--cream);'
+      +'font-size:18px;line-height:1;cursor:pointer;padding:4px 2px;opacity:.7';
+    close.textContent='×';
+    close.onclick=()=>t.remove();
+    t.appendChild(msg); t.appendChild(btn); t.appendChild(close);
+    document.body.appendChild(t);
+  }
+
+  navigator.serviceWorker.register('sw.js').then(reg=>{
+    // A worker already waiting from a previous visit (e.g. user reopened the tab).
+    if(reg.waiting && navigator.serviceWorker.controller) showUpdateToast(reg.waiting);
+    reg.addEventListener('updatefound',()=>{
+      const nw=reg.installing; if(!nw) return;
+      nw.addEventListener('statechange',()=>{
+        // installed + an existing controller  ==>  this is an update, not first install
+        if(nw.state==='installed' && navigator.serviceWorker.controller) showUpdateToast(nw);
+      });
+    });
+    // Proactively check for a new sw.js when the app regains focus.
+    document.addEventListener('visibilitychange',()=>{
+      if(document.visibilityState==='visible') reg.update().catch(()=>{});
+    });
+  }).catch(()=>{});
 }
 </script>
 
