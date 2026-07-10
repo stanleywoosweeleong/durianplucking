@@ -101,6 +101,10 @@ main{padding:18px 16px 40px}
 .ctile.sel{border-color:var(--flesh);background:#fff3df}
 .ctile:active{transform:scale(.97)}
 .ctile.big{font-size:15px}
+/* When the target-market step is still unpicked, its tiles get a soft amber ring
+   that gently pulses — so with multiple trees you don't forget this last tap. */
+.ctile-row.needpick .ctile{border-color:var(--flesh);animation:needpulse 1.6s ease-in-out infinite}
+@keyframes needpulse{0%,100%{box-shadow:0 0 0 0 rgba(232,169,75,0)}50%{box-shadow:0 0 0 3px rgba(232,169,75,.22)}}
 /* ---- guide cards ---- */
 .lead{
   background:linear-gradient(135deg,var(--flesh) 0%,var(--flesh-hi) 100%);
@@ -585,7 +589,7 @@ body.lang-en .en.blk{display:block}
 </div>
 
 <script>
-const CACHE_VERSION='durianripe-20260709-99';
+const CACHE_VERSION='durianripe-20260710-102';
 document.getElementById('ver').textContent=CACHE_VERSION.split('-').slice(1).join('-');
 
 /* ---- language ---- */
@@ -1260,7 +1264,7 @@ if(document.readyState==='loading'){ document.addEventListener('DOMContentLoaded
 else { wireWaModal(); }
 
 /* ---- iframe-safe modal (native confirm/prompt are blocked in sandboxed iframes) ---- */
-function fdModalOpen({message, input=false, defaultValue='', okLabel=null}){
+function fdModalOpen({message, input=false, defaultValue='', okLabel=null, type='text', min='', max=''}){
   return new Promise(resolve=>{
     const modal=document.getElementById('fdModal');
     const msg=document.getElementById('fdModalMsg');
@@ -1269,9 +1273,22 @@ function fdModalOpen({message, input=false, defaultValue='', okLabel=null}){
     const cancel=document.getElementById('fdModalCancel');
     if(!modal){ resolve(input?null:false); return; }
     msg.textContent=message;
-    if(input){ inp.style.display='block'; inp.value=defaultValue; } else { inp.style.display='none'; }
+    if(input){
+      inp.style.display='block';
+      inp.type = type==='date' ? 'date' : 'text';
+      // date inputs get min/max bounds and a big tap target that opens the OS calendar
+      if(type==='date'){ inp.min=min||''; inp.max=max||''; inp.style.cursor='pointer'; }
+      else { inp.removeAttribute('min'); inp.removeAttribute('max'); inp.style.cursor=''; }
+      inp.value=defaultValue;
+    } else { inp.style.display='none'; }
     modal.style.display='flex';
-    if(input) setTimeout(()=>inp.focus(),30);
+    if(input){
+      setTimeout(()=>{
+        inp.focus();
+        // On mobile, pop the native calendar straight away for date fields.
+        if(type==='date' && typeof inp.showPicker==='function'){ try{ inp.showPicker(); }catch(e){} }
+      },40);
+    }
     const cleanup=()=>{
       modal.style.display='none';
       ok.onclick=null; cancel.onclick=null; modal.onclick=null; inp.onkeydown=null;
@@ -1284,6 +1301,7 @@ function fdModalOpen({message, input=false, defaultValue='', okLabel=null}){
 }
 function fdConfirm(message){ return fdModalOpen({message,input:false}); }
 function fdPrompt(message,defaultValue=''){ return fdModalOpen({message,input:true,defaultValue}); }
+function fdDatePrompt(message,defaultValue='',min='',max=''){ return fdModalOpen({message,input:true,type:'date',defaultValue,min,max}); }
 function fdAlert(message){ return fdModalOpen({message,input:false}); } // OK-only style ok
 
 /* ---- customer flavour feedback modal (optional, per harvested batch) ---- */
@@ -1618,15 +1636,15 @@ function renderInlineCalc(farm, tree, calcKey){
 
   let out=`<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:2px"><div style="font-size:12px;font-weight:800;color:var(--warn)">🔪 ${T('采收决策（人工采摘）','Harvest decision (plucked)')}</div><button data-runtree="${calcKey}" style="flex:none;border:none;background:none;color:var(--ink-soft);font-size:15px;line-height:1;cursor:pointer;padding:0 2px" aria-label="${T('收起','Close')}">✕</button></div>
     <div style="font-size:11px;color:var(--ink-soft);margin-bottom:8px">${T('已带入：'+cloneLabel(tree.variety)+' · 开花 '+flowerDate,'Carried in: '+cloneLabel(tree.variety)+' · flowered '+flowerDate)}</div>
-    <div style="font-size:11px;font-weight:700;color:var(--ink-soft);margin-bottom:4px">${T('目标市场 / 运输','Target market / transport')}</div>
-    <div class="ctile-row">
+    <div style="font-size:11px;font-weight:700;color:var(--ink-soft);margin-bottom:4px">${T('① 割果成熟度','① Cut ripeness')}</div>
+    <div class="ctile-row">${rpBtn(85)}${rpBtn(90)}${rpBtn(95)}</div>
+    <div style="font-size:11px;font-weight:700;color:${cs.market?'var(--ink-soft)':'var(--warn)'};margin-bottom:4px">${cs.market?T('② 目标市场 / 运输','② Target market / transport'):T('② 目标市场 / 运输 ← 还没选','② Target market / transport ← pick one')}</div>
+    <div class="ctile-row${cs.market?'':' needpick'}">
       ${mkBtn('local','本地即食','Local fresh')}${mkBtn('short','短程运输','Short-haul')}${mkBtn('export','长程出口','Export')}
-    </div>
-    <div style="font-size:11px;font-weight:700;color:var(--ink-soft);margin-bottom:4px">${T('割果成熟度','Cut ripeness')}</div>
-    <div class="ctile-row">${rpBtn(85)}${rpBtn(90)}${rpBtn(95)}</div>`;
+    </div>`;
 
   if(!cs.market){
-    out+=`<div style="font-size:11.5px;color:var(--ink-soft);line-height:1.5;padding-top:6px;border-top:1px dashed var(--line)">${T('选一个目标市场，即可看到风味保留与货架期建议。','Pick a target market to see flavour retention and shelf-life advice.')}</div>`;
+    out+=`<div style="font-size:11.5px;color:var(--warn);font-weight:700;line-height:1.5;padding-top:6px;border-top:1px dashed var(--line)">${T('👆 选一个目标市场，才会显示风味保留与货架期建议。','👆 Pick a target market to reveal flavour retention and shelf-life advice.')}</div>`;
     return wrap(out);
   }
 
@@ -1787,8 +1805,8 @@ function wireFarmEvents(){
     const existing=open?open.flowerDate:'';
     const msg=existing
       ? T('已记录开花日：'+existing+'。修改后将重算预计割果日。','Flowering already recorded: '+existing+'. Changing it will recompute the projected cut.')
-      : T('开花（授粉）日期 YYYY-MM-DD：','Flowering (anthesis) date YYYY-MM-DD:');
-    const dateStr=await fdPrompt(msg, existing||today);
+      : T('选择开花（授粉）日期：','Pick the flowering (anthesis) date:');
+    const dateStr=await fdDatePrompt(msg, existing||today, '', today);
     if(!dateStr) return;
     if(!/^\d{4}-\d{2}-\d{2}$/.test(dateStr)){ await fdAlert(T('日期格式：YYYY-MM-DD','Format: YYYY-MM-DD')); return; }
     // project cut using this tree's clone + learned/generic window at drop
@@ -1816,8 +1834,9 @@ function wireFarmEvents(){
     const existing=target&&target.actualDropStr?target.actualDropStr:'';
     const msg=existing
       ? T('已记录落果日：'+existing+'。修改后将重算本树 DAA。','Drop already recorded: '+existing+'. Changing it recomputes this tree DAA.')
-      : T('实际自然落果日期 YYYY-MM-DD：','Actual natural-drop date YYYY-MM-DD:');
-    const dateStr=await fdPrompt(msg, existing||today);
+      : T('选择实际自然落果日期：','Pick the actual natural-drop date:');
+    const dropMin=(target&&target.flowerDate)?target.flowerDate:'';
+    const dateStr=await fdDatePrompt(msg, existing||today, dropMin, '');
     if(!dateStr) return;
     if(!/^\d{4}-\d{2}-\d{2}$/.test(dateStr)){ await fdAlert(T('日期格式：YYYY-MM-DD','Format: YYYY-MM-DD')); return; }
     const fdate=target&&target.flowerDate;
@@ -1839,8 +1858,9 @@ function wireFarmEvents(){
     const had=target&&target.cutDateStr;
     const dMsg=had
       ? T('已记录割果：'+target.cutDateStr+'（'+target.cutPct+'%）。可修改。','Cut already recorded: '+target.cutDateStr+' ('+target.cutPct+'%). You can update it.')
-      : T('割果日期 YYYY-MM-DD：','Cut date YYYY-MM-DD:');
-    const dateStr=await fdPrompt(dMsg, (had&&target.cutDateStr)||today);
+      : T('选择割果日期：','Pick the cut date:');
+    const cutMin=(target&&target.flowerDate)?target.flowerDate:'';
+    const dateStr=await fdDatePrompt(dMsg, (had&&target.cutDateStr)||today, cutMin, '');
     if(!dateStr) return;
     if(!/^\d{4}-\d{2}-\d{2}$/.test(dateStr)){ await fdAlert(T('日期格式：YYYY-MM-DD','Format: YYYY-MM-DD')); return; }
     const cfdate=target&&target.flowerDate;
