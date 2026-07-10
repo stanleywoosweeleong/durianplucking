@@ -174,12 +174,12 @@ main{padding:18px 16px 40px}
    WebKit calendar-picker-indicator is stretched to cover the whole input, so any
    tap on iOS Safari / Chrome triggers the native picker. A visible glyph is drawn
    via background-image so users still see the calendar affordance. */
-#flowerDate{
+#flowerDate,#fdModalInput[type=date]{
   -webkit-appearance:none;appearance:none;position:relative;
   background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%231f3a2e' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><rect x='3' y='4' width='18' height='18' rx='2'/><line x1='16' y1='2' x2='16' y2='6'/><line x1='8' y1='2' x2='8' y2='6'/><line x1='3' y1='10' x2='21' y2='10'/></svg>");
   background-repeat:no-repeat;background-position:right 14px center;
 }
-#flowerDate::-webkit-calendar-picker-indicator{
+#flowerDate::-webkit-calendar-picker-indicator,#fdModalInput[type=date]::-webkit-calendar-picker-indicator{
   position:absolute;top:0;left:0;right:0;bottom:0;width:auto;height:auto;
   margin:0;padding:0;opacity:0;cursor:pointer;
 }
@@ -589,7 +589,7 @@ body.lang-en .en.blk{display:block}
 </div>
 
 <script>
-const CACHE_VERSION='durianripe-20260710-102';
+const CACHE_VERSION='durianripe-20260710-103';
 document.getElementById('ver').textContent=CACHE_VERSION.split('-').slice(1).join('-');
 
 /* ---- language ---- */
@@ -1276,22 +1276,39 @@ function fdModalOpen({message, input=false, defaultValue='', okLabel=null, type=
     if(input){
       inp.style.display='block';
       inp.type = type==='date' ? 'date' : 'text';
-      // date inputs get min/max bounds and a big tap target that opens the OS calendar
-      if(type==='date'){ inp.min=min||''; inp.max=max||''; inp.style.cursor='pointer'; }
-      else { inp.removeAttribute('min'); inp.removeAttribute('max'); inp.style.cursor=''; }
-      inp.value=defaultValue;
-    } else { inp.style.display='none'; }
+      if(type==='date'){
+        if(min) inp.setAttribute('min',min); else inp.removeAttribute('min');
+        if(max) inp.setAttribute('max',max); else inp.removeAttribute('max');
+        // never leave a date field empty — iOS renders that as a blank grey box.
+        // default to the supplied value, else today.
+        inp.value = defaultValue || new Date().toISOString().slice(0,10);
+        inp.style.cursor='pointer';
+        inp.style.minHeight='46px';
+        inp.style.textAlign='left';
+        inp.style.paddingRight='44px';
+        inp.style.fontSize='16px';          // 16px avoids iOS zoom-on-focus
+        inp.style.fontWeight='800';
+        inp.style.color='var(--shell)';
+        inp.style.background='#fff';
+        inp.style.borderColor='var(--flesh)';
+        inp.style.borderWidth='2px';
+        // tapping the field opens the OS picker; showPicker from this gesture is
+        // allowed on iOS (unlike an auto-call on open, which iOS blocks).
+        inp.onclick=()=>{ if(typeof inp.showPicker==='function'){ try{ inp.showPicker(); }catch(e){} } };
+      } else {
+        inp.removeAttribute('min'); inp.removeAttribute('max');
+        inp.value=defaultValue;
+        inp.style.cursor=''; inp.style.minHeight=''; inp.style.textAlign=''; inp.style.paddingRight='';
+        inp.style.fontSize='16px'; inp.style.fontWeight=''; inp.style.color='var(--ink)';
+        inp.style.background='#fff'; inp.style.borderColor='var(--line)'; inp.style.borderWidth='1.5px';
+        inp.onclick=null;
+      }
+    } else { inp.style.display='none'; inp.onclick=null; }
     modal.style.display='flex';
-    if(input){
-      setTimeout(()=>{
-        inp.focus();
-        // On mobile, pop the native calendar straight away for date fields.
-        if(type==='date' && typeof inp.showPicker==='function'){ try{ inp.showPicker(); }catch(e){} }
-      },40);
-    }
+    if(input && type!=='date'){ setTimeout(()=>inp.focus(),40); }
     const cleanup=()=>{
       modal.style.display='none';
-      ok.onclick=null; cancel.onclick=null; modal.onclick=null; inp.onkeydown=null;
+      ok.onclick=null; cancel.onclick=null; modal.onclick=null; inp.onkeydown=null; inp.onclick=null;
     };
     ok.onclick=()=>{ const v=input?inp.value:true; cleanup(); resolve(v); };
     cancel.onclick=()=>{ cleanup(); resolve(input?null:false); };
@@ -1301,7 +1318,10 @@ function fdModalOpen({message, input=false, defaultValue='', okLabel=null, type=
 }
 function fdConfirm(message){ return fdModalOpen({message,input:false}); }
 function fdPrompt(message,defaultValue=''){ return fdModalOpen({message,input:true,defaultValue}); }
-function fdDatePrompt(message,defaultValue='',min='',max=''){ return fdModalOpen({message,input:true,type:'date',defaultValue,min,max}); }
+function fdDatePrompt(message,defaultValue='',min='',max=''){
+  const hint = document.body.classList.contains('lang-en') ? '\n(tap the field to open the calendar)' : '\n（点一下下方日期，打开日历）';
+  return fdModalOpen({message:message+hint,input:true,type:'date',defaultValue,min,max});
+}
 function fdAlert(message){ return fdModalOpen({message,input:false}); } // OK-only style ok
 
 /* ---- customer flavour feedback modal (optional, per harvested batch) ---- */
