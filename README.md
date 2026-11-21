@@ -2,7 +2,7 @@
 
 An offline-capable Progressive Web App that helps durian growers decide **tree-drop vs cut**
 harvest timing per clone, track farms/trees across seasons, and see calibration insights.
-Bilingual (中文 / English). No backend, no dependencies — a single self-contained page.
+Three languages (中文 / English / Bahasa Melayu), chosen on first launch and switchable from the header. No backend, no dependencies — a single self-contained page.
 
 ## Host on GitHub Pages
 
