@@ -1,4 +1,4 @@
-const CACHE='durianripe-20260710-103';
+const CACHE='durianripe-20261121-104';
 const ASSETS=[
   './','./index.html','./manifest.json',
   './icon-192.png','./icon-512.png',
@@ -10,7 +10,10 @@ const ASSETS=[
 // avoiding a surprise mid-use reload. The page posts {type:'SKIP_WAITING'} when
 // the user taps "update", which triggers activation (handler below).
 self.addEventListener('install',e=>{
-  e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS).catch(()=>{})));
+  // cache:'reload' bypasses the HTTP cache so a new version never pre-caches stale files.
+  // If any file fails, the install fails and the browser retries later — better than
+  // silently activating a worker with an incomplete offline cache.
+  e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS.map(u=>new Request(u,{cache:'reload'})))));
 });
 self.addEventListener('message',e=>{
   if(e.data && e.data.type==='SKIP_WAITING') self.skipWaiting();
@@ -23,9 +26,11 @@ self.addEventListener('fetch',e=>{
   if(new URL(e.request.url).origin!==self.location.origin)return;
   e.respondWith(
     caches.match(e.request).then(r=>r||fetch(e.request).then(resp=>{
-      const cp=resp.clone();
-      caches.open(CACHE).then(c=>c.put(e.request,cp)).catch(()=>{});
+      if(resp.ok){ // never cache a 404/500
+        const cp=resp.clone();
+        caches.open(CACHE).then(c=>c.put(e.request,cp)).catch(()=>{});
+      }
       return resp;
-    }).catch(()=>caches.match('./index.html')))
+    }).catch(()=>e.request.mode==='navigate'?caches.match('./index.html'):Response.error()))
   );
 });

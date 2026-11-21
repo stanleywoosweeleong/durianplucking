@@ -589,7 +589,7 @@ body.lang-en .en.blk{display:block}
 </div>
 
 <script>
-const CACHE_VERSION='durianripe-20260710-103';
+const CACHE_VERSION='durianripe-20261121-104';
 document.getElementById('ver').textContent=CACHE_VERSION.split('-').slice(1).join('-');
 
 /* ---- language ---- */
@@ -599,6 +599,7 @@ langBtn.addEventListener('click',()=>{
   document.body.classList.toggle('lang-zh',!en);
   document.documentElement.lang=en?'en':'zh';
   langBtn.textContent=en?'中':'EN';
+  try{ localStorage.setItem('durianripe_lang',en?'en':'zh'); }catch(e){}
   // The result & projection are built with JS T() strings (not .zh/.en spans),
   // so a language switch must re-render them to stay in sync.
   updateCustomDaaBox();
@@ -665,9 +666,23 @@ function T(zh,en){return document.body.classList.contains('lang-en')?en:zh;}
    it. A grower can override the generic drop-DAA with their own observed value; we
    shift the whole window (min/dropLo/over) by the same offset so it re-centres on
    their orchard. Stored per clone in localStorage so it persists on their device. */
+/* ---- local-calendar date helpers ----
+   Never use toISOString() for calendar dates: it converts to UTC, which is the
+   PREVIOUS day for local midnight anywhere east of Greenwich (e.g. Malaysia, UTC+8). */
+function isoLocal(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+function todayISO(){ return isoLocal(new Date()); }
+// '' for empty, a clean YYYY-MM-DD for a valid date, null for anything unparseable.
+function normDate(v){
+  const str=String(v==null?'':v).trim(); if(!str) return '';
+  const m=str.match(/^(\d{4})[-\/.](\d{1,2})[-\/.](\d{1,2})$/);
+  if(!m) return null;
+  const y=+m[1], mo=+m[2], da=+m[3], d=new Date(y,mo-1,da);
+  if(d.getFullYear()!==y||d.getMonth()!==mo-1||d.getDate()!==da) return null;
+  return isoLocal(d);
+}
 function customDropKey(v){return 'durianripe_dropDAA_'+v;}
 function getCustomDrop(v){
-  try{ const s=localStorage.getItem(customDropKey(v)); return s?parseInt(s,10):null; }
+  try{ const s=localStorage.getItem(customDropKey(v)); const n=s?parseInt(s,10):NaN; return (n>=60&&n<=180)?n:null; }
   catch(e){ return null; }
 }
 function setCustomDrop(v,val){
@@ -692,6 +707,11 @@ function cloneCfgFor(variety){
 wireOpts('q-variety','variety','v');
 wireOpts('q-method','method','m');
 wireOpts('q-market','market','k');
+// option tiles are divs — make them reachable and operable by keyboard / screen reader
+document.querySelectorAll('.opt').forEach(o=>{ o.setAttribute('role','button'); o.tabIndex=0; });
+document.addEventListener('keydown',e=>{
+  if((e.key==='Enter'||e.key===' ') && e.target.classList && e.target.classList.contains('opt')){ e.preventDefault(); e.target.click(); }
+});
 
 /* ---- collapsible clone picker ---- */
 const cloneToggle=document.getElementById('cloneToggle');
@@ -737,7 +757,8 @@ function applyCustomDaa(){
   if(cleaned!==customDaa.value) customDaa.value=cleaned;
   const v=parseInt(cleaned,10);
   if(isNaN(v)){ setCustomDrop(state.variety,null); }
-  else { setCustomDrop(state.variety,v); }
+  else if(v>=60 && v<=180){ setCustomDrop(state.variety,v); }
+  else return; // mid-typing / out of range — the change handler clamps and saves on blur
   customDaaReset.style.display = getCustomDrop(state.variety)!=null ? 'inline-block' : 'none';
   if(state.variety&&flowerDate.value) syncFromDate();
 }
@@ -878,7 +899,7 @@ function syncFromDate(){
 // Auto-compute: the moment all required inputs exist, render the result live.
 // No button — every field change re-runs decide() so the answer updates instantly.
 function maybeAutoRun(){
-  const daysOk = (state.days==='date'||state.days==='slider') && state.daa;
+  const daysOk = state.days==='date' && state.daa;
   if(state.variety && state.method && state.market && daysOk){
     decide();
   }
@@ -974,7 +995,15 @@ function decide(){
   const plucked=s.method==='pluck';
   const fragile=c.fragile;
   const tooEarly = daa!=null && daa < c.min;
-  const overRipe = daa!=null && daa > c.over;
+  // Over-ripe is judged on TODAY's DAA (days since anthesis), not the target cut DAA —
+  // the target always sits inside the window, so it could never trip this guard.
+  let nowDaa=null;
+  if(flowerDate.value){
+    const f0=new Date(flowerDate.value+'T00:00:00'), n0=new Date(); n0.setHours(0,0,0,0);
+    if(!isNaN(f0)) nowDaa=Math.round((n0-f0)/86400000);
+  }
+  const overRipe = nowDaa!=null && nowDaa > c.over;
+  if(overRipe) mat=maturityPct(c,nowDaa,s.method);
   const flav=flavourRetention(c,daa,s.method);
   const shelf=shelfLifeDays(c,daa,s.method,s.market);
 
@@ -985,7 +1014,7 @@ function decide(){
   if(overRipe){
     key='early';cls='v-early';
     title=T('过熟风险 · 已超落果期','Over-ripe risk · past drop window');
-    desc=T(`此品种 ${daa} DAA 已超过 ${c.over} 天的过熟线，果肉易软烂、开裂、发酵味重。应立即采下就地即食或加工，不宜运输。`,`At ${daa} DAA this clone is past its ${c.over}-day over-ripe line — flesh turns mushy, splits, ferments. Harvest now for immediate local/processing use, not transport.`);
+    desc=T(`此品种 ${nowDaa} DAA 已超过 ${c.over} 天的过熟线，果肉易软烂、开裂、发酵味重。应立即采下就地即食或加工，不宜运输。`,`At ${nowDaa} DAA this clone is past its ${c.over}-day over-ripe line — flesh turns mushy, splits, ferments. Harvest now for immediate local/processing use, not transport.`);
   }
   // 2. too-early / immature guard
   else if(tooEarly && plucked){
@@ -1281,7 +1310,7 @@ function fdModalOpen({message, input=false, defaultValue='', okLabel=null, type=
         if(max) inp.setAttribute('max',max); else inp.removeAttribute('max');
         // never leave a date field empty — iOS renders that as a blank grey box.
         // default to the supplied value, else today.
-        inp.value = defaultValue || new Date().toISOString().slice(0,10);
+        inp.value = defaultValue || todayISO();
         inp.style.cursor='pointer';
         inp.style.minHeight='46px';
         inp.style.textAlign='left';
@@ -1369,6 +1398,7 @@ function sanitizeFarms(d){
   (d.farms||[]).forEach(f=>(f.trees||[]).forEach(t=>(t.logs||[]).forEach(l=>{
     if(!l.flowerDate) return;
     const f0=new Date(l.flowerDate+'T00:00:00');
+    if(isNaN(f0)) return; // unreadable flowering date — don't judge the others against it
     if(l.actualDropStr){
       const diff=Math.round((new Date(l.actualDropStr+'T00:00:00')-f0)/86400000);
       if(!(diff>0)){ l.badDropStr=l.actualDropStr; l.actualDropStr=null; changed=true; }
@@ -1380,12 +1410,92 @@ function sanitizeFarms(d){
   })));
   return changed;
 }
+/* Rebuild whatever was stored/imported into the exact shape the UI expects, so a
+   malformed file can never crash rendering or inject markup. strict=true (imports)
+   collects unreadable dates in `bad` instead of keeping them. */
+function normalizeFarms(d,strict){
+  const bad=[], out={farms:[]}, FB={happy:1,ok:1,unhappy:1};
+  ((d&&Array.isArray(d.farms))?d.farms:[]).forEach(f=>{
+    if(!f||typeof f!=='object') return;
+    const fid=String(f.id==null?'':f.id);
+    const farm={id:/^[A-Za-z0-9_-]+$/.test(fid)?fid:uid(), name:String(f.name==null?'':f.name), trees:[]};
+    if(f.deletedAt) farm.deletedAt=+f.deletedAt||Date.now();
+    const seen={};
+    (Array.isArray(f.trees)?f.trees:[]).forEach(t=>{
+      if(!t||typeof t!=='object') return;
+      const id=String(t.id==null?'':t.id).trim();
+      if(!id||seen['#'+id]) return; seen['#'+id]=1;
+      const tree={id:id, variety:Object.prototype.hasOwnProperty.call(CLONES,t.variety)?t.variety:'other', logs:[]};
+      if(t.deletedAt) tree.deletedAt=+t.deletedAt||Date.now();
+      (Array.isArray(t.logs)?t.logs:[]).forEach(l=>{
+        if(!l||typeof l!=='object') return;
+        const log={};
+        ['flowerDate','actualDropStr','cutDateStr','projCutISO'].forEach(k=>{
+          if(l[k]==null||l[k]==='') return;
+          const n=normDate(l[k]);
+          if(n) log[k]=n;
+          else if(k==='projCutISO') return;            // derived — recomputed below
+          else if(strict) bad.push(String(l[k]));
+          else log[k]=String(l[k]);
+        });
+        if(typeof l.projDaa==='number'&&l.projDaa>0) log.projDaa=l.projDaa;
+        if(l.projCutStr) log.projCutStr=String(l.projCutStr);
+        const pc=parseInt(l.cutPct,10); if(!isNaN(pc)) log.cutPct=Math.max(60,Math.min(100,pc));
+        if(l.outcome) log.outcome=String(l.outcome);
+        if(l.badDropStr) log.badDropStr=String(l.badDropStr);
+        if(l.badCutStr) log.badCutStr=String(l.badCutStr);
+        if(l.feedback&&typeof l.feedback==='object'){
+          const r=FB[l.feedback.rating]?l.feedback.rating:null, note=String(l.feedback.note==null?'':l.feedback.note);
+          if(r||note) log.feedback={rating:r,note:note};
+        }
+        if(Object.keys(log).length) tree.logs.push(log);
+      });
+      farm.trees.push(tree);
+    });
+    out.farms.push(farm);
+  });
+  return {data:out,bad:bad};
+}
+// (Re)derive the projected drop date of every still-open record from its flowering date.
+function refreshProjections(farms){
+  (farms||[]).forEach(f=>(f.trees||[]).forEach(t=>(t.logs||[]).forEach(l=>{
+    if(!l.flowerDate || l.actualDropStr || l.cutDateStr) return;
+    const daa=(typeof l.projDaa==='number'&&l.projDaa>0)?l.projDaa:cfgForTree(t).dropHi;
+    const cut=new Date(l.flowerDate+'T00:00:00'); cut.setDate(cut.getDate()+daa);
+    if(isNaN(cut)) return;
+    l.projDaa=daa; l.projCutISO=isoLocal(cut); l.projCutStr=fmtDate(cut);
+  })));
+}
+// projected date in the CURRENT language (the stored string is frozen at log time)
+function projStr(l){
+  if(l.projCutISO){ const d=new Date(l.projCutISO+'T00:00:00'); if(!isNaN(d)) return fmtDate(d); }
+  return l.projCutStr||'';
+}
+// An import replaces the active records, but must not silently empty the recycle bin.
+function keepRecycleBin(oldD,newD){
+  (oldD.farms||[]).forEach(f=>{
+    if(f.deletedAt){ if(!newD.farms.some(x=>x.id===f.id)) newD.farms.push(f); return; }
+    const gone=(f.trees||[]).filter(t=>t.deletedAt); if(!gone.length) return;
+    const match=newD.farms.find(x=>!x.deletedAt&&x.name===f.name);
+    const rest=[];
+    gone.forEach(t=>{ if(match&&!match.trees.some(x=>x.id===t.id)) match.trees.push(t); else if(!match) rest.push(t); });
+    if(rest.length) newD.farms.push({id:uid(),name:f.name,deletedAt:Date.now(),trees:rest.map(t=>{ const c=Object.assign({},t); delete c.deletedAt; return c; })});
+  });
+}
+// "farmId|treeId" → [farmId, treeId]; farm ids never contain '|', tree ids may.
+function splitKey(k){ const i=k.indexOf('|'); return i<0?[k,'']:[k.slice(0,i),k.slice(i+1)]; }
 let farmsData=loadFarms();
-if(sanitizeFarms(farmsData)) saveFarms(farmsData);
+(function(){
+  const before=JSON.stringify(farmsData);
+  farmsData=normalizeFarms(farmsData,false).data;
+  sanitizeFarms(farmsData); refreshProjections(farmsData.farms);
+  if(JSON.stringify(farmsData)!==before) saveFarms(farmsData);
+})();
 
 // Clone label lookup, read from the tool's clone options so it stays in sync.
 function cloneLabel(v){
-  const el=document.querySelector(`#q-variety .opt[data-v="${v}"] .lbl`);
+  const opt=[...document.querySelectorAll('#q-variety .opt')].find(o=>o.dataset.v===v);
+  const el=opt&&opt.querySelector('.lbl');
   if(!el) return v;
   const zh=el.querySelector('.zh'), en=el.querySelector('.en');
   return document.body.classList.contains('lang-en') ? (en?en.textContent:v) : (zh?zh.textContent:v);
@@ -1406,10 +1516,10 @@ function cloneTilePicker(fid){
   let tiles='';
   document.querySelectorAll('#q-variety .opt').forEach(function(o){
     const v=o.dataset.v, wrap=o.querySelector('.lbl').parentElement;
-    tiles+='<div class="opt'+(v===sel?' sel':'')+'" data-clonepickopt="'+fid+'|'+v+'">'+wrap.outerHTML+'</div>';
+    tiles+='<div class="opt'+(v===sel?' sel':'')+'" role="button" tabindex="0" data-clonepickopt="'+fid+'|'+v+'">'+wrap.outerHTML+'</div>';
   });
   return '<button type="button" data-clonepick="'+fid+'" style="width:100%;margin-top:6px;border:1.5px solid var(--line);background:#fff;border-radius:9px;padding:9px 12px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:8px;text-align:left">'
-    +'<span style="font-weight:700;font-size:12.5px;color:var(--shell)">'+cloneLabel(sel)+'</span>'
+    +'<span style="font-weight:700;font-size:12.5px;color:var(--shell)">'+escapeHtml(cloneLabel(sel))+'</span>'
     +'<span style="flex:0 0 auto;color:var(--thorn);font-size:12px;font-weight:800">'+(open?'▲':'▼')+'</span></button>'
     +'<div class="opts tiles clone-tiles" style="display:'+(open?'grid':'none')+';margin-top:6px">'+tiles+'</div>';
 }
@@ -1423,6 +1533,15 @@ function treeLearnedDaa(tree){
   }).filter(n=>n>40&&n<200);
   if(!daas.length) return null;
   return Math.round(daas.reduce((a,b)=>a+b,0)/daas.length);
+}
+
+// Window for one tree: re-centred on its own measured drop DAA when it has one,
+// otherwise the clone's (generic or grower-customised) window.
+function cfgForTree(tree){
+  const learned=treeLearnedDaa(tree);
+  if(learned==null) return cloneCfgFor(tree.variety);
+  const base=CLONES[tree.variety]||CLONES.other, sh=learned-base.dropHi;
+  return {min:base.min+sh, dropLo:base.dropLo+sh, dropHi:learned, over:base.over+sh, fragile:base.fragile};
 }
 
 // ---- render the whole farms UI ----
@@ -1495,16 +1614,18 @@ function renderFarms(){
       const lastLog=(tree.logs||[])[tree.logs.length-1];
       html+=`<div style="border-top:1px solid var(--line);margin-top:10px;padding-top:10px">
         <div style="display:flex;align-items:baseline;justify-content:space-between;gap:8px">
-          <div style="font-weight:800;font-size:14px;color:var(--ink)">${escapeHtml(tree.id)} <span style="font-weight:600;font-size:11.5px;color:var(--ink-soft)">${cloneLabel(tree.variety)}</span></div>
-          <button data-menutree="${farm.id}|${tree.id}" style="flex:none;border:none;background:none;color:var(--ink-soft);font-size:18px;line-height:1;cursor:pointer;padding:0 6px" aria-label="${T('更多','More')}">⋯</button>
+          <div style="font-weight:800;font-size:14px;color:var(--ink)">${escapeHtml(tree.id)} <span style="font-weight:600;font-size:11.5px;color:var(--ink-soft)">${escapeHtml(cloneLabel(tree.variety))}</span></div>
+          <button data-menutree="${escapeHtml(farm.id+'|'+tree.id)}" style="flex:none;border:none;background:none;color:var(--ink-soft);font-size:18px;line-height:1;cursor:pointer;padding:0 6px" aria-label="${T('更多','More')}">⋯</button>
         </div>`;
       if(learned!=null){
         html+=`<div style="font-size:11.5px;color:var(--good);font-weight:700;margin-top:3px">${T('本树实测落果 DAA：约 '+learned+' 天','Measured drop DAA for this tree: ~'+learned+'d')}</div>`;
       }
       if(lastLog){
-        const proj = lastLog.projCutStr? T('预计割果 '+lastLog.projCutStr,'cut ~'+lastLog.projCutStr):'';
-        const drop = lastLog.actualDropStr? T(' · 实际落果 '+lastLog.actualDropStr,' · dropped '+lastLog.actualDropStr):'';
-        html+=`<div style="font-size:11.5px;color:var(--ink-soft);margin-top:3px">${T('开花 '+lastLog.flowerDate,'flowered '+lastLog.flowerDate)}${proj?' · '+proj:''}${drop}</div>`;
+        const L={fl:escapeHtml(lastLog.flowerDate||'—'), dr:escapeHtml(lastLog.actualDropStr||''), cu:escapeHtml(lastLog.cutDateStr||''),
+                 pc:(lastLog.cutPct!=null?escapeHtml(lastLog.cutPct)+'%':'—'), ps:escapeHtml(projStr(lastLog))};
+        const proj = L.ps? T('预计落果 '+L.ps,'drop ~'+L.ps):'';
+        const drop = L.dr? T(' · 实际落果 '+L.dr,' · dropped '+L.dr):'';
+        html+=`<div style="font-size:11.5px;color:var(--ink-soft);margin-top:3px">${T('开花 '+L.fl,'flowered '+L.fl)}${proj?' · '+proj:''}${drop}</div>`;
         // live countdown if still waiting (no drop, no cut yet)
         if(lastLog.projCutISO && !lastLog.actualDropStr && !lastLog.cutDateStr){
           const cut=new Date(lastLog.projCutISO+'T00:00:00'); const now=new Date();now.setHours(0,0,0,0);
@@ -1516,7 +1637,7 @@ function renderFarms(){
         // cut/outcome record, if logged
         if(lastLog.cutDateStr){
           const oc = lastLog.outcome? ' · '+escapeHtml(lastLog.outcome):'';
-          html+=`<div style="font-size:11.5px;color:var(--warn);font-weight:700;margin-top:3px">${T('已割 '+lastLog.cutDateStr+'（'+lastLog.cutPct+'%）','cut '+lastLog.cutDateStr+' ('+lastLog.cutPct+'%)')}${oc}</div>`;
+          html+=`<div style="font-size:11.5px;color:var(--warn);font-weight:700;margin-top:3px">${T('已割 '+L.cu+'（'+L.pc+'）','cut '+L.cu+' ('+L.pc+')')}${oc}</div>`;
         }
         if(lastLog.feedback && (lastLog.feedback.rating||lastLog.feedback.note)){
           const fm={happy:{t:T('顾客满意','Customer happy'),c:'#3f7d55',e:'😊'},ok:{t:T('反应一般','Mixed reaction'),c:'#c98a2b',e:'😐'},unhappy:{t:T('顾客不满','Customer unhappy'),c:'#b4482f',e:'🙁'}};
@@ -1525,9 +1646,9 @@ function renderFarms(){
           html+=`<div style="font-size:11.5px;color:${fmm.c};font-weight:700;margin-top:3px">${fmm.e} ${fmm.t}${fnote}</div>`;
         }
         if(lastLog.badDropStr || lastLog.badCutStr){
-          const bad=lastLog.badDropStr||lastLog.badCutStr;
+          const bad=escapeHtml(lastLog.badDropStr||lastLog.badCutStr);
           const what=lastLog.badDropStr?T('落果日','drop date'):T('割果日','cut date');
-          html+=`<div style="font-size:11.5px;color:var(--danger);font-weight:700;margin-top:4px;line-height:1.5;background:#faeae6;border:1px solid var(--danger);border-radius:8px;padding:6px 9px">⚠ ${T('已清除无效'+what+'（原填 '+bad+'，未晚于开花日 '+lastLog.flowerDate+'）——请用下方按钮重新填写正确日期。','Cleared an invalid '+what+' (was '+bad+', not after flowering '+lastLog.flowerDate+') — please re-enter a correct date with the button below.')}</div>`;
+          html+=`<div style="font-size:11.5px;color:var(--danger);font-weight:700;margin-top:4px;line-height:1.5;background:#faeae6;border:1px solid var(--danger);border-radius:8px;padding:6px 9px">⚠ ${T('已清除无效'+what+'（原填 '+bad+'，未晚于开花日 '+L.fl+'）——请用下方按钮重新填写正确日期。','Cleared an invalid '+what+' (was '+bad+', not after flowering '+L.fl+') — please re-enter a correct date with the button below.')}</div>`;
         }
       }
       // per-tree actions — square tiles; icon over label. Order: flowering, drop,
@@ -1535,17 +1656,19 @@ function renderFarms(){
       const hasFlower=!!(lastLog&&lastLog.flowerDate);
       const hasDrop=!!(lastLog&&lastLog.actualDropStr);
       const hasCut=!!(lastLog&&lastLog.cutDateStr);
+      const seasonDone=hasDrop||hasCut;   // next flowering tap starts a NEW season
+      const editFlower=hasFlower&&!seasonDone;
       const calcOpen=openMenus.has('calc:'+farm.id+'|'+tree.id);
       const tiles=[];
       // flowering: always present; ✎ if already recorded
-      tiles.push(`<button data-logflower="${farm.id}|${tree.id}" class="mtile" style="border-color:var(--line);background:${hasFlower?'#f3efe6':'#fff'};color:var(--shell)"><span class="ic">${hasFlower?'✎':'✚'}</span><span>${hasFlower?T('开花','Flowering'):T('记录开花','Log flowering')}</span></button>`);
+      tiles.push(`<button data-logflower="${escapeHtml(farm.id+'|'+tree.id)}" class="mtile" style="border-color:var(--line);background:${editFlower?'#f3efe6':'#fff'};color:var(--shell)"><span class="ic">${editFlower?'✎':'✚'}</span><span>${seasonDone?T('新一季开花','New season'):editFlower?T('开花','Flowering'):T('记录开花','Log flowering')}</span></button>`);
       // drop: show once flowering exists and not yet cut; ✎ if recorded
       if(hasFlower && !hasCut){
-        tiles.push(`<button data-logdrop="${farm.id}|${tree.id}" class="mtile" style="border-color:var(--good);background:${hasDrop?'#e3ecdf':'#eef5ec'};color:var(--good)"><span class="ic">${hasDrop?'✎':'✚'}</span><span>${hasDrop?T('落果日','Drop date'):T('回填落果日','Log actual drop')}</span></button>`);
+        tiles.push(`<button data-logdrop="${escapeHtml(farm.id+'|'+tree.id)}" class="mtile" style="border-color:var(--good);background:${hasDrop?'#e3ecdf':'#eef5ec'};color:var(--good)"><span class="ic">${hasDrop?'✎':'✚'}</span><span>${hasDrop?T('落果日','Drop date'):T('回填落果日','Log actual drop')}</span></button>`);
       }
       // cut: show once flowering exists and no natural drop; ✎ if recorded
       if(hasFlower && !hasDrop){
-        tiles.push(`<button data-logcut="${farm.id}|${tree.id}" class="mtile" style="border-color:var(--warn);background:${hasCut?'#f6e8d2':'#fdf3e4'};color:var(--warn)"><span class="ic">${hasCut?'✎':'✚'}</span><span>${hasCut?T('割果日','Cut date'):T('记录割果日','Log cut date')}</span></button>`);
+        tiles.push(`<button data-logcut="${escapeHtml(farm.id+'|'+tree.id)}" class="mtile" style="border-color:var(--warn);background:${hasCut?'#f6e8d2':'#fdf3e4'};color:var(--warn)"><span class="ic">${hasCut?'✎':'✚'}</span><span>${hasCut?T('割果日','Cut date'):T('记录割果日','Log cut date')}</span></button>`);
       }
       // feedback: once flowering exists
       if(hasFlower){
@@ -1553,10 +1676,10 @@ function renderFarms(){
         const emap={happy:'😊',ok:'😐',unhappy:'🙁'};
         const hasFb=!!(fbv&&(fbv.rating||fbv.note));
         const fbIcon = hasFb ? (fbv.rating?emap[fbv.rating]:'✎') : '✚';
-        tiles.push(`<button data-feedback="${farm.id}|${tree.id}" class="mtile" style="border-color:var(--shell);background:${hasFb?'#eef1f7':'#fff'};color:var(--shell)"><span class="ic">${fbIcon}</span><span>${T('顾客反馈','Feedback')}</span></button>`);
+        tiles.push(`<button data-feedback="${escapeHtml(farm.id+'|'+tree.id)}" class="mtile" style="border-color:var(--shell);background:${hasFb?'#eef1f7':'#fff'};color:var(--shell)"><span class="ic">${fbIcon}</span><span>${T('顾客反馈','Feedback')}</span></button>`);
       }
       // harvest calculator — ALWAYS the last tile
-      tiles.push(`<button data-runtree="${farm.id}|${tree.id}" class="mtile" style="border-color:var(--flesh);background:${calcOpen?'#f6e8d2':'#fffaf0'};color:var(--warn)"><span class="ic">${calcOpen?'▲':'🧮'}</span><span>${calcOpen?T('收起决策','Close calc'):T('采收决策算','Harvest calc')}</span></button>`);
+      tiles.push(`<button data-runtree="${escapeHtml(farm.id+'|'+tree.id)}" class="mtile" style="border-color:var(--flesh);background:${calcOpen?'#f6e8d2':'#fffaf0'};color:var(--warn)"><span class="ic">${calcOpen?'▲':'🧮'}</span><span>${calcOpen?T('收起决策','Close calc'):T('采收决策算','Harvest calc')}</span></button>`);
       html+=`<div class="tacts">${tiles.join('')}</div>`;
       // ---- inline harvest calc (plucking only) — expands here, no page jump ----
       const calcKey=farm.id+'|'+tree.id;
@@ -1567,8 +1690,14 @@ function renderFarms(){
       if(openMenus.has('tree:'+farm.id+'|'+tree.id)){
         html+=`<div style="margin-top:9px;padding-top:9px;border-top:1px dashed var(--line);display:flex;align-items:center;gap:10px">
           <span style="font-size:11.5px;color:var(--ink-soft);flex:1">${T('把这棵树移到回收站？可还原。','Move this tree to the recycle bin? Restorable.')}</span>
-          <button data-deltree="${farm.id}|${tree.id}" style="flex:none;border:1.5px solid var(--danger);background:#fff;color:var(--danger);border-radius:8px;padding:6px 12px;font-size:11.5px;font-weight:700;cursor:pointer">${T('删除','Delete')}</button>
+          <button data-deltree="${escapeHtml(farm.id+'|'+tree.id)}" style="flex:none;border:1.5px solid var(--danger);background:#fff;color:var(--danger);border-radius:8px;padding:6px 12px;font-size:11.5px;font-weight:700;cursor:pointer">${T('删除','Delete')}</button>
         </div>`;
+        if(lastLog){
+          html+=`<div style="margin-top:7px;display:flex;align-items:center;gap:10px">
+          <span style="font-size:11.5px;color:var(--ink-soft);flex:1">${T('记错了？删除最近一条季次记录（无法还原）。','Logged by mistake? Delete the latest season record (cannot be undone).')}</span>
+          <button data-dellog="${escapeHtml(farm.id+'|'+tree.id)}" style="flex:none;border:1.5px solid var(--danger);background:#fff;color:var(--danger);border-radius:8px;padding:6px 12px;font-size:11.5px;font-weight:700;cursor:pointer">${T('删除记录','Delete record')}</button>
+        </div>`;
+        }
       }
       html+=`</div>`; // close tree row
     });
@@ -1610,10 +1739,10 @@ function renderFarms(){
     });
     deletedTrees.forEach(({farm,tree})=>{
       bin+=`<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 0;border-top:1px solid var(--line)">
-        <div style="min-width:0;flex:1"><span style="font-weight:700;font-size:13px;color:var(--ink)">${escapeHtml(tree.id)}</span> <span style="font-size:11px;color:var(--ink-soft)">${cloneLabel(tree.variety)} · ${escapeHtml(farm.name)}</span></div>
+        <div style="min-width:0;flex:1"><span style="font-weight:700;font-size:13px;color:var(--ink)">${escapeHtml(tree.id)}</span> <span style="font-size:11px;color:var(--ink-soft)">${escapeHtml(cloneLabel(tree.variety))} · ${escapeHtml(farm.name)}</span></div>
         <div style="flex:none;display:flex;gap:6px">
-          <button data-restoretree="${farm.id}|${tree.id}" style="border:1.5px solid var(--good);background:#eef5ec;color:var(--good);border-radius:8px;padding:5px 10px;font-size:11.5px;font-weight:700;cursor:pointer">${T('还原','Restore')}</button>
-          <button data-purgetree="${farm.id}|${tree.id}" style="border:1.5px solid var(--danger);background:#fff;color:var(--danger);border-radius:8px;padding:5px 10px;font-size:11.5px;font-weight:700;cursor:pointer">${T('永久删除','Purge')}</button>
+          <button data-restoretree="${escapeHtml(farm.id+'|'+tree.id)}" style="border:1.5px solid var(--good);background:#eef5ec;color:var(--good);border-radius:8px;padding:5px 10px;font-size:11.5px;font-weight:700;cursor:pointer">${T('还原','Restore')}</button>
+          <button data-purgetree="${escapeHtml(farm.id+'|'+tree.id)}" style="border:1.5px solid var(--danger);background:#fff;color:var(--danger);border-radius:8px;padding:5px 10px;font-size:11.5px;font-weight:700;cursor:pointer">${T('永久删除','Purge')}</button>
         </div>
       </div>`;
     });
@@ -1640,7 +1769,7 @@ function renderInlineCalc(farm, tree, calcKey){
     return wrap(`<div style="font-size:12px;color:var(--ink-soft);line-height:1.5">${T('先「记录开花」，才能算出这棵树的采收决策。','Log the flowering date first, then this tree can compute its harvest decision.')}</div>`);
   }
 
-  const c=cloneCfgFor(tree.variety);
+  const c=cfgForTree(tree);
   const target=cs.target||95;
   const targetDaa=daaForTarget(c,target);
   const d0=new Date(flowerDate+'T00:00:00');
@@ -1651,11 +1780,11 @@ function renderInlineCalc(farm, tree, calcKey){
   const flav=flavourRetention(c,targetDaa,'pluck');
 
   // market + ripeness pickers — square tiles (match the action tiles above)
-  const mkBtn=(k,zh,en)=>`<button data-calcmarket="${calcKey}|${k}" class="ctile${cs.market===k?' sel':''}">${T(zh,en)}</button>`;
-  const rpBtn=(v)=>`<button data-calctarget="${calcKey}|${v}" class="ctile big${target===v?' sel':''}">${v}%</button>`;
+  const mkBtn=(k,zh,en)=>`<button data-calcmarket="${escapeHtml(calcKey)}|${k}" class="ctile${cs.market===k?' sel':''}">${T(zh,en)}</button>`;
+  const rpBtn=(v)=>`<button data-calctarget="${escapeHtml(calcKey)}|${v}" class="ctile big${target===v?' sel':''}">${v}%</button>`;
 
-  let out=`<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:2px"><div style="font-size:12px;font-weight:800;color:var(--warn)">🔪 ${T('采收决策（人工采摘）','Harvest decision (plucked)')}</div><button data-runtree="${calcKey}" style="flex:none;border:none;background:none;color:var(--ink-soft);font-size:15px;line-height:1;cursor:pointer;padding:0 2px" aria-label="${T('收起','Close')}">✕</button></div>
-    <div style="font-size:11px;color:var(--ink-soft);margin-bottom:8px">${T('已带入：'+cloneLabel(tree.variety)+' · 开花 '+flowerDate,'Carried in: '+cloneLabel(tree.variety)+' · flowered '+flowerDate)}</div>
+  let out=`<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:2px"><div style="font-size:12px;font-weight:800;color:var(--warn)">🔪 ${T('采收决策（人工采摘）','Harvest decision (plucked)')}</div><button data-runtree="${escapeHtml(calcKey)}" style="flex:none;border:none;background:none;color:var(--ink-soft);font-size:15px;line-height:1;cursor:pointer;padding:0 2px" aria-label="${T('收起','Close')}">✕</button></div>
+    <div style="font-size:11px;color:var(--ink-soft);margin-bottom:8px">${T('已带入：'+escapeHtml(cloneLabel(tree.variety))+' · 开花 '+escapeHtml(flowerDate),'Carried in: '+escapeHtml(cloneLabel(tree.variety))+' · flowered '+escapeHtml(flowerDate))}</div>
     <div style="font-size:11px;font-weight:700;color:var(--ink-soft);margin-bottom:4px">${T('① 割果成熟度','① Cut ripeness')}</div>
     <div class="ctile-row">${rpBtn(85)}${rpBtn(90)}${rpBtn(95)}</div>
     <div style="font-size:11px;font-weight:700;color:${cs.market?'var(--ink-soft)':'var(--warn)'};margin-bottom:4px">${cs.market?T('② 目标市场 / 运输','② Target market / transport'):T('② 目标市场 / 运输 ← 还没选','② Target market / transport ← pick one')}</div>
@@ -1780,12 +1909,22 @@ function wireFarmEvents(){
     saveFarms(farmsData); renderFarms();
   });
   app.querySelectorAll('[data-deltree]').forEach(b=>b.onclick=async()=>{
-    const [fid,tid]=b.dataset.deltree.split('|');
+    const [fid,tid]=splitKey(b.dataset.deltree);
     if(!await fdConfirm(T('把这棵树移到回收站？可随时还原。','Move this tree to the recycle bin? You can restore it anytime.'))) return;
     const farm=farmsData.farms.find(f=>f.id===fid);
     const tree=farm&&farm.trees.find(t=>t.id===tid);
     if(tree){ tree.deletedAt=Date.now(); }
     saveFarms(farmsData); renderFarms();
+  });
+  app.querySelectorAll('[data-dellog]').forEach(b=>b.onclick=async()=>{
+    const [fid,tid]=splitKey(b.dataset.dellog);
+    const farm=farmsData.farms.find(f=>f.id===fid);
+    const tree=farm&&farm.trees.find(t=>t.id===tid);
+    if(!tree||!(tree.logs||[]).length) return;
+    const l=tree.logs[tree.logs.length-1];
+    if(!await fdConfirm(T('永久删除「'+tid+'」最近一条记录（开花 '+(l.flowerDate||'—')+'）？此操作无法还原。','Permanently delete the latest record of "'+tid+'" (flowered '+(l.flowerDate||'—')+')? This cannot be undone.'))) return;
+    tree.logs.pop();
+    saveFarms(farmsData); renderFarms(); renderInsights();
   });
   // ---- restore ----
   app.querySelectorAll('[data-restorefarm]').forEach(b=>b.onclick=()=>{
@@ -1794,7 +1933,7 @@ function wireFarmEvents(){
     saveFarms(farmsData); renderFarms();
   });
   app.querySelectorAll('[data-restoretree]').forEach(b=>b.onclick=()=>{
-    const [fid,tid]=b.dataset.restoretree.split('|');
+    const [fid,tid]=splitKey(b.dataset.restoretree);
     const farm=farmsData.farms.find(f=>f.id===fid);
     const tree=farm&&farm.trees.find(t=>t.id===tid);
     if(tree){ delete tree.deletedAt; }
@@ -1809,15 +1948,15 @@ function wireFarmEvents(){
     saveFarms(farmsData); renderFarms();
   });
   app.querySelectorAll('[data-purgetree]').forEach(b=>b.onclick=async()=>{
-    const [fid,tid]=b.dataset.purgetree.split('|');
+    const [fid,tid]=splitKey(b.dataset.purgetree);
     if(!await fdConfirm(T('永久删除这棵树及其所有记录？此操作无法还原。','Permanently delete this tree and all its records? This cannot be undone.'))) return;
     const farm=farmsData.farms.find(f=>f.id===fid);
     if(farm){ farm.trees=farm.trees.filter(t=>t.id!==tid); }
     saveFarms(farmsData); renderFarms();
   });
   app.querySelectorAll('[data-logflower]').forEach(b=>b.onclick=async()=>{
-    const [fid,tid]=b.dataset.logflower.split('|');
-    const today=new Date().toISOString().slice(0,10);
+    const [fid,tid]=splitKey(b.dataset.logflower);
+    const today=todayISO();
     const farm=farmsData.farms.find(f=>f.id===fid);
     const tree=farm.trees.find(t=>t.id===tid);
     // is there an open (un-dropped, un-cut) log already? then we UPDATE it, not add a new one
@@ -1825,16 +1964,16 @@ function wireFarmEvents(){
     const existing=open?open.flowerDate:'';
     const msg=existing
       ? T('已记录开花日：'+existing+'。修改后将重算预计割果日。','Flowering already recorded: '+existing+'. Changing it will recompute the projected cut.')
-      : T('选择开花（授粉）日期：','Pick the flowering (anthesis) date:');
+      : (tree.logs||[]).length
+        ? T('上一季已完成，这会开始新的一季。选择新一季的开花（授粉）日期：','The last season is complete, so this starts a NEW season. Pick its flowering (anthesis) date:')
+        : T('选择开花（授粉）日期：','Pick the flowering (anthesis) date:');
     const dateStr=await fdDatePrompt(msg, existing||today, '', today);
     if(!dateStr) return;
     if(!/^\d{4}-\d{2}-\d{2}$/.test(dateStr)){ await fdAlert(T('日期格式：YYYY-MM-DD','Format: YYYY-MM-DD')); return; }
     // project cut using this tree's clone + learned/generic window at drop
-    const cfg=CLONES[tree.variety]||CLONES.other;
-    const learned=treeLearnedDaa(tree);
-    const dropDaa=learned!=null?learned:cfg.dropHi;
+    const dropDaa=cfgForTree(tree).dropHi;
     const f=new Date(dateStr+'T00:00:00'); const cut=new Date(f); cut.setDate(cut.getDate()+dropDaa);
-    const cutISO=cut.toISOString().slice(0,10);
+    const cutISO=isoLocal(cut);
     if(open){
       // update the existing open record — no duplicate
       open.flowerDate=dateStr; open.projDaa=dropDaa; open.projCutStr=fmtDate(cut); open.projCutISO=cutISO;
@@ -1844,8 +1983,8 @@ function wireFarmEvents(){
     saveFarms(farmsData); renderFarms();
   });
   app.querySelectorAll('[data-logdrop]').forEach(b=>b.onclick=async()=>{
-    const [fid,tid]=b.dataset.logdrop.split('|');
-    const today=new Date().toISOString().slice(0,10);
+    const [fid,tid]=splitKey(b.dataset.logdrop);
+    const today=todayISO();
     const farm=farmsData.farms.find(f=>f.id===fid);
     const tree=farm.trees.find(t=>t.id===tid);
     // the log we'd write to: most recent one without a drop yet, else the latest (to edit its drop)
@@ -1869,8 +2008,8 @@ function wireFarmEvents(){
     saveFarms(farmsData); renderFarms();
   });
   app.querySelectorAll('[data-logcut]').forEach(b=>b.onclick=async()=>{
-    const [fid,tid]=b.dataset.logcut.split('|');
-    const today=new Date().toISOString().slice(0,10);
+    const [fid,tid]=splitKey(b.dataset.logcut);
+    const today=todayISO();
     const farm=farmsData.farms.find(f=>f.id===fid);
     const tree=farm.trees.find(t=>t.id===tid);
     let target=(tree.logs||[]).filter(l=>!l.actualDropStr&&!l.cutDateStr).pop();
@@ -1902,7 +2041,7 @@ function wireFarmEvents(){
     renderFarms();
   });
   app.querySelectorAll('[data-feedback]').forEach(b=>b.onclick=async()=>{
-    const [fid,tid]=b.dataset.feedback.split('|');
+    const [fid,tid]=splitKey(b.dataset.feedback);
     const farm=farmsData.farms.find(f=>f.id===fid);
     const tree=farm&&farm.trees.find(t=>t.id===tid);
     if(!tree) return;
@@ -1938,38 +2077,6 @@ function switchTab(name){
   const t=document.querySelector(`.tab[data-p="${name}"]`);
   if(t) t.click();
 }
-// pre-select a clone in the tool
-function preselectClone(v){
-  const opt=document.querySelector(`#q-variety .opt[data-v="${v}"]`);
-  if(opt){ opt.click(); }
-}
-// carry a tree's known data into the calculator so nothing is retyped
-function prefillFromTree(variety, flowerDateVal, learnedDaa){
-  // 1) select the clone (this sets state.variety and reveals the DAA box)
-  preselectClone(variety);
-  // 2) apply the tree's own measured DAA as the custom drop window, if we have one
-  if(learnedDaa!=null && variety){
-    setCustomDrop(variety, learnedDaa);
-    if(typeof updateCustomDaaBox==='function') updateCustomDaaBox();
-  }
-  // 3) fill the flowering date and trigger the forward projection + auto-compute
-  if(flowerDateVal){
-    const fd=document.getElementById('flowerDate');
-    if(fd){
-      fd.value=flowerDateVal;
-      fd.dispatchEvent(new Event('change',{bubbles:true}));
-    }
-  }
-  // 4) make sure the result recomputes with everything applied
-  if(typeof syncFromDate==='function') syncFromDate();
-  if(typeof maybeAutoRun==='function') maybeAutoRun();
-  // 5) bring the result into view
-  setTimeout(()=>{
-    const r=document.getElementById('result');
-    if(r && r.textContent.trim()) r.scrollIntoView({behavior:'smooth',block:'center'});
-  },120);
-}
-
 // export / import backups — one clean, human-readable sheet (opens in Excel; UTF-8 BOM
 // keeps Chinese intact). One row per tree-season with plain headers; internal/derived
 // fields (IDs, projections, flags) are recomputed on import, not shown. Import also
@@ -1999,8 +2106,8 @@ function prefillFromTree(variety, flowerDateVal, learnedDaa){
 
   function fbToLabel(rating){ return {happy:T('满意','Happy'),ok:T('一般','So-so'),unhappy:T('不满意','Unhappy')}[rating]||''; }
   function fbCode(s){ s=(s||'').trim().toLowerCase(); if(!s) return null;
-    if(s.indexOf('happy')>=0||s.indexOf('满意')>=0) return 'happy';
     if(s.indexOf('unhappy')>=0||s.indexOf('不满')>=0) return 'unhappy';
+    if(s.indexOf('happy')>=0||s.indexOf('满意')>=0) return 'happy';
     if(s.indexOf('so-so')>=0||s.indexOf('so so')>=0||s.indexOf('一般')>=0||s==='ok') return 'ok';
     return null;
   }
@@ -2029,20 +2136,6 @@ function prefillFromTree(variety, flowerDateVal, learnedDaa){
       });
     });
     return rows.join('\r\n');
-  }
-
-  function recomputeProjections(farms){
-    farms.forEach(f=>(f.trees||[]).forEach(t=>{
-      (t.logs||[]).forEach(l=>{
-        if(l.flowerDate && !l.actualDropStr && !l.cutDateStr){
-          const cfg=CLONES[t.variety]||CLONES.other;
-          const learned=(typeof treeLearnedDaa==='function')?treeLearnedDaa(t):null;
-          const dropDaa=learned!=null?learned:cfg.dropHi;
-          const f0=new Date(l.flowerDate+'T00:00:00'); const cut=new Date(f0); cut.setDate(cut.getDate()+dropDaa);
-          if(!isNaN(cut)){ l.projDaa=dropDaa; l.projCutISO=cut.toISOString().slice(0,10); l.projCutStr=fmtDate(cut); }
-        }
-      });
-    }));
   }
 
   function readableToFarms(rows){
@@ -2087,7 +2180,6 @@ function prefillFromTree(variety, flowerDateVal, learnedDaa){
       }
     }
     const farms=order.map(k=>{ const f=fmap[k]; delete f._t; return f; });
-    recomputeProjections(farms);
     return {farms:farms};
   }
 
@@ -2146,7 +2238,7 @@ function prefillFromTree(variety, flowerDateVal, learnedDaa){
     const csv='\uFEFF'+readableToCsv(farmsData);
     const blob=new Blob([csv],{type:'text/csv;charset=utf-8'});
     const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
-    a.download='durianripe-farms-'+new Date().toISOString().slice(0,10)+'.csv';
+    a.download='durianripe-farms-'+todayISO()+'.csv';
     a.click(); URL.revokeObjectURL(a.href);
   };
   if(imp) imp.onclick=()=>impFile&&impFile.click();
@@ -2158,8 +2250,12 @@ function prefillFromTree(variety, flowerDateVal, learnedDaa){
         const raw=String(r.result||'').replace(/^\uFEFF/,'');
         let d = raw.trimStart().charAt(0)==='{' ? JSON.parse(raw) : csvToFarms(parseCsv(raw));
         if(d&&Array.isArray(d.farms)){
-          if(await fdConfirm(T('导入将覆盖当前记录，确定？','Import will replace current records. Continue?'))){
-            farmsData=d; sanitizeFarms(farmsData); saveFarms(farmsData); renderFarms(); if(typeof renderInsights==='function') renderInsights();
+          const n=normalizeFarms(d,true);
+          if(n.bad.length){
+            await fdAlert(T('导入已取消，没有改动任何记录：有 '+n.bad.length+' 个日期不是 YYYY-MM-DD 格式（例如「'+n.bad[0]+'」）。若用 Excel 编辑过，请先把日期栏设为「文本」或 yyyy-mm-dd 格式再存档。','Import cancelled, nothing was changed: '+n.bad.length+' date(s) are not in YYYY-MM-DD format (e.g. "'+n.bad[0]+'"). If the file was edited in Excel, set the date columns to Text or yyyy-mm-dd before saving.'));
+          } else if(await fdConfirm(T('导入将覆盖当前记录（回收站内容会保留），确定？','Import will replace current records (the recycle bin is kept). Continue?'))){
+            keepRecycleBin(farmsData,n.data);
+            farmsData=n.data; sanitizeFarms(farmsData); refreshProjections(farmsData.farms); saveFarms(farmsData); renderFarms(); if(typeof renderInsights==='function') renderInsights();
           }
         } else await fdAlert(T('文件格式不对（需为本工具导出的 CSV 或 JSON）','Invalid file (use a CSV or JSON exported by this tool)'));
       }catch(err){ await fdAlert(T('无法读取文件','Could not read file')); }
@@ -2211,7 +2307,7 @@ function renderInsights(){
       }
       if(l.actualDropStr || l.cutDateStr) completedSeasons++;
       if(l.cutDateStr){
-        cuts.push({clone:tree.variety, cutStr:l.cutDateStr, iso:l.cutISO||'', pct:l.cutPct, outcome:l.outcome||'', tree:tree.id, farm:farm.name});
+        cuts.push({clone:tree.variety, cutStr:l.cutDateStr, iso:l.cutDateStr||'', pct:l.cutPct, outcome:l.outcome||'', tree:tree.id, farm:farm.name});
       }
       if(l.feedback && (l.feedback.rating||l.feedback.note)){
         fb.total++;
@@ -2329,10 +2425,10 @@ function renderInsights(){
   if(!fb.total){
     html+='<div style="font-size:12.5px;color:var(--ink-soft);line-height:1.6">'+T('还没有反馈记录。在「我的果园」为已采收/落果的树点「顾客反馈」，记下满意 / 一般 / 不满意（可加备注）——把「割果时机」对上「顾客反应」。','No feedback yet. Tap "Customer feedback" on a harvested/dropped tree in "My Farms" to note happy / so-so / unhappy (with an optional comment) — this links cut timing to how customers actually responded.')+'</div>';
   } else {
-    const rate=Math.round(fb.happy/fb.total*100);
+    const rated=fb.happy+fb.ok+fb.unhappy; const rate=rated?Math.round(fb.happy/rated*100):0; // note-only entries carry no rating
     const tile=function(v,zh,en,col){return '<div style="flex:1;background:#fff;border:1px solid var(--line);border-radius:10px;padding:9px 6px;text-align:center"><div style="font-size:20px;font-weight:800;color:'+col+'">'+v+'</div><div style="font-size:10.5px;color:var(--ink-soft);font-weight:600;line-height:1.3">'+T(zh,en)+'</div></div>';};
     html+='<div style="display:flex;gap:8px;margin-bottom:11px">'+tile(fb.happy,'😊 满意','😊 Happy','#3f7d55')+tile(fb.ok,'😐 一般','😐 So-so','#c98a2b')+tile(fb.unhappy,'🙁 不满意','🙁 Unhappy','#b4482f')+'</div>';
-    html+='<div class="matbar"><i style="width:'+rate+'%;background:#3f7d55"></i></div><div class="matlabel"><span>'+T('满意率','Satisfaction')+'</span><span style="color:#3f7d55;font-weight:800">'+rate+'%</span><span>'+T('共 '+fb.total+' 条','of '+fb.total)+'</span></div>';
+    html+='<div class="matbar"><i style="width:'+rate+'%;background:#3f7d55"></i></div><div class="matlabel"><span>'+T('满意率','Satisfaction')+'</span><span style="color:#3f7d55;font-weight:800">'+rate+'%</span><span>'+T('共 '+rated+' 条评分','of '+rated+' rated')+'</span></div>';
     if(fb.notes.length){
       const emap={happy:'😊',ok:'😐',unhappy:'🙁'};
       html+=fb.notes.slice(-8).reverse().map(function(n){return '<div style="border-top:1px solid var(--line);padding:7px 0;font-size:12px;color:var(--ink-soft);line-height:1.5"><b style="color:var(--ink)">'+(emap[n.rating]||'💬')+' '+escapeHtml(n.tree)+'</b> <span style="font-size:11px">'+escapeHtml(cloneLabel(n.clone))+'</span> — “'+escapeHtml(n.note)+'”</div>';}).join('');
@@ -2367,6 +2463,11 @@ function renderInsights(){
 
 
 /* ---- service worker ---- */
+/* restore the remembered language (runs after everything the toggle re-renders exists) */
+(function(){
+  let l=null; try{ l=localStorage.getItem('durianripe_lang'); }catch(e){}
+  if(l==='en' && !document.body.classList.contains('lang-en')) langBtn.click();
+})();
 /* restore last-selected tab on launch (runs after all handlers/functions are defined) */
 (function(){
   const p=getSavedTab();
@@ -2379,8 +2480,13 @@ function renderInsights(){
    taps update — so their work is never interrupted by a surprise refresh. */
 if('serviceWorker' in navigator){
   let refreshing=false;
-  // When the new worker takes control, reload once to pick up fresh assets.
+  // Was this page already controlled when it loaded? On the very first install the
+  // worker's clients.claim() also fires controllerchange — that is not an update and
+  // must not reload the page under the user.
+  let hadController=!!navigator.serviceWorker.controller;
+  // When a NEW worker takes control, reload once to pick up fresh assets.
   navigator.serviceWorker.addEventListener('controllerchange',()=>{
+    if(!hadController){ hadController=true; return; }
     if(refreshing) return; refreshing=true; window.location.reload();
   });
 
