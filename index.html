@@ -1435,11 +1435,12 @@ function sanitizeFarms(d){
    malformed file can never crash rendering or inject markup. strict=true (imports)
    collects unreadable dates in `bad` instead of keeping them. */
 function normalizeFarms(d,strict){
-  const bad=[], out={farms:[]}, FB={happy:1,ok:1,unhappy:1};
+  const bad=[], out={farms:[]}, FB={happy:1,ok:1,unhappy:1}, usedIds=Object.create(null);
   ((d&&Array.isArray(d.farms))?d.farms:[]).forEach(f=>{
     if(!f||typeof f!=='object') return;
     const fid=String(f.id==null?'':f.id);
-    const farm={id:/^[A-Za-z0-9_-]+$/.test(fid)?fid:uid(), name:String(f.name==null?'':f.name), trees:[]};
+    const farm={id:(/^[A-Za-z0-9_-]+$/.test(fid)&&!usedIds[fid])?fid:uid(), name:String(f.name==null?'':f.name), trees:[]};
+    usedIds[farm.id]=1; // farm ids must be unique — every button addresses a farm by id
     if(f.deletedAt) farm.deletedAt=+f.deletedAt||Date.now();
     const seen={};
     (Array.isArray(f.trees)?f.trees:[]).forEach(t=>{
@@ -1466,7 +1467,7 @@ function normalizeFarms(d,strict){
         if(l.badDropStr) log.badDropStr=String(l.badDropStr);
         if(l.badCutStr) log.badCutStr=String(l.badCutStr);
         if(l.feedback&&typeof l.feedback==='object'){
-          const r=FB[l.feedback.rating]?l.feedback.rating:null, note=String(l.feedback.note==null?'':l.feedback.note);
+          const r=Object.prototype.hasOwnProperty.call(FB,l.feedback.rating)?l.feedback.rating:null, note=String(l.feedback.note==null?'':l.feedback.note);
           if(r||note) log.feedback={rating:r,note:note};
         }
         if(Object.keys(log).length) tree.logs.push(log);
@@ -1691,8 +1692,9 @@ function renderFarms(){
       if(hasFlower && !hasDrop){
         tiles.push(`<button data-logcut="${escapeHtml(farm.id+'|'+tree.id)}" class="mtile" style="border-color:var(--warn);background:${hasCut?'#f6e8d2':'#fdf3e4'};color:var(--warn)"><span class="ic">${hasCut?'✎':'✚'}</span><span>${hasCut?T('割果日','Cut date'):T('记录割果日','Log cut date')}</span></button>`);
       }
-      // feedback: once flowering exists
-      if(hasFlower){
+      // feedback: only for the season shown here, and only once it has been harvested
+      // (dropped or cut) — a new, still-growing season has no fruit to give feedback on.
+      if(hasFlower && seasonDone){
         const fbv=lastLog.feedback;
         const emap={happy:'😊',ok:'😐',unhappy:'🙁'};
         const hasFb=!!(fbv&&(fbv.rating||fbv.note));
@@ -1813,6 +1815,13 @@ function renderInlineCalc(farm, tree, calcKey){
       ${mkBtn('local','本地即食','Local fresh')}${mkBtn('short','短程运输','Short-haul')}${mkBtn('export','长程出口','Export')}
     </div>`;
 
+  // Same guard as the main calculator: judge over-ripeness on TODAY's DAA. Only for a
+  // season still on the tree — a dropped/cut record is history, not a decision.
+  const nowDaa=Math.round((now-d0)/86400000);
+  if(!(open.actualDropStr||open.cutDateStr) && nowDaa>c.over){
+    out+=`<div style="font-size:12px;color:var(--danger);font-weight:700;line-height:1.55;padding:9px 10px;border:1px solid var(--danger);border-radius:9px;background:#faeae6">⚠ ${T('过熟风险：开花至今已 '+nowDaa+' 天，超过此树 '+c.over+' 天的过熟线。果实应已落果或过熟，不宜再按割果/运输规划 —— 请立即检查；若已采收，请回填落果日或割果日。','Over-ripe risk: '+nowDaa+' days since flowering, past this tree\'s '+c.over+'-day over-ripe line. The fruit should already have dropped or be over-ripe, so cut/transport planning no longer applies — check the tree now; if it was already harvested, log the drop or cut date.')}</div>`;
+    return wrap(out);
+  }
   if(!cs.market){
     out+=`<div style="font-size:11.5px;color:var(--warn);font-weight:700;line-height:1.5;padding-top:6px;border-top:1px dashed var(--line)">${T('👆 选一个目标市场，才会显示风味保留与货架期建议。','👆 Pick a target market to reveal flavour retention and shelf-life advice.')}</div>`;
     return wrap(out);
@@ -2074,9 +2083,9 @@ function wireFarmEvents(){
     const farm=farmsData.farms.find(f=>f.id===fid);
     const tree=farm&&farm.trees.find(t=>t.id===tid);
     if(!tree) return;
-    let target=(tree.logs||[]).filter(l=>l.actualDropStr||l.cutDateStr).pop();
-    if(!target) target=(tree.logs||[])[tree.logs.length-1];
-    if(!target) return;
+    // always the season displayed on the card (the latest record) — never an older one
+    const target=(tree.logs||[])[tree.logs.length-1];
+    if(!target || !(target.actualDropStr||target.cutDateStr)) return;
     const sub=T(tid+' · '+cloneLabel(tree.variety)+' · 这批果的顾客风味反馈', tid+' · '+cloneLabel(tree.variety)+' · flavour feedback for this batch');
     const res=await openFeedback({sub:sub, current:target.feedback});
     if(res===null) return;
@@ -2114,7 +2123,7 @@ function switchTab(name){
   const exp=document.getElementById('farmsExport');
   const imp=document.getElementById('farmsImport');
   const impFile=document.getElementById('farmsImportFile');
-  const HEAD=['Farm 果园','Tree ID 树号','Variety 品种','Flowering 开花日','Projected cut 预计割果日','Actual drop 实际落果日','Cut date 割果日','Ripeness % 成熟度','Outcome 记录','Feedback 顾客反馈','Feedback note 反馈备注'];
+  const HEAD=['Farm 果园','Tree ID 树号','Variety 品种','Flowering 开花日','Projected cut 预计割果日','Actual drop 实际落果日','Cut date 割果日','Ripeness % 成熟度','Outcome 记录','Feedback 顾客反馈','Feedback note 反馈备注','Farm ID 果园编号（勿改）'];
 
   // A cell starting with = + - @ would be run as a formula by Excel/Sheets; a leading
   // apostrophe makes it plain text. parseCsv() strips it again on import.
@@ -2156,13 +2165,13 @@ function switchTab(name){
     const rows=[HEAD.map(csvEsc).join(',')];
     (data.farms||[]).filter(f=>!f.deletedAt).forEach(function(f){
       const trees=(f.trees||[]).filter(t=>!t.deletedAt);
-      if(!trees.length){ rows.push([f.name||'','','','','','','','','','',''].map(csvEsc).join(',')); return; }
+      if(!trees.length){ rows.push([f.name||'','','','','','','','','','','',f.id].map(csvEsc).join(',')); return; }
       trees.forEach(function(t){
         const vlabel=cloneLabel(t.variety); const logs=t.logs||[];
-        if(!logs.length){ rows.push([f.name||'',t.id||'',vlabel,'','','','','','','',''].map(csvEsc).join(',')); return; }
+        if(!logs.length){ rows.push([f.name||'',t.id||'',vlabel,'','','','','','','','',f.id].map(csvEsc).join(',')); return; }
         logs.forEach(function(l){
           const fbk=l.feedback||{};
-          rows.push([f.name||'',t.id||'',vlabel,l.flowerDate||'',l.projCutISO||'',l.actualDropStr||'',l.cutDateStr||'',(l.cutPct!=null?l.cutPct:''),l.outcome||'',fbToLabel(fbk.rating),(fbk.note||'')].map(csvEsc).join(','));
+          rows.push([f.name||'',t.id||'',vlabel,l.flowerDate||'',l.projCutISO||'',l.actualDropStr||'',l.cutDateStr||'',(l.cutPct!=null?l.cutPct:''),l.outcome||'',fbToLabel(fbk.rating),(fbk.note||''),f.id].map(csvEsc).join(','));
         });
       });
     });
@@ -2173,7 +2182,9 @@ function switchTab(name){
     if(!rows.length) return null;
     const header=rows[0].map(h=>String(h).trim().toLowerCase());
     const find=(preds)=>{ for(let i=0;i<header.length;i++){ if(preds.some(p=>header[i].indexOf(p)>=0)) return i; } return -1; };
-    const iFarm=find(['farm','果园']);
+    // 'Farm ID' also contains "farm" — find it first and keep it out of the name lookup.
+    let iFarmId=-1; for(let i=0;i<header.length;i++){ if(header[i].indexOf('farm id')>=0||header[i].indexOf('果园编号')>=0){ iFarmId=i; break; } }
+    let iFarm=-1; for(let i=0;i<header.length;i++){ if(i===iFarmId) continue; if(header[i].indexOf('farm')>=0||header[i].indexOf('果园')>=0){ iFarm=i; break; } }
     const iTree=find(['tree','树号']);
     const iVar=find(['variety','品种']);
     const iFlower=find(['flower','开花']);
@@ -2186,14 +2197,18 @@ function switchTab(name){
     let iFb=-1; for(let i=0;i<header.length;i++){ if(i===iNote) continue; if(header[i].indexOf('feedback')>=0||header[i].indexOf('顾客')>=0||header[i].indexOf('反馈')>=0){ iFb=i; break; } }
     if(iFarm<0 && iTree<0) return null;
     const get=(r,i)=> (i>=0 && r[i]!==undefined)? String(r[i]).trim() : '';
-    const fmap={}, order=[];
+    const fmap=Object.create(null), byName=Object.create(null), order=[];
     for(let r=1;r<rows.length;r++){
       const row=rows[r]; if(!row||!row.length) continue;
       const fname=get(row,iFarm), tid=get(row,iTree);
       if(fname==='' && tid==='') continue;
-      const key=fname||('__row'+r);
+      // Group rows by Farm ID when the file has one (two farms may share a name).
+      // Rows without an ID — older exports, or rows added by hand — group by name,
+      // joining an ID'd farm of that name if there is one.
+      const fidCsv=get(row,iFarmId);
+      const key=fidCsv ? 'id:'+fidCsv : (byName[fname]||('n:'+(fname||'__row'+r)));
       let farm=fmap[key];
-      if(!farm){ farm={id:uid(),name:fname,trees:[],_t:{}}; fmap[key]=farm; order.push(key); }
+      if(!farm){ farm={id:fidCsv||uid(),name:fname,trees:[],_t:Object.create(null)}; fmap[key]=farm; order.push(key); if(fname&&!byName[fname]) byName[fname]=key; }
       if(tid!==''){
         let tree=farm._t[tid];
         if(!tree){ tree={id:tid,variety:varietyCode(get(row,iVar)),logs:[]}; farm._t[tid]=tree; farm.trees.push(tree); }
@@ -2231,26 +2246,26 @@ function switchTab(name){
     return log;
   }
   function sectionsToFarms(rows){
-    const sec={}; let cur=null;
+    const sec=Object.create(null); let cur=null;
     rows.forEach(function(row){ if(!row.length||(row.length===1&&row[0]==='')) return; if(row[0]==='#SHEET'){ cur=(row[1]||'').trim(); sec[cur]=[]; return; } if(cur) sec[cur].push(row); });
     if(!sec.Farms && !sec.Trees && !sec.Logs) return null;
-    const hIndex=(arr)=>{ const h=arr.shift().map(x=>x.trim()); const idx={}; h.forEach((k,i)=>idx[k]=i); return idx; };
-    const byId={}, order=[];
-    function ensureFarm(id){ if(!byId[id]){ byId[id]={id:id||uid(),name:'',trees:[],_t:{}}; order.push(id); } return byId[id]; }
+    const hIndex=(arr)=>{ const h=arr.shift().map(x=>x.trim()); const idx=Object.create(null); h.forEach((k,i)=>idx[k]=i); return idx; };
+    const byId=Object.create(null), order=[];
+    function ensureFarm(id){ if(!byId[id]){ byId[id]={id:id||uid(),name:'',trees:[],_t:Object.create(null)}; order.push(id); } return byId[id]; }
     if(sec.Farms&&sec.Farms.length){ const idx=hIndex(sec.Farms); sec.Farms.forEach(r=>{ const id=idx.farm_id!=null?(r[idx.farm_id]||''):''; const name=idx.farm_name!=null?(r[idx.farm_name]||''):''; if(id===''&&name==='') return; const f=ensureFarm(id); f.name=name; const del=idx.farm_deleted!=null?r[idx.farm_deleted]:''; if(del) f.deletedAt=parseInt(del,10)||Date.now(); }); }
     if(sec.Trees&&sec.Trees.length){ const idx=hIndex(sec.Trees); sec.Trees.forEach(r=>{ const fid=idx.farm_id!=null?(r[idx.farm_id]||''):''; const tid=idx.tree_id!=null?(r[idx.tree_id]||''):''; if(tid==='') return; const f=ensureFarm(fid); if(!f._t[tid]){ const t={id:tid,variety:(idx.variety!=null?r[idx.variety]:'')||'other',logs:[]}; const td=idx.tree_deleted!=null?r[idx.tree_deleted]:''; if(td) t.deletedAt=parseInt(td,10)||Date.now(); f._t[tid]=t; f.trees.push(t); } }); }
     if(sec.Logs&&sec.Logs.length){ const idx=hIndex(sec.Logs); sec.Logs.forEach(r=>{ const g=(k)=>(idx[k]!=null&&r[idx[k]]!==undefined)?r[idx[k]]:''; const fid=g('farm_id'), tid=g('tree_id'); if(tid==='') return; const f=ensureFarm(fid); let t=f._t[tid]; if(!t){ t={id:tid,variety:'other',logs:[]}; f._t[tid]=t; f.trees.push(t); } t.logs.push(buildLog(g)); }); }
     return {farms: order.map(id=>{ const f=byId[id]; if(f) delete f._t; return f; }).filter(Boolean)};
   }
   function flatToFarms(rows){
-    const header=rows[0].map(h=>h.trim()); const idx={}; header.forEach((h,i)=>idx[h]=i);
+    const header=rows[0].map(h=>h.trim()); const idx=Object.create(null); header.forEach((h,i)=>idx[h]=i);
     if(idx.farm_id==null && idx.farm_name==null) return null;
     const get=(r,k)=>(idx[k]!=null&&r[idx[k]]!==undefined)?r[idx[k]]:'';
-    const fmap={}, order=[];
+    const fmap=Object.create(null), order=[];
     for(let r=1;r<rows.length;r++){ const row=rows[r]; if(!row||!row.length) continue;
       const fid=get(row,'farm_id'), fname=get(row,'farm_name'); if(fid===''&&fname==='') continue;
       const key=fid||('__'+fname); let farm=fmap[key];
-      if(!farm){ farm={id:fid||uid(),name:fname,trees:[],_t:{}}; const fd=get(row,'farm_deleted'); if(fd) farm.deletedAt=parseInt(fd,10)||Date.now(); fmap[key]=farm; order.push(key); }
+      if(!farm){ farm={id:fid||uid(),name:fname,trees:[],_t:Object.create(null)}; const fd=get(row,'farm_deleted'); if(fd) farm.deletedAt=parseInt(fd,10)||Date.now(); fmap[key]=farm; order.push(key); }
       const tid=get(row,'tree_id');
       if(tid!==''){ let tree=farm._t[tid]; if(!tree){ tree={id:tid,variety:get(row,'variety')||'other',logs:[]}; const td=get(row,'tree_deleted'); if(td) tree.deletedAt=parseInt(td,10)||Date.now(); farm._t[tid]=tree; farm.trees.push(tree); }
         const g=(k)=>get(row,k); if(['flowerDate','actualDropStr','cutDateStr','outcome','feedback_rating','feedback_note','projCutISO','cutPct'].some(k=>g(k)!=='')) tree.logs.push(buildLog(g)); }
