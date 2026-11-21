@@ -77,6 +77,11 @@ main{padding:18px 16px 40px}
 .panel.active{display:block}
 @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 @keyframes toastIn{from{opacity:0;transform:translateX(-50%) translateY(10px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+.toast{position:fixed;left:50%;bottom:calc(22px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:200;background:var(--shell);color:var(--cream);border-radius:14px;padding:11px 13px 11px 15px;box-shadow:0 8px 28px rgba(0,0,0,.28);display:flex;align-items:center;gap:12px;font-size:13.5px;max-width:calc(100% - 28px);animation:toastIn .28s ease}
+.toast[hidden]{display:none}
+.toast>span{line-height:1.35;font-weight:600}
+#toastgo{flex:0 0 auto;border:none;background:var(--flesh);color:var(--shell);font-weight:800;font-size:13.5px;border-radius:10px;padding:8px 14px;cursor:pointer}
+#toastx{flex:0 0 auto;border:none;background:transparent;color:var(--cream);font-size:18px;line-height:1;cursor:pointer;padding:4px 2px;opacity:.7}
 /* Per-tree action tiles (My Farms): square, uniform, 3-per-row grid. Icon stacks
    above the label so each tile reads as an equal square regardless of text length. */
 .tacts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:10px}
@@ -584,13 +589,22 @@ body.lang-en .en.blk{display:block}
 </section>
 </main>
 <footer>
-  <span class="zh">离线可用 · 中立决策工具·科学参考 · v</span><span class="en">Works offline · neutral decision tool · scientific reference · v</span><span id="ver"></span>
+  <span class="zh">离线可用 · 中立决策工具·科学参考 · </span><span class="en">Works offline · neutral decision tool · scientific reference · </span><span id="ver"></span>
 </footer>
 </div>
 
+<div class="toast" id="toast" role="status" aria-live="polite" hidden>
+  <span><span class="zh">新版本已就绪</span><span class="en">A new version is ready</span></span>
+  <button type="button" id="toastgo"><span class="zh">刷新</span><span class="en">Refresh</span></button>
+  <button type="button" id="toastx" aria-label="✕">×</button>
+</div>
 <script>
-const CACHE_VERSION='durianripe-20261121-104';
-document.getElementById('ver').textContent=CACHE_VERSION.split('-').slice(1).join('-');
+// Footer shows when the running copy was published (its Last-Modified header, which
+// survives the service-worker cache) — nothing to maintain by hand.
+(function(){
+  const d=new Date(document.lastModified), p=n=>String(n).padStart(2,'0');
+  if(!isNaN(d)) document.getElementById('ver').textContent=d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())+' '+p(d.getHours())+':'+p(d.getMinutes());
+})();
 
 /* ---- language ---- */
 const langBtn=document.getElementById('langBtn');
@@ -2474,65 +2488,27 @@ function renderInsights(){
   if(p && p!=='guide'){ const el=document.querySelector(`.tab[data-p="${p}"]`); if(el) el.click(); }
 })();
 
-/* ---- service worker + intelligent update prompt ----
-   A new sw.js stays in the "waiting" state (it no longer calls skipWaiting on
-   install). We watch for it, show a small toast, and only reload once the user
-   taps update — so their work is never interrupted by a surprise refresh. */
-if('serviceWorker' in navigator){
-  let refreshing=false;
-  // Was this page already controlled when it loaded? On the very first install the
-  // worker's clients.claim() also fires controllerchange — that is not an update and
-  // must not reload the page under the user.
-  let hadController=!!navigator.serviceWorker.controller;
-  // When a NEW worker takes control, reload once to pick up fresh assets.
-  navigator.serviceWorker.addEventListener('controllerchange',()=>{
-    if(!hadController){ hadController=true; return; }
-    if(refreshing) return; refreshing=true; window.location.reload();
+/* ---- service worker: self-updating, no version to bump ----
+   The app opens instantly from the cache. On every launch, and whenever it returns
+   to the foreground, the page asks the worker to "check": the worker re-fetches the
+   app files, and if index.html changed it answers "updated" and we show a toast.
+   Refresh then loads the new copy; if dismissed, it simply appears on next launch. */
+document.getElementById('toastgo').onclick=()=>location.reload();
+document.getElementById('toastx').onclick=()=>{ document.getElementById('toast').hidden=true; };
+if('serviceWorker' in navigator && location.protocol!=='file:'){
+  const askForUpdate=()=>{
+    if(navigator.onLine===false) return;
+    navigator.serviceWorker.ready.then(reg=>{ if(reg.active) reg.active.postMessage('check'); }).catch(()=>{});
+  };
+  navigator.serviceWorker.addEventListener('message',e=>{
+    if(e.data==='updated') document.getElementById('toast').hidden=false;
   });
-
-  function showUpdateToast(worker){
-    if(document.getElementById('updateToast')) return; // already shown
-    const t=document.createElement('div');
-    t.id='updateToast';
-    t.style.cssText='position:fixed;left:50%;bottom:22px;transform:translateX(-50%);z-index:200;'
-      +'background:var(--shell);color:var(--cream);border-radius:14px;padding:11px 13px 11px 15px;'
-      +'box-shadow:0 8px 28px rgba(0,0,0,.28);display:flex;align-items:center;gap:12px;'
-      +'font-size:13.5px;max-width:calc(100% - 28px);animation:toastIn .28s ease';
-    const msg=document.createElement('span');
-    msg.style.cssText='line-height:1.35;font-weight:600';
-    msg.textContent=T('有新版本可用','A new version is available');
-    const btn=document.createElement('button');
-    btn.style.cssText='flex:0 0 auto;border:none;background:var(--flesh);color:var(--shell);'
-      +'font-weight:800;font-size:13.5px;border-radius:10px;padding:8px 14px;cursor:pointer';
-    btn.textContent=T('更新','Update');
-    btn.onclick=()=>{ btn.disabled=true; btn.style.opacity=.6;
-      btn.textContent=T('更新中…','Updating…');
-      worker.postMessage({type:'SKIP_WAITING'}); };
-    const close=document.createElement('button');
-    close.setAttribute('aria-label',T('关闭','Dismiss'));
-    close.style.cssText='flex:0 0 auto;border:none;background:transparent;color:var(--cream);'
-      +'font-size:18px;line-height:1;cursor:pointer;padding:4px 2px;opacity:.7';
-    close.textContent='×';
-    close.onclick=()=>t.remove();
-    t.appendChild(msg); t.appendChild(btn); t.appendChild(close);
-    document.body.appendChild(t);
-  }
-
-  navigator.serviceWorker.register('sw.js').then(reg=>{
-    // A worker already waiting from a previous visit (e.g. user reopened the tab).
-    if(reg.waiting && navigator.serviceWorker.controller) showUpdateToast(reg.waiting);
-    reg.addEventListener('updatefound',()=>{
-      const nw=reg.installing; if(!nw) return;
-      nw.addEventListener('statechange',()=>{
-        // installed + an existing controller  ==>  this is an update, not first install
-        if(nw.state==='installed' && navigator.serviceWorker.controller) showUpdateToast(nw);
-      });
-    });
-    // Proactively check for a new sw.js when the app regains focus.
-    document.addEventListener('visibilitychange',()=>{
-      if(document.visibilityState==='visible') reg.update().catch(()=>{});
-    });
-  }).catch(()=>{});
+  window.addEventListener('load',()=>{
+    navigator.serviceWorker.register('./sw.js').then(askForUpdate).catch(()=>{});
+  });
+  document.addEventListener('visibilitychange',()=>{
+    if(document.visibilityState==='visible') askForUpdate();
+  });
 }
 </script>
 

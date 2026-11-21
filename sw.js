@@ -1,36 +1,128 @@
-const CACHE='durianripe-20261121-104';
-const ASSETS=[
-  './','./index.html','./manifest.json',
-  './icon-192.png','./icon-512.png',
-  './icon-192-maskable.png','./icon-512-maskable.png',
-  './icon-180.png','./icon-167.png','./icon-152.png'
+/* Self-updating service worker.
+
+   No version number to bump. The app opens instantly from the cache, then the
+   page sends "check": every shell file is re-fetched, the cache is refreshed,
+   and if index.html came back different every open window is sent "updated"
+   so it can show its "new version" toast. */
+"use strict";
+
+var CACHE_PREFIX = "durianripe-";   /* unique to THIS app — see activate */
+var CACHE = "durianripe-shell";     /* fixed name; never changes between deploys */
+var INDEX = "./index.html";
+
+var SHELL = [
+  INDEX,
+  "./manifest.json",
+  "./icon-192.png", "./icon-512.png",
+  "./icon-192-maskable.png", "./icon-512-maskable.png",
+  "./icon-180.png", "./icon-167.png", "./icon-152.png"
 ];
-// NOTE: we deliberately do NOT self.skipWaiting() here. A new worker stays in the
-// "waiting" state so the page can notice it and ask the user before updating —
-// avoiding a surprise mid-use reload. The page posts {type:'SKIP_WAITING'} when
-// the user taps "update", which triggers activation (handler below).
-self.addEventListener('install',e=>{
-  // cache:'reload' bypasses the HTTP cache so a new version never pre-caches stale files.
-  // If any file fails, the install fails and the browser retries later — better than
-  // silently activating a worker with an incomplete offline cache.
-  e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS.map(u=>new Request(u,{cache:'reload'})))));
+
+function sameBytes(a, b){
+  if (a.byteLength !== b.byteLength) return false;
+  var x = new Uint8Array(a), y = new Uint8Array(b);
+  for (var i = 0; i < x.length; i++) if (x[i] !== y[i]) return false;
+  return true;
+}
+
+/* Fetch one file past the HTTP cache and store it. Resolves true only when a
+   copy was already cached and the new one differs. Errors and non-200
+   responses leave the cache alone, so a 404/503 can never replace the app. */
+function refresh(url){
+  return fetch(url, { cache: "no-cache" }).then(function(res){
+    if (!res || !res.ok) return false;
+    return caches.open(CACHE).then(function(c){
+      return c.match(url).then(function(old){
+        return Promise.all([
+          old ? old.arrayBuffer() : null,
+          res.clone().arrayBuffer()
+        ]).then(function(b){
+          var changed = !!b[0] && !sameBytes(b[0], b[1]);
+          return c.put(url, res).then(function(){ return changed; });
+        });
+      });
+    });
+  }).catch(function(){ return false; });
+}
+
+function refreshShell(){
+  return Promise.all(SHELL.map(refresh)).then(function(changed){
+    return changed[SHELL.indexOf(INDEX)];
+  });
+}
+
+/* install: precache, then take over at once. Safe because the cache name is
+   stable — a new worker never strands an open page on a deleted cache. */
+self.addEventListener("install", function(e){
+  e.waitUntil(refreshShell().then(function(){ return self.skipWaiting(); }));
 });
-self.addEventListener('message',e=>{
-  if(e.data && e.data.type==='SKIP_WAITING') self.skipWaiting();
+
+/* activate: delete only THIS app's other caches (e.g. old versioned ones).
+   Cache Storage is shared by the whole origin — on <user>.github.io that is
+   every project page — so never delete caches without our prefix. */
+self.addEventListener("activate", function(e){
+  e.waitUntil(
+    caches.keys().then(function(keys){
+      return Promise.all(keys.map(function(k){
+        return (k.indexOf(CACHE_PREFIX) === 0 && k !== CACHE) ? caches.delete(k) : null;
+      }));
+    }).then(function(){ return self.clients.claim(); })
+  );
 });
-self.addEventListener('activate',e=>{
-  e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim()));
-});
-self.addEventListener('fetch',e=>{
-  if(e.request.method!=='GET')return;
-  if(new URL(e.request.url).origin!==self.location.origin)return;
+
+/* fetch:
+   - navigations  → the cached app, instantly; network only if nothing is cached
+   - same-origin  → cache first, then network, and cache what comes back
+   - cross-origin → left alone (API calls etc. are the page's business)
+   Freshness is handled by the "check" message, not here. */
+self.addEventListener("fetch", function(e){
+  var req = e.request;
+  if (req.method !== "GET") return;
+
+  var url;
+  try { url = new URL(req.url); } catch (err) { return; }
+  if (url.origin !== self.location.origin) return;
+
+  if (req.mode === "navigate"){
+    e.respondWith(
+      caches.match(INDEX).then(function(hit){
+        if (hit) return hit;
+        return fetch(req).then(function(res){
+          if (res.ok){
+            var copy = res.clone();
+            caches.open(CACHE).then(function(c){ c.put(INDEX, copy); });
+          }
+          return res;
+        });
+      })
+    );
+    return;
+  }
+
   e.respondWith(
-    caches.match(e.request).then(r=>r||fetch(e.request).then(resp=>{
-      if(resp.ok){ // never cache a 404/500
-        const cp=resp.clone();
-        caches.open(CACHE).then(c=>c.put(e.request,cp)).catch(()=>{});
-      }
-      return resp;
-    }).catch(()=>e.request.mode==='navigate'?caches.match('./index.html'):Response.error()))
+    caches.match(req).then(function(hit){
+      if (hit) return hit;
+      return fetch(req).then(function(res){
+        if (res && res.status === 200 && res.type === "basic"){
+          var copy = res.clone();
+          caches.open(CACHE).then(function(c){ c.put(req, copy); });
+        }
+        return res;
+      });
+    })
+  );
+});
+
+/* "check" from a page: refresh the shell and, if index.html changed, tell
+   every open window so each can offer a reload. */
+self.addEventListener("message", function(e){
+  if (e.data !== "check") return;
+  e.waitUntil(
+    refreshShell().then(function(changed){
+      if (!changed) return;
+      return self.clients.matchAll({ type: "window" }).then(function(list){
+        list.forEach(function(c){ c.postMessage("updated"); });
+      });
+    })
   );
 });

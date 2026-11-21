@@ -35,5 +35,10 @@ All paths are relative, so it works under the `/<repo>/` sub-path with no change
 
 ## Updating
 
-Bump the `CACHE` string in `sw.js` **and** the `CACHE_VERSION` in `index.html` whenever you
-change files, so returning visitors pick up the new version.
+Just push your changes to `main` — there is no version number to bump. GitHub Pages takes a
+minute or two to publish.
+
+The app always opens instantly from its saved copy, then checks for changes in the background
+(on every launch and whenever it returns to the foreground). If `index.html` has changed,
+users see a "new version is ready" toast; tapping **Refresh** loads it. If they dismiss the
+toast, the new version appears the next time they open the app.
