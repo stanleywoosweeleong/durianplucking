@@ -397,6 +397,16 @@ body.lang-en .en.blk{display:block}
     <p style="margin-top:11px;font-size:12.5px;color:var(--ink-soft)"><span class="zh">注：DMC 有便携式「干物质计」可现场约 3 分钟测（约 25% 生果 → 40% 熟果）；硫化物与酯类需 SPME-GC/MS，通常送大学或研究机构。</span><span class="en">Note: portable "dry-matter meters" read DMC in ~3 min on-site (~25% immature → 40% ripe); sulfur/ester volatiles need SPME-GC/MS, usually via a university or research lab.</span></p>
   </div>
 
+  <div class="card" style="border-left:4px solid var(--good)">
+    <h3><span class="n" style="background:var(--good)">📋</span><span class="zh">本工具的依据顺序</span><span class="en">Which source this tool follows</span></h3>
+    <p><span class="zh"><b>① 以农业局（Jabatan Pertanian）2026 年 8 月 6 日发出的《Garis Panduan Kaedah Penuaian Durian Potong Matang Malaysia》为准。</b>起算日（超过 70% 花盛开）、成熟判断法（天数初判 → 首果落下 5 天后看离层线、瓣线与刺）、割果方法、催熟、包装标签、预冷（12°C ± 1）与运输条件，都照指南。</span>
+    <span class="en"><b>① The Malaysia DOA guideline "Garis Panduan Kaedah Penuaian Durian Potong Matang Malaysia" (circulated 6 Aug 2026) is the default.</b> The start date (more than 70% bloom), the way maturity is judged (days as a first guide → 5 days after the first fruit drops, check the abscission line, segment lines and spines), cutting method, ripening induction, packing and labelling, pre-cooling (12°C ± 1) and transport conditions all follow it.</span></p>
+    <p style="margin-top:10px"><span class="zh"><b>② 只有在有已发表依据时，才保留本工具自己的数字</b>，并标明出处：D197（MARDI 2024）、D24（ITFNet／农业局品种表）、Chanee（Scientific Reports）、Monthong（泰国研究）的最早割果天数；13–15°C 冷链与冷害（UC Davis、USDA Handbook 66、Romphophak & Siriphanich 1997）；近落果割果 ≈ 落果品质（MARDI 2024）。</span>
+    <span class="en"><b>② The tool keeps a figure of its own only where a published source supports it</b>, and names that source: earliest-cut days for D197 (MARDI 2024), D24 (ITFNet / DOA cultivar table), Chanee (Scientific Reports) and Monthong (Thai research); the 13–15°C cold chain and chilling injury (UC Davis, USDA Handbook 66, Romphophak & Siriphanich 1997); near-drop cut ≈ dropped-fruit quality (MARDI 2024).</span></p>
+    <p style="margin-top:10px"><span class="zh"><b>③ 其余是本工具的估算，会清楚标明</b>：黑刺、Tekka、IOI、红虾、红肉、甘榜等品种没有已发表的专属最早割果天数，故用农业局通用参考（约 90 天）；各品种的落果窗口、85／90／95% 刻度、风味保留与货架期天数都是模型估算 —— 农业局指南没有这些数字，请用你自己的落果记录与送验结果校准。</span>
+    <span class="en"><b>③ Everything else is this tool's estimate and is labelled as such</b>: Black Thorn, Tekka, IOI, Red Prawn, Red Flesh and kampung have no published clone-specific earliest-cut day, so the DOA general figure (~day 90) applies; each clone's drop window, the 85/90/95% dial, flavour retention and shelf-life days are model estimates — the DOA guideline gives none of these, so calibrate them with your own drop records and lab results.</span></p>
+  </div>
+
   <div class="card" style="border-left:4px solid var(--shell)">
     <h3><span class="n" style="background:var(--shell)">📚</span><span class="zh">DAA 数字的出处（不只 MARDI）</span><span class="en">Where the DAA numbers come from (not just MARDI)</span></h3>
     <p><span class="zh">很多果农不认同某个 DAA 数字 —— 这是合理的，因为<b>数字本来就会因树龄、气候、地区、以及「割熟 vs 树熟」而不同</b>。下面列出各品种的独立研究来源，让你看到区间，而非单一权威。</span>
@@ -658,18 +668,25 @@ function wireOpts(id,key,attr){
    overripe = beyond this risks splitting / over-ripe
    Sources: MARDI D197 post-harvest study (13/14/15 WAA), DurianInfo season classes,
    Thai research on Chanee/Monthong, Malaysian tree-drop practice (~130 DAA upper). */
+/* SOURCE RULE: the Malaysia DOA 2026 cut-harvest guideline is the default. A clone keeps
+   its own earliest-cut day (min) only where a published source supports it (src);
+   otherwise min falls back to the DOA general figure (week 13 / day 90) and the clone
+   is flagged as uncited. Drop windows are not covered by the DOA at all: they are
+   estimates inside the reviewed 95–135 d range, meant to be replaced by the grower's
+   own drop record. */
+const DOA_MIN=90;
 const CLONES={
-  d197:{min:98, dropLo:100, dropHi:112, over:120, fragile:true},
-  d24: {min:100,dropLo:105, dropHi:115, over:123, fragile:false},
-  d200:{min:112,dropLo:115, dropHi:128, over:135, fragile:false},
-  d160:{min:105,dropLo:110, dropHi:120, over:128, fragile:true},
-  d168:{min:100,dropLo:105, dropHi:115, over:123, fragile:false},
-  d175:{min:105,dropLo:110, dropHi:120, over:128, fragile:false},
-  d101:{min:95, dropLo:100, dropHi:112, over:120, fragile:false},
-  d123:{min:88, dropLo:90,  dropHi:105, over:113, fragile:true},   // Chanee, fast
-  d159:{min:105,dropLo:120, dropHi:130, over:138, fragile:true},   // Monthong, cut early in Thai practice
-  kampung:{min:98,dropLo:100,dropHi:120,over:128,fragile:false},
-  other:{min:100,dropLo:105,dropHi:120,over:128,fragile:false}
+  d197:{min:98, dropLo:100, dropHi:112, over:120, fragile:true,  src:['MARDI 2024（13／14／15 周割果试验：15 周 ≈ 落果品质）','MARDI 2024 (cut at 13/14/15 weeks: 15 weeks ≈ dropped-fruit quality)']},
+  d24: {min:100,dropLo:105, dropHi:115, over:123, fragile:false, src:['ITFNet／农业局品种表：D24 105–115 天','ITFNet / DOA cultivar table: D24 105–115 days']},
+  d200:{min:DOA_MIN,dropLo:115, dropHi:128, over:135, fragile:false},
+  d160:{min:DOA_MIN,dropLo:110, dropHi:120, over:128, fragile:true},
+  d168:{min:DOA_MIN,dropLo:105, dropHi:115, over:123, fragile:false},
+  d175:{min:DOA_MIN,dropLo:110, dropHi:120, over:128, fragile:false},
+  d101:{min:DOA_MIN,dropLo:100, dropHi:112, over:120, fragile:false},
+  d123:{min:90, dropLo:90,  dropHi:105, over:113, fragile:true,  src:['Scientific Reports（泰国 Trat）：Chanee 约 90 天成熟','Scientific Reports (Trat, Thailand): Chanee mature at ~90 days']},
+  d159:{min:105,dropLo:120, dropHi:130, over:138, fragile:true,  src:['泰国研究：Monthong 商业成熟约 105–115 天','Thai research: Monthong commercial maturity ~105–115 days']},
+  kampung:{min:DOA_MIN,dropLo:100,dropHi:120,over:128,fragile:false},
+  other:{min:DOA_MIN,dropLo:105,dropHi:120,over:128,fragile:false}
 };
 
 function T(zh,en){return document.body.classList.contains('lang-en')?en:zh;}
@@ -713,8 +730,8 @@ function cloneCfgFor(variety){
   if(custom==null || custom===base.dropHi) return base;
   const shift=custom-base.dropHi;
   return {
-    min:base.min+shift, dropLo:base.dropLo+shift,
-    dropHi:custom, over:base.over+shift, fragile:base.fragile
+    min:Math.max(DOA_MIN,base.min+shift), dropLo:base.dropLo+shift,
+    dropHi:custom, over:base.over+shift, fragile:base.fragile, src:base.src, own:true
   };
 }
 
@@ -1057,7 +1074,7 @@ function decide(){
     }else{
       key='std';cls='v-std';
       title=T('标准采摘 + 控温出口线','Standard + climate-control export');
-      desc=T('此品种采摘后风味保持较好，配合全程控温可延长货架期，适合长程出口。越贴近落果窗口，自然与催熟差距越小。','This clone holds flavor well after plucking; with full climate control it ships well for export. Closer to the drop window, the natural-vs-forced gap shrinks.');
+      desc=T('此品种采摘后风味保持较好，配合全程控温可延长货架期，适合长程出口。越贴近落果窗口，割果与树熟的差距越小。','This clone holds flavor well after plucking; with full climate control it ships well for export. Closer to the drop window, the gap between cut and tree-dropped fruit shrinks.');
     }
   }else if(s.market==='short'){
     key='high';cls='v-high';
@@ -1073,8 +1090,11 @@ function decide(){
   const harvest=[],handle=[];
   harvest.push(win);
   if(plucked && !overRipe){
-    harvest.push(T(`确认已过 ${c.min} DAA 生理成熟门槛再采，避免后熟不完整。`,`Confirm past the ${c.min}-DAA maturity threshold before cutting to avoid incomplete ripening.`));
-    harvest.push(T('越贴近落果窗口，自然与催熟的品质差距越小。','The closer to the drop window, the smaller the gap between natural and forced ripening.'));
+    harvest.push(T('<b>农业局（DOA 2026）判断法优先</b>：天数只是初步参考（一般开花后第 13 周／约 90 天起成熟）；第一颗果落下 5 天后，以果柄离层线、瓣线与刺的特征确认（见下方指南）。','<b>DOA (2026) method comes first</b>: day count is only a first guide (generally mature from week 13 / ~day 90 after flowering); 5 days after the first fruit drops, confirm with the stalk abscission line, segment lines and spines (see the guideline below).'));
+    if(c.own) harvest.push(T(`按你自己的落果记录推算，此品种最早割果约 ${c.min} DAA。`,`From your own drop record, the earliest cut for this clone works out to ~${c.min} DAA.`));
+    else if(c.src) harvest.push(T(`此品种有专属依据：最早割果约 ${c.min} DAA —— ${c.src[0]}。`,`This clone has its own evidence: earliest cut ~${c.min} DAA — ${c.src[1]}.`));
+    else harvest.push(T('此品种<b>没有已发表的专属最早割果天数</b>，故采用农业局通用参考（约 90 天起）。上面的落果窗口是本工具的估算 —— 请在「我的果园」记录实际落果日，用你自己的数字取代。','This clone has <b>no published clone-specific earliest-cut day</b>, so the DOA general figure applies (from ~day 90). The drop window above is this tool\'s estimate — log actual drop dates in My Farms to replace it with your own number.'));
+    harvest.push(T('85／90／95% 是本工具的刻度（约落果前 12／8／4 天），农业局指南没有百分比刻度。越贴近落果窗口，割果与树熟的品质差距越小（MARDI D197）。','The 85/90/95% dial is this tool\'s own scale (about 12/8/4 days before drop); the DOA guideline defines no percentage scale. The closer to the drop window, the smaller the gap between cut and tree-dropped fruit (MARDI D197).'));
   }else if(!overRipe){
     harvest.push(T('树熟自然落果风味峰值最高，但常温约1–2天即开裂，尽快分销。','Tree-drop peaks highest in flavour but cracks in ~1–2 days at room temp — distribute fast.'));
   }
@@ -1084,7 +1104,7 @@ function decide(){
     handle.push(T('立即处理：就地即食、冷冻果肉或加工，避免任何运输延误。','Handle now: eat fresh, freeze the pulp, or process — avoid any transport delay.'));
   }else if(s.market==='export'){
     handle.push(T('全程控温，抑制呼吸与乙烯，延长货架期。','Climate-control throughout to slow respiration & ethylene and extend shelf life.'));
-    handle.push(T('若催熟：开裂只是外表信号，不等于内部风味成熟。','If forcing: cracking is only an external sign, not internal flavor maturity.'));
+    handle.push(T('催熟（如需要）按农业局指南：用已注册的乙烯利（Ethephon）或乙烯气体，依标签浓度涂在新切的果柄末端，并做记录。','Ripening induction, if needed, per the DOA guideline: registered ethephon or ethylene gas at label rate on the freshly trimmed stalk end, and record it.'));
   }else if(s.market==='short'){
     handle.push(T('短程可轻度控温，抵达后让其自然后熟至峰值。','Light climate control for short-haul; let it ripen naturally to peak on arrival.'));
   }else{
@@ -1144,6 +1164,7 @@ function decide(){
       <div style="font-size:12.5px;font-weight:800;color:var(--shell);margin-bottom:2px">${T('出口中国：路线可行性','Export to China: route feasibility')}</div>
       <div style="font-size:11px;color:var(--ink-soft);margin-bottom:4px">${T(`按 13–15°C 冷链整果寿命 ${coldLife} 天，预留 ${RIPEN_RESERVE} 天到港后熟`,`Based on ${coldLife}d reefer whole-fruit life, ${RIPEN_RESERVE}d reserved to auto-ripen on arrival`)}</div>
       ${rows}
+      <div style="font-size:11.5px;color:var(--danger);font-weight:700;margin-top:8px;line-height:1.5">${T('⚠️ 任何路线都须符合进口国所定条件（农业局指南第 9 节）。据《马来西亚前锋报》报道，农业局 2026 年 7 月 2 日声明：<b>目前未批准以陆路出口鲜榴梿到中国</b>，须待双方议定新协议或修订。上表的陆运／铁路天数仅供规划参考，出货前请向农业局确认。','⚠️ Every route must meet the importing country\'s conditions (DOA guideline, section 9). As reported by Utusan Malaysia, the DOA stated on 2 July 2026 that <b>overland export of fresh durian to China is not currently approved</b>, pending a new or amended protocol agreed by both sides. The road/rail day counts above are for planning only — confirm with the DOA before shipping.')}</div>
       ${airTip}
       ${railTip}
       ${frozenTip}
@@ -1158,7 +1179,7 @@ function decide(){
    Malaysia, Jabatan Pertanian, circulated 6 Aug 2026; export scope) ----
    Shown ALONGSIDE the tool's own research-based figures, never replacing them. */
 function DOA_TEMP_NOTE(){
-  return `<div style="margin-top:8px;padding:8px 10px;border:1px dashed var(--shell);border-radius:9px;background:#fff;color:var(--shell);font-weight:600">${T('📋 农业局（DOA）2026《榴梿成熟割果采收指南》的数字：预冷 <b>12°C ± 1，4–5 小时</b>；其输华标签范例的储存温度为 <b>10–12°C</b>。这比本工具依据研究采用的 13–15°C 略低 —— 两者并列供参考，实际请以买家与出口协议的规格为准。','📋 Malaysia DOA 2026 cut-harvest guideline figures: pre-cool at <b>12°C ± 1 for 4–5 hours</b>; its sample China label shows storage at <b>10–12°C</b>. That is slightly lower than the research-based 13–15°C this tool uses — both are shown for reference; follow your buyer\'s and the export protocol\'s specification.')}</div>`;
+  return `<div style="margin-top:8px;padding:8px 10px;border:1px dashed var(--shell);border-radius:9px;background:#fff;color:var(--shell);font-weight:600">${T('📋 <b>官方数字（农业局 DOA 2026 指南）：预冷 12°C ± 1，4–5 小时</b>；其输华标签范例的储存温度为 10–12°C。<br>📚 本工具的 13–15°C 来自文献：UC Davis 采后中心建议 13–15°C；USDA Handbook 66 指整果低于 15°C 果壳会冷害；Romphophak & Siriphanich (1997) 发现较生的果在 13.5°C 出现冷害、较熟的果可存 15 天。两者有差距 —— 以农业局与出口协议／买家规格为准，越生的果越要留意冷害。','📋 <b>Official figure (Malaysia DOA 2026 guideline): pre-cool at 12°C ± 1 for 4–5 hours</b>; its sample China label shows storage at 10–12°C.<br>📚 This tool\'s 13–15°C comes from the literature: UC Davis Postharvest Center recommends 13–15°C; USDA Handbook 66 reports husk chilling injury in whole fruit below 15°C; Romphophak & Siriphanich (1997) found less-mature fruit chill-injured at 13.5°C while riper fruit kept 15 days. The two differ — follow the DOA and your export protocol or buyer specification, and watch for chilling injury in less-mature fruit.')}</div>`;
 }
 function doaCardHTML(isExport){
   const li=a=>a.map(x=>`<li>${x}</li>`).join('');
@@ -1249,10 +1270,10 @@ function render(key,cls,title,desc,mat,harvest,handle,tr){
     if(isLocal){
       shelfNote = T('🏠 本地即食：当天至隔天就吃，树熟风味最高最划算 —— 无需冷链或早割。常温约 '+tr.shelf.ambient+' 天内开裂，尽快分销即可。','🏠 Local fresh: eaten same/next day, so tree-ripe flavour is highest and best — no cold chain or early cutting needed. Cracks within ~'+tr.shelf.ambient+' days at room temp; just distribute promptly.');
     } else if(isExport){
-      shelfNote = T('⚠️ 常温整果只有约 1–2 天便开裂 —— 割得早一点最多多争取一两天，<b>不会大幅延长</b>。出口真正靠的是 <b>13–15°C 冷链</b>（业界实测约 5–7 天鲜果、上限约14天）。<b>切勿低于 12°C</b> —— 榴梿会冷害（红斑、异味）。要长期保存则取肉<b>冷冻（可存数月）</b>。','⚠️ At room temp a whole fruit cracks in only ~1–2 days — cutting earlier buys at most a day or two, <b>not a big extension</b>. Export relies on a <b>13–15°C reefer cold chain</b> (industry-real ~5–7 days fresh, ~14-day ceiling). <b>Never below 12°C</b> — durian gets chilling injury (red lesions, off-flavour). For long storage, remove the flesh and <b>freeze it (keeps for months)</b>.')
+      shelfNote = T('⚠️ 常温整果只有约 1–2 天便开裂 —— 割得早一点最多多争取一两天，<b>不会大幅延长</b>。出口真正靠的是 <b>13–15°C 冷链</b>（业界实测约 5–7 天鲜果、上限约14天）。<b>不要低于农业局的预冷范围（12°C ± 1）</b> —— 文献指出整果低于约 13–15°C 果壳会冷害，越生的果越敏感。要长期保存则取肉<b>冷冻（可存数月）</b>。','⚠️ At room temp a whole fruit cracks in only ~1–2 days — cutting earlier buys at most a day or two, <b>not a big extension</b>. Export relies on a <b>13–15°C reefer cold chain</b> (industry-real ~5–7 days fresh, ~14-day ceiling). <b>Do not go below the DOA pre-cooling range (12°C ± 1)</b> — the literature reports husk chilling injury in whole fruit below about 13–15°C, and less-mature fruit is more sensitive. For long storage, remove the flesh and <b>freeze it (keeps for months)</b>.')
         + DOA_TEMP_NOTE();
     } else { // short-haul
-      shelfNote = T('🚚 短程运输：数小时至隔天到货，常温整果约 '+tr.shelf.ambient+' 天内要送到并分销。若行程接近隔天，用一点冷藏（13–15°C）更稳；<b>切勿低于 12°C</b>（会冷害）。','🚚 Short-haul: arrives within hours to next day, so a whole fruit at room temp (~'+tr.shelf.ambient+' days) is usually fine if you deliver and distribute promptly. If the run stretches toward next-day, light chilling (13–15°C) helps; <b>never below 12°C</b> (chilling injury).');
+      shelfNote = T('🚚 短程运输：数小时至隔天到货，常温整果约 '+tr.shelf.ambient+' 天内要送到并分销。若行程接近隔天，用一点冷藏（13–15°C）更稳；<b>不要低于农业局的 12°C ± 1</b>（更低有冷害风险）。','🚚 Short-haul: arrives within hours to next day, so a whole fruit at room temp (~'+tr.shelf.ambient+' days) is usually fine if you deliver and distribute promptly. If the run stretches toward next-day, light chilling (13–15°C) helps; <b>do not go below the DOA figure of 12°C ± 1</b> (chilling-injury risk below that).');
     }
     // Transit-route panel is export-only.
     const transitPanel = isExport ? (tr.transitCheck||'') : '';
@@ -1494,7 +1515,7 @@ function normalizeFarms(d,strict){
       (Array.isArray(t.logs)?t.logs:[]).forEach(l=>{
         if(!l||typeof l!=='object') return;
         const log={};
-        ['flowerDate','actualDropStr','cutDateStr','projCutISO'].forEach(k=>{
+        ['flowerDate','firstDropStr','actualDropStr','cutDateStr','projCutISO'].forEach(k=>{
           if(l[k]==null||l[k]==='') return;
           const n=normDate(l[k]);
           if(n) log[k]=n;
@@ -1605,7 +1626,7 @@ function cfgForTree(tree){
   const learned=treeLearnedDaa(tree);
   if(learned==null) return cloneCfgFor(tree.variety);
   const base=CLONES[tree.variety]||CLONES.other, sh=learned-base.dropHi;
-  return {min:base.min+sh, dropLo:base.dropLo+sh, dropHi:learned, over:base.over+sh, fragile:base.fragile};
+  return {min:Math.max(DOA_MIN,base.min+sh), dropLo:base.dropLo+sh, dropHi:learned, over:base.over+sh, fragile:base.fragile, src:base.src, own:true};
 }
 
 // ---- render the whole farms UI ----
@@ -1690,6 +1711,18 @@ function renderFarms(){
         const proj = L.ps? T('预计落果 '+L.ps,'drop ~'+L.ps):'';
         const drop = L.dr? T(' · 实际落果 '+L.dr,' · dropped '+L.dr):'';
         html+=`<div style="font-size:11.5px;color:var(--ink-soft);margin-top:3px">${T('开花 '+L.fl,'flowered '+L.fl)}${proj?' · '+proj:''}${drop}</div>`;
+        // DOA step: maturity is checked 5 days after the FIRST fruit falls
+        if(lastLog.firstDropStr && !lastLog.actualDropStr && !lastLog.cutDateStr){
+          const chk=new Date(lastLog.firstDropStr+'T00:00:00');
+          if(!isNaN(chk)){
+            chk.setDate(chk.getDate()+5);
+            const n0=new Date(); n0.setHours(0,0,0,0);
+            const dd=Math.round((chk-n0)/86400000);
+            html+= dd>0
+              ? `<div style="font-size:11.5px;color:var(--shell);font-weight:700;margin-top:3px">📋 ${T('首果 '+escapeHtml(lastLog.firstDropStr)+' 落下 · 农业局成熟检查：'+fmtDate(chk)+'（还有 '+dd+' 天）','First fruit fell '+escapeHtml(lastLog.firstDropStr)+' · DOA maturity check: '+fmtDate(chk)+' (in '+dd+'d)')}</div>`
+              : `<div style="font-size:11.5px;color:var(--shell);font-weight:700;margin-top:4px;line-height:1.55;background:#eef5ec;border:1px solid var(--good);border-radius:8px;padding:6px 9px">📋 ${T('首果落下已满 5 天 —— 现在按农业局特征检查其余的果：① 果柄离层线膨大、清晰、带褐色　② 果壳瓣线清楚可见　③ 刺稍软、间距变宽。三项都符合才割。','5 days since the first fruit fell — check the rest against the DOA signs now: ① stalk abscission line swollen, distinct, brownish　② segment lines clearly visible on the husk　③ spines slightly soft and spaced wide. Cut only when all three hold.')}</div>`;
+          }
+        }
         // live countdown if still waiting (no drop, no cut yet)
         if(lastLog.projCutISO && !lastLog.actualDropStr && !lastLog.cutDateStr){
           const cut=new Date(lastLog.projCutISO+'T00:00:00'); const now=new Date();now.setHours(0,0,0,0);
@@ -1726,6 +1759,11 @@ function renderFarms(){
       const tiles=[];
       // flowering: always present; ✎ if already recorded
       tiles.push(`<button data-logflower="${escapeHtml(farm.id+'|'+tree.id)}" class="mtile" style="border-color:var(--line);background:${editFlower?'#f3efe6':'#fff'};color:var(--shell)"><span class="ic">${editFlower?'✎':'✚'}</span><span>${seasonDone?T('新一季开花','New season'):editFlower?T('开花','Flowering'):T('记录开花','Log flowering')}</span></button>`);
+      // DOA trigger: date the first fruit fell (season still on the tree)
+      if(hasFlower && !seasonDone){
+        const hasFirst=!!lastLog.firstDropStr;
+        tiles.push(`<button data-logfirst="${escapeHtml(farm.id+'|'+tree.id)}" class="mtile" style="border-color:var(--shell);background:${hasFirst?'#e3ecdf':'#fff'};color:var(--shell)"><span class="ic">${hasFirst?'✎':'✚'}</span><span>${T('首果落下','First fruit fell')}</span></button>`);
+      }
       // drop: show once flowering exists and not yet cut; ✎ if recorded
       if(hasFlower && !hasCut){
         tiles.push(`<button data-logdrop="${escapeHtml(farm.id+'|'+tree.id)}" class="mtile" style="border-color:var(--good);background:${hasDrop?'#e3ecdf':'#eef5ec'};color:var(--good)"><span class="ic">${hasDrop?'✎':'✚'}</span><span>${hasDrop?T('落果日','Drop date'):T('回填落果日','Log actual drop')}</span></button>`);
@@ -1889,7 +1927,7 @@ function renderInlineCalc(farm, tree, calcKey){
   if(isLocal){
     out+=T('🏠 本地即食：常温约 '+shelf.ambient+' 天内开裂，尽快分销；越贴近树熟风味越高。','🏠 Local: cracks within ~'+shelf.ambient+'d at room temp — distribute promptly; closer to tree-ripe = more flavour.');
   } else if(isExport){
-    out+=T('📦 出口：13–15°C 冷链整果约 '+shelf.cold+' 天。越贴近落果窗口，自然与催熟差距越小；远程可考虑取肉急冻。','📦 Export: ~'+shelf.cold+'d whole fruit at 13–15°C reefer. Closer to the drop window narrows the natural-vs-forced gap; for long-haul consider frozen flesh.') + DOA_TEMP_NOTE();
+    out+=T('📦 出口：13–15°C 冷链整果约 '+shelf.cold+' 天。越贴近落果窗口，割果与树熟的差距越小；远程可考虑取肉急冻。','📦 Export: ~'+shelf.cold+'d whole fruit at 13–15°C reefer. Closer to the drop window narrows the gap between cut and tree-dropped fruit; for long-haul consider frozen flesh.') + DOA_TEMP_NOTE();
   } else {
     out+=T('🚚 短程：常温整果约 '+shelf.ambient+' 天，或 13–15°C 冷链约 '+shelf.cold+' 天，及时分销即可。','🚚 Short-haul: ~'+shelf.ambient+'d whole fruit at room temp, or ~'+shelf.cold+'d at 13–15°C reefer — distribute promptly.');
   }
@@ -2054,6 +2092,20 @@ function wireFarmEvents(){
     }
     saveFarms(farmsData); renderFarms();
   });
+  app.querySelectorAll('[data-logfirst]').forEach(b=>b.onclick=async()=>{
+    const [fid,tid]=splitKey(b.dataset.logfirst);
+    const today=todayISO();
+    const farm=farmsData.farms.find(f=>f.id===fid);
+    const tree=farm&&farm.trees.find(t=>t.id===tid);
+    const open=tree&&(tree.logs||[]).filter(l=>l.flowerDate&&!l.actualDropStr&&!l.cutDateStr).pop();
+    if(!open) return;
+    const dateStr=await fdDatePrompt(T('这棵树这一季第一颗果自然落下的日期。\n农业局指南：5 天后开始检查其余果的成熟度。','The date the FIRST fruit of this season fell from this tree.\nDOA guideline: start checking the rest for maturity 5 days later.'), open.firstDropStr||today, open.flowerDate, today);
+    if(!dateStr) return;
+    if(!/^\d{4}-\d{2}-\d{2}$/.test(dateStr)){ await fdAlert(T('日期格式：YYYY-MM-DD','Format: YYYY-MM-DD')); return; }
+    if(dateStr>today || dateStr<=open.flowerDate){ await fdAlert(T('日期须晚于开花日（'+open.flowerDate+'），且不能是未来。','The date must be after flowering ('+open.flowerDate+') and not in the future.')); return; }
+    open.firstDropStr=dateStr;
+    saveFarms(farmsData); renderFarms();
+  });
   app.querySelectorAll('[data-logdrop]').forEach(b=>b.onclick=async()=>{
     const [fid,tid]=splitKey(b.dataset.logdrop);
     const today=todayISO();
@@ -2165,7 +2217,7 @@ function switchTab(name){
   const exp=document.getElementById('farmsExport');
   const imp=document.getElementById('farmsImport');
   const impFile=document.getElementById('farmsImportFile');
-  const HEAD=['Farm 果园','Tree ID 树号','Variety 品种','Flowering 开花日','Projected cut 预计割果日','Actual drop 实际落果日','Cut date 割果日','Ripeness % 成熟度','Outcome 记录','Feedback 顾客反馈','Feedback note 反馈备注','Farm ID 果园编号（勿改）'];
+  const HEAD=['Farm 果园','Tree ID 树号','Variety 品种','Flowering 开花日','Projected cut 预计割果日','Actual drop 实际落果日','Cut date 割果日','Ripeness % 成熟度','Outcome 记录','Feedback 顾客反馈','Feedback note 反馈备注','Farm ID 果园编号（勿改）','First fruit fell 首果掉落日'];
 
   // A cell starting with = + - @ would be run as a formula by Excel/Sheets; a leading
   // apostrophe makes it plain text. parseCsv() strips it again on import.
@@ -2207,13 +2259,13 @@ function switchTab(name){
     const rows=[HEAD.map(csvEsc).join(',')];
     (data.farms||[]).filter(f=>!f.deletedAt).forEach(function(f){
       const trees=(f.trees||[]).filter(t=>!t.deletedAt);
-      if(!trees.length){ rows.push([f.name||'','','','','','','','','','','',f.id].map(csvEsc).join(',')); return; }
+      if(!trees.length){ rows.push([f.name||'','','','','','','','','','','',f.id,''].map(csvEsc).join(',')); return; }
       trees.forEach(function(t){
         const vlabel=cloneLabel(t.variety); const logs=t.logs||[];
-        if(!logs.length){ rows.push([f.name||'',t.id||'',vlabel,'','','','','','','','',f.id].map(csvEsc).join(',')); return; }
+        if(!logs.length){ rows.push([f.name||'',t.id||'',vlabel,'','','','','','','','',f.id,''].map(csvEsc).join(',')); return; }
         logs.forEach(function(l){
           const fbk=l.feedback||{};
-          rows.push([f.name||'',t.id||'',vlabel,l.flowerDate||'',l.projCutISO||'',l.actualDropStr||'',l.cutDateStr||'',(l.cutPct!=null?l.cutPct:''),l.outcome||'',fbToLabel(fbk.rating),(fbk.note||''),f.id].map(csvEsc).join(','));
+          rows.push([f.name||'',t.id||'',vlabel,l.flowerDate||'',l.projCutISO||'',l.actualDropStr||'',l.cutDateStr||'',(l.cutPct!=null?l.cutPct:''),l.outcome||'',fbToLabel(fbk.rating),(fbk.note||''),f.id,l.firstDropStr||''].map(csvEsc).join(','));
         });
       });
     });
@@ -2231,6 +2283,7 @@ function switchTab(name){
     const iVar=find(['variety','品种']);
     const iFlower=find(['flower','开花']);
     const iDrop=find(['drop','落果']);
+    const iFirst=find(['first fruit','首果']);
     const iProj=find(['projected','预计']);
     let iCutDate=-1; for(let i=0;i<header.length;i++){ if(i===iProj) continue; if(header[i].indexOf('cut date')>=0||header[i].indexOf('割果日')>=0){ iCutDate=i; break; } }
     const iRipe=find(['ripeness','成熟']);
@@ -2254,10 +2307,11 @@ function switchTab(name){
       if(tid!==''){
         let tree=farm._t[tid];
         if(!tree){ tree={id:tid,variety:varietyCode(get(row,iVar)),logs:[]}; farm._t[tid]=tree; farm.trees.push(tree); }
-        const flower=get(row,iFlower), drop=get(row,iDrop), cutd=get(row,iCutDate), ripe=get(row,iRipe), outc=get(row,iOutcome), fbr=get(row,iFb), fbn=get(row,iNote);
+        const flower=get(row,iFlower), first=get(row,iFirst), drop=get(row,iDrop), cutd=get(row,iCutDate), ripe=get(row,iRipe), outc=get(row,iOutcome), fbr=get(row,iFb), fbn=get(row,iNote);
         if(flower||drop||cutd||ripe||outc||fbr||fbn){
           const log={};
           if(flower) log.flowerDate=flower;
+          if(first) log.firstDropStr=first;
           if(drop) log.actualDropStr=drop;
           if(cutd) log.cutDateStr=cutd;
           const rp=parseInt(ripe,10); if(!isNaN(rp)) log.cutPct=rp;
