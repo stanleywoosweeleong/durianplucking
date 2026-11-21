@@ -831,7 +831,11 @@ function fmtDate(d){
   return T(`${yr}年${mo}月${da}日 ${wd}`,`${da} ${['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][d.getMonth()]} ${yr} (${wd})`);
 }
 function project(){
-  if(!state.variety||!flowerDate.value){checkReady();return;}
+  if(!state.variety||!flowerDate.value){
+    // no date (or it was cleared): drop the old projection so a stale answer can't linger
+    state.daa=null; state.days=null; state.cutDateStr=null; state.daysToGo=null;
+    checkReady(); return;
+  }
   const c=cloneCfg();
   const d0=new Date(flowerDate.value+'T00:00:00');
   const now=new Date();now.setHours(0,0,0,0);
@@ -913,10 +917,17 @@ function syncFromDate(){
 // Auto-compute: the moment all required inputs exist, render the result live.
 // No button — every field change re-runs decide() so the answer updates instantly.
 function maybeAutoRun(){
-  const daysOk = state.days==='date' && state.daa;
-  if(state.variety && state.method && state.market && daysOk){
-    decide();
+  if(!(state.variety && state.method && state.market)) return;
+  if(state.days==='date' && state.daa){ decide(); return; }
+  if(state.method==='tree'){
+    // Tree-drop advice doesn't depend on a date: evaluate at the natural-drop point.
+    state.daa=cloneCfg().dropHi; decide(); state.daa=null; return;
   }
+  clearResult(); // plucking without a flowering date — nothing valid to show
+}
+function clearResult(){
+  const el=document.getElementById('result');
+  el.classList.remove('show'); el.innerHTML='';
 }
 function checkReady(){ maybeAutoRun(); }
 
@@ -936,7 +947,7 @@ function flavourRetention(c,daa,method){
   if(daa>=c.min)    return Math.round(78+ (daa-c.min)/(Math.max(1,c.dropLo-c.min))*17);      // 78→95
   return Math.max(35, Math.round(78- (c.min-daa)*4)); // below threshold: steep loss
 }
-function shelfLifeDays(c,daa,method,market){
+function shelfLifeDays(c,daa,method){
   // EVIDENCE-BASED, cross-checked against real Thailand/Vietnam→China export practice:
   // - Ambient (room temp, unpackaged): ripe/tree-drop fruit dehisces (cracks) in
   //   ~1–2 days. Cutting earlier buys a little more pre-crack time, but dehiscence is
@@ -1008,7 +1019,6 @@ function decide(){
   let mat=maturityPct(c,daa,s.method);
   const plucked=s.method==='pluck';
   const fragile=c.fragile;
-  const tooEarly = daa!=null && daa < c.min;
   // Over-ripe is judged on TODAY's DAA (days since anthesis), not the target cut DAA —
   // the target always sits inside the window, so it could never trip this guard.
   let nowDaa=null;
@@ -1019,7 +1029,7 @@ function decide(){
   const overRipe = nowDaa!=null && nowDaa > c.over;
   if(overRipe) mat=maturityPct(c,nowDaa,s.method);
   const flav=flavourRetention(c,daa,s.method);
-  const shelf=shelfLifeDays(c,daa,s.method,s.market);
+  const shelf=shelfLifeDays(c,daa,s.method);
 
   const win=T(`落果窗口 ${c.dropLo}–${c.dropHi} DAA · 过熟 >${c.over}`,`Drop window ${c.dropLo}–${c.dropHi} DAA · over-ripe >${c.over}`);
   let key,cls,title,desc;
@@ -1030,12 +1040,8 @@ function decide(){
     title=T('过熟风险 · 已超落果期','Over-ripe risk · past drop window');
     desc=T(`此品种 ${nowDaa} DAA 已超过 ${c.over} 天的过熟线，果肉易软烂、开裂、发酵味重。应立即采下就地即食或加工，不宜运输。`,`At ${nowDaa} DAA this clone is past its ${c.over}-day over-ripe line — flesh turns mushy, splits, ferments. Harvest now for immediate local/processing use, not transport.`);
   }
-  // 2. too-early / immature guard
-  else if(tooEarly && plucked){
-    key='early';cls='v-early';
-    title=T('过早采摘 · 风险','Plucked too early · risk');
-    desc=T(`此品种生理成熟门槛约 ${c.min} DAA，当前 ${daa} DAA 偏生。后熟会微弱或不完整，即使催熟开裂也难有好风味。`,`This clone's maturity threshold is ~${c.min} DAA; at ${daa} DAA it's under-ripe. Post-harvest ripening will be weak — even forced cracking won't give good flavor.`);
-  }
+  // (no 'too early' branch: the target cut DAA is clamped to the maturity threshold
+  //  in daaForTarget, so the tool never proposes an immature cut.)
   // 3. tree-ripe / natural drop
   else if(s.method==='tree'){
     key='tree';cls='v-tree';
@@ -1145,7 +1151,7 @@ function decide(){
     </div>`;
   }
 
-  render(key,cls,title,desc,mat,harvest,handle,{flav,shelf,method:s.method,market:s.market,overRipe,tooEarly,target:s.target,cutDateStr:s.cutDateStr,daysToGo:s.daysToGo,transitCheck});
+  render(key,cls,title,desc,mat,harvest,handle,{flav,shelf,method:s.method,market:s.market,overRipe,target:s.target,cutDateStr:s.cutDateStr,daysToGo:s.daysToGo,transitCheck});
 }
 
 function render(key,cls,title,desc,mat,harvest,handle,tr){
@@ -1182,7 +1188,7 @@ function render(key,cls,title,desc,mat,harvest,handle,tr){
   let tradeoff='';
   if(tr.flav!=null && !tr.overRipe){
     const fColor=tr.flav>=95?'#3f7d55':tr.flav>=80?'#c98a2b':'#b4482f';
-    const treeCold=shelfLifeDays(cloneCfg(),cloneCfg().dropHi,'tree',tr.market).cold;
+    const treeCold=shelfLifeDays(cloneCfg(),cloneCfg().dropHi,'tree').cold;
     const coldGain=tr.shelf.cold-treeCold; // honest extra COLD-STORAGE days vs tree-drop
     tr.cold_note = coldGain>0 ? T(`冷藏下比树熟果多约 ${coldGain} 天（较硬果实更耐存）`,`~${coldGain} more cold-storage days than tree-drop (firmer fruit keeps better)`) : '';
     const flavLine = tr.method==='tree'
@@ -1307,7 +1313,7 @@ if(document.readyState==='loading'){ document.addEventListener('DOMContentLoaded
 else { wireWaModal(); }
 
 /* ---- iframe-safe modal (native confirm/prompt are blocked in sandboxed iframes) ---- */
-function fdModalOpen({message, input=false, defaultValue='', okLabel=null, type='text', min='', max=''}){
+function fdModalOpen({message, input=false, defaultValue='', okLabel=null, type='text', min='', max='', alertOnly=false}){
   return new Promise(resolve=>{
     const modal=document.getElementById('fdModal');
     const msg=document.getElementById('fdModalMsg');
@@ -1354,6 +1360,7 @@ function fdModalOpen({message, input=false, defaultValue='', okLabel=null, type=
       ok.onclick=null; cancel.onclick=null; modal.onclick=null; inp.onkeydown=null; inp.onclick=null;
     };
     ok.onclick=()=>{ const v=input?inp.value:true; cleanup(); resolve(v); };
+    cancel.style.display=alertOnly?'none':'';
     cancel.onclick=()=>{ cleanup(); resolve(input?null:false); };
     modal.onclick=(e)=>{ if(e.target===modal){ cleanup(); resolve(input?null:false); } };
     inp.onkeydown=(e)=>{ if(e.key==='Enter'){ const v=inp.value; cleanup(); resolve(v); } };
@@ -1365,7 +1372,7 @@ function fdDatePrompt(message,defaultValue='',min='',max=''){
   const hint = document.body.classList.contains('lang-en') ? '\n(tap the field to open the calendar)' : '\n（点一下下方日期，打开日历）';
   return fdModalOpen({message:message+hint,input:true,type:'date',defaultValue,min,max});
 }
-function fdAlert(message){ return fdModalOpen({message,input:false}); } // OK-only style ok
+function fdAlert(message){ return fdModalOpen({message,input:false,alertOnly:true}); } // OK-only
 
 /* ---- customer flavour feedback modal (optional, per harvested batch) ---- */
 function openFeedback(opts){
@@ -1811,7 +1818,7 @@ function renderInlineCalc(farm, tree, calcKey){
     return wrap(out);
   }
 
-  const shelf=shelfLifeDays(c,targetDaa,'pluck',cs.market);
+  const shelf=shelfLifeDays(c,targetDaa,'pluck');
   const cd = days<0?T(`已过 ${-days} 天`,`${-days}d past`):days===0?T('就是今天','today'):T(`还有 ${days} 天`,`${days}d to go`);
   const cdCol = days<0?'#b4482f':days<=3?'#c98a2b':'#3f7d55';
   const fColor=flav>=95?'#3f7d55':flav>=80?'#c98a2b':'#b4482f';
@@ -2009,9 +2016,10 @@ function wireFarmEvents(){
       ? T('已记录落果日：'+existing+'。修改后将重算本树 DAA。','Drop already recorded: '+existing+'. Changing it recomputes this tree DAA.')
       : T('选择实际自然落果日期：','Pick the actual natural-drop date:');
     const dropMin=(target&&target.flowerDate)?target.flowerDate:'';
-    const dateStr=await fdDatePrompt(msg, existing||today, dropMin, '');
+    const dateStr=await fdDatePrompt(msg, existing||today, dropMin, today);
     if(!dateStr) return;
     if(!/^\d{4}-\d{2}-\d{2}$/.test(dateStr)){ await fdAlert(T('日期格式：YYYY-MM-DD','Format: YYYY-MM-DD')); return; }
+    if(dateStr>today){ await fdAlert(T('落果日不能是未来的日期 —— 等真的落果了再回填。','The drop date cannot be in the future — log it once the fruit has actually dropped.')); return; }
     const fdate=target&&target.flowerDate;
     if(fdate){
       const diff=Math.round((new Date(dateStr+'T00:00:00')-new Date(fdate+'T00:00:00'))/86400000);
@@ -2033,9 +2041,10 @@ function wireFarmEvents(){
       ? T('已记录割果：'+target.cutDateStr+'（'+target.cutPct+'%）。可修改。','Cut already recorded: '+target.cutDateStr+' ('+target.cutPct+'%). You can update it.')
       : T('选择割果日期：','Pick the cut date:');
     const cutMin=(target&&target.flowerDate)?target.flowerDate:'';
-    const dateStr=await fdDatePrompt(dMsg, (had&&target.cutDateStr)||today, cutMin, '');
+    const dateStr=await fdDatePrompt(dMsg, (had&&target.cutDateStr)||today, cutMin, today);
     if(!dateStr) return;
     if(!/^\d{4}-\d{2}-\d{2}$/.test(dateStr)){ await fdAlert(T('日期格式：YYYY-MM-DD','Format: YYYY-MM-DD')); return; }
+    if(dateStr>today){ await fdAlert(T('割果日不能是未来的日期 —— 割了之后再记录。','The cut date cannot be in the future — log it once the fruit has actually been cut.')); return; }
     const cfdate=target&&target.flowerDate;
     if(cfdate){
       const cdiff=Math.round((new Date(dateStr+'T00:00:00')-new Date(cfdate+'T00:00:00'))/86400000);
@@ -2044,9 +2053,15 @@ function wireFarmEvents(){
     }
     const pctRaw=await fdPrompt(T('割果成熟度 %（85 / 90 / 95）：','Cut ripeness % (85 / 90 / 95):'), (had&&target.cutPct)?String(target.cutPct):'95');
     if(pctRaw===null) return;
-    const pct=Math.max(60,Math.min(100,parseInt(pctRaw,10)||95));
-    if(target){ target.cutDateStr=dateStr; target.cutPct=pct; delete target.badCutStr; }
-    saveFarms(farmsData); renderFarms();
+    const pct=/^\s*\d{1,3}\s*%?\s*$/.test(pctRaw)?parseInt(pctRaw,10):NaN;
+    if(isNaN(pct)||pct<60||pct>100){ await fdAlert(T('成熟度请填 60–100 之间的数字（例如 90）。这次没有保存。','Ripeness must be a number from 60 to 100 (e.g. 90). Nothing was saved.')); return; }
+    const noteRaw=await fdPrompt(T('结果备注（选填）：例如「后熟 3 天、果肉偏硬、买家满意」','Outcome note (optional): e.g. "ripened in 3 days, flesh a bit firm, buyer happy"'), (target&&target.outcome)||'');
+    if(noteRaw===null) return;
+    if(target){
+      target.cutDateStr=dateStr; target.cutPct=pct; delete target.badCutStr;
+      const note=noteRaw.trim(); if(note) target.outcome=note; else delete target.outcome;
+    }
+    saveFarms(farmsData); renderFarms(); renderInsights();
   });
   app.querySelectorAll('[data-runtree]').forEach(b=>b.onclick=()=>{
     const key='calc:'+b.dataset.runtree;
@@ -2101,7 +2116,9 @@ function switchTab(name){
   const impFile=document.getElementById('farmsImportFile');
   const HEAD=['Farm 果园','Tree ID 树号','Variety 品种','Flowering 开花日','Projected cut 预计割果日','Actual drop 实际落果日','Cut date 割果日','Ripeness % 成熟度','Outcome 记录','Feedback 顾客反馈','Feedback note 反馈备注'];
 
-  function csvEsc(v){ v=(v==null?'':String(v)); return /[",\n\r]/.test(v) ? '"'+v.replace(/"/g,'""')+'"' : v; }
+  // A cell starting with = + - @ would be run as a formula by Excel/Sheets; a leading
+  // apostrophe makes it plain text. parseCsv() strips it again on import.
+  function csvEsc(v){ v=(v==null?'':String(v)); if(/^[=+\-@\t\r]/.test(v)) v="'"+v; return /[",\n\r]/.test(v) ? '"'+v.replace(/"/g,'""')+'"' : v; }
   function parseCsv(text){
     if(text.charCodeAt(0)===0xFEFF) text=text.slice(1);
     const rows=[]; let row=[], field='', inQ=false, i=0; const n=text.length;
@@ -2115,7 +2132,7 @@ function switchTab(name){
       field+=c; i++;
     }
     if(field!=='' || row.length){ row.push(field); rows.push(row); }
-    return rows;
+    return rows.map(r=>r.map(f=>/^'[=+\-@\t\r]/.test(f)?f.slice(1):f));
   }
 
   function fbToLabel(rating){ return {happy:T('满意','Happy'),ok:T('一般','So-so'),unhappy:T('不满意','Unhappy')}[rating]||''; }
@@ -2285,6 +2302,17 @@ function switchTab(name){
 
 // render when the farms tab is first shown and on language switch
 function initFarms(){ renderFarms(); if(typeof renderInsights==='function') renderInsights(); }
+// An installed app can stay open for days: when it comes back to the foreground on a
+// new calendar day, redraw everything that shows a countdown.
+(function(){
+  let shownDay=todayISO();
+  document.addEventListener('visibilitychange',()=>{
+    if(document.visibilityState!=='visible' || todayISO()===shownDay) return;
+    shownDay=todayISO();
+    renderFarms(); renderInsights();
+    if(state.variety&&flowerDate.value) project();
+  });
+})();
 if(document.readyState==='loading'){ document.addEventListener('DOMContentLoaded',initFarms); }
 else { initFarms(); }
 
