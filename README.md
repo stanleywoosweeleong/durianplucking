@@ -21,6 +21,14 @@ All paths are relative, so it works under the `/<repo>/` sub-path with no change
 - **iOS / Safari:** open the site → Share → *Add to Home Screen* (uses the 180×180 icon).
 - Works offline after the first load (service worker caches the app shell).
 
+## Sharing
+
+The share button in the header (and the "Share this app" button in the footer) opens a
+dialog with a QR code for the address the app is served from, plus **WhatsApp** and
+**Copy link** buttons. The QR code is generated inside the app, so it works offline and
+follows the app to whatever address you host it at. The separate QR code in the Science
+tab points to the source video, not to the app.
+
 ## Files
 
 | File | Purpose |
