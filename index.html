@@ -834,7 +834,23 @@ function updateCustomDaaBox(){
   customDaa.placeholder = String(base.dropHi); // generic drop day as the hint
   customDaaGeneric.textContent = T('通用参考：'+base.dropHi+' DAA','generic ref: '+base.dropHi+' DAA','rujukan umum: '+base.dropHi+' DAA');
   customDaaReset.style.display = custom!=null ? 'inline-block' : 'none';
+  // figures already established on the grower's farms for this clone — one tap to use
+  let hints='';
+  try{
+    (farmsData.farms||[]).filter(f=>!f.deletedAt).forEach(f=>{
+      const c=windowFor(state.variety,f,null), k=c.basis.kind;
+      if(k==='farm'||k==='first'||k==='stated')
+        hints+=`<div style="display:flex;align-items:center;gap:8px;margin-top:6px"><span style="flex:1;min-width:0;font-size:11.5px;color:var(--ink-soft);line-height:1.4"><b style="color:var(--shell)">${escapeHtml(f.name)}</b> · ${basisText(c)}</span><button type="button" data-usecalib="${c.dropHi}" style="flex:none;border:1.5px solid var(--line);background:#fff;color:var(--shell);border-radius:8px;padding:4px 10px;font-size:11.5px;font-weight:700;cursor:pointer">${T('采用','Use','Guna')}</button></div>`;
+    });
+  }catch(e){}
+  customDaaFarms.innerHTML = hints ? `<div style="font-size:11.5px;font-weight:800;color:var(--shell);margin-top:9px">${T('你的果园已有的数字','Figures from your farms','Angka daripada kebun anda')}</div>`+hints : '';
 }
+const customDaaFarms=document.createElement('div');
+customDaaBox.appendChild(customDaaFarms);
+customDaaFarms.addEventListener('click',e=>{
+  const b=e.target.closest('[data-usecalib]'); if(!b) return;
+  customDaa.value=b.dataset.usecalib; customDaa.dispatchEvent(new Event('input')); customDaa.dispatchEvent(new Event('change'));
+});
 function applyCustomDaa(){
   if(!state.variety) return;
   // keep only digits (mobile-friendly free typing, no spinner)
@@ -1542,7 +1558,10 @@ function loadFarms(){
   try{ const s=localStorage.getItem(FARMS_KEY); return s?JSON.parse(s):{farms:[]}; }
   catch(e){ return {farms:[]}; }
 }
-function saveFarms(d){ try{ localStorage.setItem(FARMS_KEY,JSON.stringify(d)); }catch(e){} }
+function saveFarms(d){
+  try{ refreshProjections(d.farms); }catch(e){}   // a new drop date re-calibrates the whole farm
+  try{ localStorage.setItem(FARMS_KEY,JSON.stringify(d)); }catch(e){}
+}
 /* migration: clean historically-saved bad dates (drop/cut on or before flowering). */
 function sanitizeFarms(d){
   let changed=false;
@@ -1572,6 +1591,10 @@ function normalizeFarms(d,strict){
     const farm={id:(/^[A-Za-z0-9_-]+$/.test(fid)&&!usedIds[fid])?fid:uid(), name:String(f.name==null?'':f.name), trees:[]};
     usedIds[farm.id]=1; // farm ids must be unique — every button addresses a farm by id
     if(f.deletedAt) farm.deletedAt=+f.deletedAt||Date.now();
+    if(f.calib&&typeof f.calib==='object'){   // the grower's own drop day per clone
+      Object.keys(f.calib).forEach(v=>{ const n=parseInt(f.calib[v],10);
+        if(Object.prototype.hasOwnProperty.call(CLONES,v)&&n>=60&&n<=180){ farm.calib=farm.calib||{}; farm.calib[v]=n; } });
+    }
     const seen={};
     (Array.isArray(f.trees)?f.trees:[]).forEach(t=>{
       if(!t||typeof t!=='object') return;
@@ -1612,7 +1635,7 @@ function normalizeFarms(d,strict){
 function refreshProjections(farms){
   (farms||[]).forEach(f=>(f.trees||[]).forEach(t=>(t.logs||[]).forEach(l=>{
     if(!l.flowerDate || l.actualDropStr || l.cutDateStr) return;
-    const daa=cfgForTree(t).dropHi;   // always the current window — a stale projection can be weeks late
+    const daa=cfgForTree(t,f).dropHi;   // always the current window — a stale projection can be weeks late
     const cut=new Date(l.flowerDate+'T00:00:00'); cut.setDate(cut.getDate()+daa);
     if(isNaN(cut)) return;
     l.projDaa=daa; l.projCutISO=isoLocal(cut); l.projCutStr=fmtDate(cut);
@@ -1681,13 +1704,95 @@ function treeLearnedDaa(tree){
   return Math.round(daas.reduce((a,b)=>a+b,0)/daas.length);
 }
 
-// Window for one tree: re-centred on its own measured drop DAA when it has one,
-// otherwise the clone's (generic or grower-customised) window.
-function cfgForTree(tree){
-  const learned=treeLearnedDaa(tree);
-  if(learned==null) return cloneCfgFor(tree.variety);
-  const base=CLONES[tree.variety]||CLONES.other, sh=learned-base.dropHi;
-  return {min:base.min+sh, dropLo:base.dropLo+sh, dropHi:learned, over:base.over+sh, fragile:base.fragile, src:base.src, ev:base.ev, fast:base.fast, own:true};
+/* ================= DROP-DAY CALIBRATION =================
+   No published drop day can be trusted for a particular orchard, so each tree uses the
+   best figure available, in this order:
+     1. tree    — this tree's own logged drops
+     2. farm    — median of logged drops of the same clone on the same farm
+     3. first   — "first fruit fell" dates of that clone on the farm; the first fruit marks
+                  the START of the drop window (growers who cut never see a natural drop)
+     4. stated  — the grower's own figure for that clone on that farm (farm.calib)
+     5. device  — the figure typed in the Harvest Decision tab
+     6. generic — the app's default
+   The whole window (earliest cut, drop window, over-ripe line) shifts with the drop day.
+   `basis` records which one applied and how much data is behind it. */
+function daysBetween(a,b){ return Math.round((new Date(b+'T00:00:00')-new Date(a+'T00:00:00'))/86400000); }
+function median(arr){ const v=arr.slice().sort((x,y)=>x-y), m=v.length>>1; return v.length%2 ? v[m] : Math.round((v[m-1]+v[m])/2); }
+function farmCloneStats(farm,variety){
+  const drops=[], firsts=[];
+  ((farm&&farm.trees)||[]).filter(t=>!t.deletedAt&&t.variety===variety).forEach(t=>(t.logs||[]).forEach(l=>{
+    if(!l.flowerDate) return;
+    if(l.actualDropStr){ const n=daysBetween(l.flowerDate,l.actualDropStr); if(n>40&&n<200) drops.push(n); }
+    else if(l.firstDropStr){ const n=daysBetween(l.flowerDate,l.firstDropStr); if(n>40&&n<200) firsts.push(n); }
+  }));
+  return {drops,firsts};
+}
+function windowFor(variety,farm,tree){
+  const base=CLONES[variety]||CLONES.other;
+  const at=(dropHi,basis)=>{ const sh=dropHi-base.dropHi;
+    return {min:base.min+sh, dropLo:base.dropLo+sh, dropHi:dropHi, over:base.over+sh, fragile:base.fragile, src:base.src, ev:base.ev, fast:base.fast, own:true, basis:basis}; };
+  const span=a=>({n:a.length, lo:Math.min.apply(null,a), hi:Math.max.apply(null,a)});
+  if(tree){
+    const own=(tree.logs||[]).filter(l=>l.flowerDate&&l.actualDropStr).map(l=>daysBetween(l.flowerDate,l.actualDropStr)).filter(n=>n>40&&n<200);
+    if(own.length) return at(treeLearnedDaa(tree), Object.assign({kind:'tree'},span(own)));
+  }
+  if(farm){
+    const st=farmCloneStats(farm,variety);
+    if(st.drops.length) return at(median(st.drops), Object.assign({kind:'farm'},span(st.drops)));
+    if(st.firsts.length){ const f=median(st.firsts); return at(f+(base.dropHi-base.dropLo), Object.assign({kind:'first',first:f},span(st.firsts))); }
+    const stated=farm.calib&&farm.calib[variety];
+    if(stated) return at(stated,{kind:'stated'});
+  }
+  const dev=getCustomDrop(variety);
+  if(dev!=null && dev!==base.dropHi) return at(dev,{kind:'device'});
+  return Object.assign({},base,{basis:{kind:'generic'}});
+}
+function cfgForTree(tree,farm){ return windowFor(tree.variety,farm,tree); }
+// one line saying where a window's drop day comes from and how solid it is
+function basisText(c){
+  const b=c.basis||{kind:'generic'}, d=c.dropHi, rng=(b.n>1&&b.lo!==b.hi)?`${b.lo}–${b.hi}`:'';
+  switch(b.kind){
+    case 'tree':   return T(`本树自己的记录：${d} 天（${b.n} 次落果${rng?'，'+rng:''}）`,`this tree's own record: ${d} days (${b.n} drop${b.n>1?'s':''}${rng?', range '+rng:''})`,`rekod pokok ini sendiri: ${d} hari (${b.n} kali gugur${rng?', julat '+rng:''})`);
+    case 'farm':   return T(`本果园此品种的实测：${d} 天（${b.n} 次落果${rng?'，'+rng:''}）`,`measured on this farm for this clone: ${d} days (${b.n} drop${b.n>1?'s':''}${rng?', range '+rng:''})`,`diukur di kebun ini bagi klon ini: ${d} hari (${b.n} kali gugur${rng?', julat '+rng:''})`);
+    case 'first':  return T(`按「首果落下」推算：首果约第 ${b.first} 天落，窗口到第 ${d} 天（${b.n} 笔记录）`,`estimated from "first fruit fell": first fruit at about day ${b.first}, window to day ${d} (${b.n} record${b.n>1?'s':''})`,`dianggar daripada "buah pertama gugur": buah pertama pada kira-kira hari ke-${b.first}, tempoh hingga hari ke-${d} (${b.n} rekod)`);
+    case 'stated': return T(`你为本果园填的数字：${d} 天（尚无实测）`,`your own figure for this farm: ${d} days (no measured drops yet)`,`angka anda sendiri bagi kebun ini: ${d} hari (belum ada gugur diukur)`);
+    case 'device': return T(`你在「采收决策」填的数字：${d} 天`,`the figure you entered on the Harvest Decision tab: ${d} days`,`angka yang anda masukkan dalam tab Keputusan Tuai: ${d} hari`);
+    default:       return T(`通用参考 ${d} 天 —— 尚未校准`,`generic default ${d} days — not yet calibrated`,`rujukan umum ${d} hari — belum ditentukur`);
+  }
+}
+// The calibration panel on a farm card: one row per clone grown there.
+function calibBlock(farm,activeTrees){
+  const vs=[...new Set(activeTrees.map(t=>t.variety))];
+  if(!vs.length) return '';
+  const rows=vs.map(v=>{
+    const c=windowFor(v,farm,null), b=c.basis, measured=b.kind==='farm'||b.kind==='first';
+    const col=measured?'var(--good)':b.kind==='generic'?'var(--warn)':'var(--shell)';
+    const wide=(b.kind==='farm'&&b.hi-b.lo>14)
+      ? `<div style="font-size:11px;color:var(--danger);font-weight:700;margin-top:2px">⚠ ${T('记录之间相差超过两周 —— 请检查日期是否记错，或是否混了不同花期。','Records differ by more than two weeks — check for a mistyped date or mixed flowering flushes.','Rekod berbeza lebih dua minggu — semak tarikh yang tersalah taip atau kelompok bunga yang bercampur.')}</div>` : '';
+    return `<div style="display:flex;align-items:flex-start;gap:8px;padding:7px 0;border-top:1px solid var(--line)">
+      <div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:800;color:var(--ink)">${escapeHtml(cloneLabel(v))}</div>
+        <div style="font-size:11.5px;color:${col};font-weight:700;line-height:1.45">${basisText(c)}</div>${wide}</div>
+      <button data-setcalib="${escapeHtml(farm.id+'|'+v)}" style="flex:none;border:1.5px solid var(--line);background:#fff;color:var(--shell);border-radius:8px;padding:5px 10px;font-size:11.5px;font-weight:700;cursor:pointer">${farm.calib&&farm.calib[v]?T('改我的数字','Edit my figure','Ubah angka saya'):T('填我的数字','Set my figure','Tetapkan angka saya')}</button>
+    </div>`;
+  }).join('');
+  return `<div style="margin-top:11px;padding:10px 12px;background:#fffaf0;border:1px solid var(--flesh);border-radius:11px">
+    <div style="font-size:12.5px;font-weight:800;color:var(--shell)">📏 ${T('本果园的落果天数校准','Drop-day calibration for this farm','Penentukuran hari gugur kebun ini')}</div>
+    <div style="font-size:11px;color:var(--ink-soft);line-height:1.5;margin:2px 0 4px">${T('每记一次落果日（或「首果落下」），这里就更准，并自动套用到本果园同品种的每一棵树。实测优先于你填的数字，你填的数字优先于通用参考。','Every drop date (or "first fruit fell") you log sharpens this, and it is applied automatically to every tree of that clone on this farm. Measured records beat your own figure, and your own figure beats the generic default.','Setiap tarikh gugur (atau "buah pertama gugur") yang anda rekodkan menajamkan angka ini, dan ia digunakan secara automatik bagi setiap pokok klon itu di kebun ini. Rekod terukur mengatasi angka anda sendiri, dan angka anda mengatasi rujukan umum.')}</div>
+    ${rows}</div>`;
+}
+// Ask for the grower's own bloom-to-drop figure for a clone on a farm. Returns true if something changed.
+async function askCalib(farm,variety){
+  const base=CLONES[variety]||CLONES.other, cur=(farm.calib&&farm.calib[variety])||'';
+  const raw=await fdPrompt(T(
+    '在「'+farm.name+'」，'+cloneLabel(variety)+' 从开花到自然落果大约几天？\n填 60–180 之间的数字；不确定就留空（通用参考 '+base.dropHi+' 天）。\n之后只要记下落果日，实测数字会自动取代它。',
+    'At "'+farm.name+'", about how many days from flowering to natural drop for '+cloneLabel(variety)+'?\nEnter a number from 60 to 180, or leave it blank if unsure (generic default '+base.dropHi+' days).\nOnce you log drop dates, the measured figure takes over automatically.',
+    'Di "'+farm.name+'", kira-kira berapa hari dari berbunga hingga gugur semula jadi bagi '+cloneLabel(variety)+'?\nMasukkan nombor antara 60 hingga 180, atau biarkan kosong jika tidak pasti (rujukan umum '+base.dropHi+' hari).\nSetelah anda merekodkan tarikh gugur, angka terukur akan mengambil alih secara automatik.'), String(cur));
+  if(raw===null) return false;
+  const t=raw.trim();
+  if(t===''){ if(farm.calib) delete farm.calib[variety]; return true; }
+  const n=/^\d{2,3}$/.test(t)?parseInt(t,10):NaN;
+  if(isNaN(n)||n<60||n>180){ await fdAlert(T('请填 60–180 之间的数字。这次没有保存。','Enter a number from 60 to 180. Nothing was saved.','Masukkan nombor antara 60 hingga 180. Tiada apa-apa disimpan.')); return false; }
+  farm.calib=farm.calib||{}; farm.calib[variety]=n; return true;
 }
 
 // ---- render the whole farms UI ----
@@ -1754,6 +1859,7 @@ function renderFarms(){
         </div>
         ${cloneTilePicker(farm.id)}
       </div>`;
+    html+=calibBlock(farm,activeTrees);
 
     activeTrees.forEach(tree=>{
       const learned=treeLearnedDaa(tree);
@@ -1936,7 +2042,7 @@ function renderInlineCalc(farm, tree, calcKey){
   if(open.actualDropStr||open.cutDateStr){
     return wrap(`<div style="font-size:12px;color:var(--ink-soft);line-height:1.5">${T('这一季已完成（已落果或割果）。记录下一季的开花日期后，才能为新一季做采收决策。','This season is finished (dropped or cut). Log the next flowering date to plan the new season.','Musim ini sudah selesai (gugur atau dipotong). Rekodkan tarikh berbunga seterusnya untuk merancang musim baharu.')}</div>`);
   }
-  const c=cfgForTree(tree);
+  const c=cfgForTree(tree,farm);
   const target=cs.target||95;
   const targetDaa=daaForTarget(c,target);
   const d0=new Date(flowerDate+'T00:00:00');
@@ -1951,7 +2057,7 @@ function renderInlineCalc(farm, tree, calcKey){
   const rpBtn=(v)=>`<button data-calctarget="${escapeHtml(calcKey)}|${v}" class="ctile big${target===v?' sel':''}">${v}%</button>`;
 
   let out=`<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:2px"><div style="font-size:12px;font-weight:800;color:var(--warn)">🔪 ${T('采收决策（人工采摘）','Harvest decision (plucked)','Keputusan tuaian (dipetik)')}</div><button data-runtree="${escapeHtml(calcKey)}" style="flex:none;border:none;background:none;color:var(--ink-soft);font-size:15px;line-height:1;cursor:pointer;padding:0 2px" aria-label="${T('收起','Close','Tutup')}">✕</button></div>
-    <div style="font-size:11px;color:var(--ink-soft);margin-bottom:8px">${T('已带入：'+escapeHtml(cloneLabel(tree.variety))+' · 开花 '+escapeHtml(flowerDate),'Carried in: '+escapeHtml(cloneLabel(tree.variety))+' · flowered '+escapeHtml(flowerDate),'Dibawa masuk: '+escapeHtml(cloneLabel(tree.variety))+' · berbunga '+escapeHtml(flowerDate))}</div>
+    <div style="font-size:11px;color:var(--ink-soft);margin-bottom:8px">${T('已带入：'+escapeHtml(cloneLabel(tree.variety))+' · 开花 '+escapeHtml(flowerDate),'Carried in: '+escapeHtml(cloneLabel(tree.variety))+' · flowered '+escapeHtml(flowerDate),'Dibawa masuk: '+escapeHtml(cloneLabel(tree.variety))+' · berbunga '+escapeHtml(flowerDate))}<br>📏 ${basisText(c)}</div>
     <div style="font-size:11px;font-weight:700;color:var(--ink-soft);margin-bottom:4px">${T('① 割果成熟度','① Cut ripeness','① Tahap masak ketika potong')}</div>
     <div class="ctile-row">${rpBtn(85)}${rpBtn(90)}${rpBtn(95)}</div>
     <div style="font-size:11px;font-weight:700;color:${cs.market?'var(--ink-soft)':'var(--warn)'};margin-bottom:4px">${cs.market?T('② 目标市场 / 运输','② Target market / transport','② Pasaran sasaran / pengangkutan'):T('② 目标市场 / 运输 ← 还没选','② Target market / transport ← pick one','② Pasaran sasaran / pengangkutan ← pilih satu')}</div>
@@ -2031,6 +2137,12 @@ function wireFarmEvents(){
     farm.trees.push({id:tid, variety:variety, logs:[]});
     if(window.__fdTreeId) delete window.__fdTreeId[fid];
     saveFarms(farmsData); renderFarms();
+    // first tree of this clone on this farm, and nothing calibrated yet → ask once, up front
+    const firstOfClone=farm.trees.filter(t=>!t.deletedAt&&t.variety===variety).length===1;
+    const k=windowFor(variety,farm,null).basis.kind;
+    if(firstOfClone && (k==='generic'||k==='device')){
+      if(await askCalib(farm,variety)){ saveFarms(farmsData); renderFarms(); renderInsights(); }
+    }
   });
   function _keepTreeId(fid){ const inp=app.querySelector('[data-treeid-for="'+fid+'"]'); if(inp){ if(!window.__fdTreeId)window.__fdTreeId={}; window.__fdTreeId[fid]=inp.value; } }
   app.querySelectorAll('[data-clonepick]').forEach(b=>b.onclick=()=>{
@@ -2146,7 +2258,7 @@ function wireFarmEvents(){
     if(!/^\d{4}-\d{2}-\d{2}$/.test(dateStr)){ await fdAlert(T('日期格式：YYYY-MM-DD','Format: YYYY-MM-DD','Format: YYYY-MM-DD')); return; }
     if(dateStr>today){ await fdAlert(T('开花日不能是未来的日期。','The flowering date cannot be in the future.','Tarikh berbunga tidak boleh pada masa hadapan.')); return; }
     // project cut using this tree's clone + learned/generic window at drop
-    const dropDaa=cfgForTree(tree).dropHi;
+    const dropDaa=cfgForTree(tree,farm).dropHi;
     const f=new Date(dateStr+'T00:00:00'); const cut=new Date(f); cut.setDate(cut.getDate()+dropDaa);
     const cutISO=isoLocal(cut);
     if(open){
@@ -2157,6 +2269,12 @@ function wireFarmEvents(){
       tree.logs.push({flowerDate:dateStr, projDaa:dropDaa, projCutStr:fmtDate(cut), projCutISO:cutISO, actualDropStr:null});
     }
     saveFarms(farmsData); renderFarms();
+  });
+  app.querySelectorAll('[data-setcalib]').forEach(b=>b.onclick=async()=>{
+    const [fid,variety]=splitKey(b.dataset.setcalib);
+    const farm=farmsData.farms.find(f=>f.id===fid);
+    if(!farm||!Object.prototype.hasOwnProperty.call(CLONES,variety)) return;
+    if(await askCalib(farm,variety)){ saveFarms(farmsData); renderFarms(); renderInsights(); }
   });
   app.querySelectorAll('[data-logfirst]').forEach(b=>b.onclick=async()=>{
     const [fid,tid]=splitKey(b.dataset.logfirst);
@@ -2280,7 +2398,7 @@ function switchTab(name){
   const exp=document.getElementById('farmsExport');
   const imp=document.getElementById('farmsImport');
   const impFile=document.getElementById('farmsImportFile');
-  const HEAD=['Farm 果园','Tree ID 树号','Variety 品种','Flowering 开花日','Projected drop 预计落果日','Actual drop 实际落果日','Cut date 割果日','Ripeness % 成熟度','Outcome 记录','Feedback 顾客反馈','Feedback note 反馈备注','Farm ID 果园编号（勿改）','First fruit fell 首果掉落日'];
+  const HEAD=['Farm 果园','Tree ID 树号','Variety 品种','Flowering 开花日','Projected drop 预计落果日','Actual drop 实际落果日','Cut date 割果日','Ripeness % 成熟度','Outcome 记录','Feedback 顾客反馈','Feedback note 反馈备注','Farm ID 果园编号（勿改）','First fruit fell 首果掉落日','Farm calibration days 果园校准天数'];
 
   // A cell starting with = + - @ would be run as a formula by Excel/Sheets; a leading
   // apostrophe makes it plain text. parseCsv() strips it again on import.
@@ -2321,13 +2439,14 @@ function switchTab(name){
     const rows=[HEAD.map(csvEsc).join(',')];
     (data.farms||[]).filter(f=>!f.deletedAt).forEach(function(f){
       const trees=(f.trees||[]).filter(t=>!t.deletedAt);
-      if(!trees.length){ rows.push([f.name||'','','','','','','','','','','',f.id,''].map(csvEsc).join(',')); return; }
+      if(!trees.length){ rows.push([f.name||'','','','','','','','','','','',f.id,'',''].map(csvEsc).join(',')); return; }
       trees.forEach(function(t){
         const vlabel=cloneLabel(t.variety); const logs=t.logs||[];
-        if(!logs.length){ rows.push([f.name||'',t.id||'',vlabel,'','','','','','','','',f.id,''].map(csvEsc).join(',')); return; }
+        const cal=(f.calib&&f.calib[t.variety])||'';
+        if(!logs.length){ rows.push([f.name||'',t.id||'',vlabel,'','','','','','','','',f.id,'',cal].map(csvEsc).join(',')); return; }
         logs.forEach(function(l){
           const fbk=l.feedback||{};
-          rows.push([f.name||'',t.id||'',vlabel,l.flowerDate||'',l.projCutISO||'',l.actualDropStr||'',l.cutDateStr||'',(l.cutPct!=null?l.cutPct:''),l.outcome||'',fbToLabel(fbk.rating),(fbk.note||''),f.id,l.firstDropStr||''].map(csvEsc).join(','));
+          rows.push([f.name||'',t.id||'',vlabel,l.flowerDate||'',l.projCutISO||'',l.actualDropStr||'',l.cutDateStr||'',(l.cutPct!=null?l.cutPct:''),l.outcome||'',fbToLabel(fbk.rating),(fbk.note||''),f.id,l.firstDropStr||'',cal].map(csvEsc).join(','));
         });
       });
     });
@@ -2345,6 +2464,7 @@ function switchTab(name){
     const iVar=find(['variety','品种']);
     const iFlower=find(['flower','开花']);
     const iFirst=find(['first fruit','首果']);
+    const iCal=find(['calibration','校准']);
     const iProj=find(['projected','预计']);
     // "Projected drop" also contains "drop" — keep it out of the actual-drop lookup
     let iDrop=-1; for(let i=0;i<header.length;i++){ if(i===iProj||i===iFirst) continue; if(header[i].indexOf('drop')>=0||header[i].indexOf('落果')>=0){ iDrop=i; break; } }
@@ -2370,6 +2490,7 @@ function switchTab(name){
       if(tid!==''){
         let tree=farm._t[tid];
         if(!tree){ tree={id:tid,variety:varietyCode(get(row,iVar)),logs:[]}; farm._t[tid]=tree; farm.trees.push(tree); }
+        const calv=parseInt(get(row,iCal),10); if(calv>=60&&calv<=180){ farm.calib=farm.calib||{}; farm.calib[tree.variety]=calv; }
         const flower=get(row,iFlower), first=get(row,iFirst), drop=get(row,iDrop), cutd=get(row,iCutDate), ripe=get(row,iRipe), outc=get(row,iOutcome), fbr=get(row,iFb), fbn=get(row,iNote);
         if(flower||drop||cutd||ripe||outc||fbr||fbn){
           const log={};
@@ -2575,7 +2696,7 @@ function renderInsights(){
     const allVals=[]; Object.keys(perClone).forEach(function(v){ perClone[v].forEach(function(x){allVals.push(x);}); allVals.push((CLONES[v]||CLONES.other).dropHi); });
     const lo=Math.min.apply(null,allVals)-4, hi=Math.max.apply(null,allVals)+4, span=Math.max(1,hi-lo);
     const pos=function(x){ return (x-lo)/span*100; };
-    html+='<div style="font-size:11.5px;color:var(--ink-soft);margin-bottom:12px;line-height:1.5">'+T('○ 通用参考（落果 DAA） · ● 你的实测均值 · 细线为实测范围。你的值越稳定、样本越多，就越该用它覆盖通用参考（在「采收决策」的品种设定里填入）。','○ generic reference (drop DAA) · ● your measured average · thin line = your measured range. The steadier your values and the more samples, the more you should override the generic (enter it in the clone settings on the Harvest Decision tab).','○ rujukan umum (DAA gugur) · ● purata terukur anda · garis halus = julat terukur anda. Semakin stabil nilai anda dan semakin banyak sampel, semakin wajar anda menggantikan rujukan umum (masukkan dalam tetapan klon di tab Keputusan Tuai).')+'</div>';
+    html+='<div style="font-size:11.5px;color:var(--ink-soft);margin-bottom:12px;line-height:1.5">'+T('○ 通用参考（落果 DAA） · ● 你的实测均值 · 细线为实测范围。你的值越稳定、样本越多，就越可靠 —— 这些数字会自动套用到同一果园、同一品种的树上（见「我的果园」里的校准栏）。','○ generic reference (drop DAA) · ● your measured average · thin line = your measured range. The steadier your values and the more samples, the more reliable it is — these figures are applied automatically to trees of the same clone on the same farm (see the calibration panel in My Farms).','○ rujukan umum (DAA gugur) · ● purata terukur anda · garis halus = julat terukur anda. Semakin stabil nilai anda dan semakin banyak sampel, semakin boleh dipercayai — angka ini digunakan secara automatik bagi pokok klon yang sama di kebun yang sama (lihat panel penentukuran dalam Kebun Saya).')+'</div>';
     Object.keys(perClone).sort(function(a,b){return perClone[b].length-perClone[a].length;}).forEach(function(v){
       const arr=perClone[v];
       const gen=(CLONES[v]||CLONES.other).dropHi;
