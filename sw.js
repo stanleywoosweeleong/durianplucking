@@ -87,9 +87,13 @@ self.addEventListener("fetch", function(e){
 
   /* Only the app's own address gets the cached app. Other pages under the same path
      (references/*.pdf, README, sw.js …) go to the network untouched. */
-  if (req.mode === "navigate" && url.pathname !== APP_PATH && url.pathname !== APP_PATH + "index.html") return;
+  var isApp = url.pathname === APP_PATH || url.pathname === APP_PATH + "index.html";
+  if (req.mode === "navigate" && !isApp) return;
 
-  if (req.mode === "navigate"){
+  /* The app's address is answered from the cache whatever kind of request it is: a page
+     load, or a plain fetch such as the browser's own "does this app work offline?" check
+     of the start URL, which is not a navigation and would otherwise miss the cache. */
+  if (isApp){
     e.respondWith(
       caches.match(INDEX).then(function(hit){
         if (hit) return hit;
@@ -99,7 +103,7 @@ self.addEventListener("fetch", function(e){
             caches.open(CACHE).then(function(c){ c.put(INDEX, copy); });
           }
           return res;
-        });
+        }).catch(offline);
       })
     );
     return;
@@ -114,10 +118,16 @@ self.addEventListener("fetch", function(e){
           caches.open(CACHE).then(function(c){ c.put(req, copy); });
         }
         return res;
-      });
+      }).catch(offline);
     })
   );
 });
+
+/* No cached copy and no network: answer with a plain 504 instead of letting the
+   promise reject, which the browser reports as a failed fetch event. */
+function offline(){
+  return new Response("", { status: 504, statusText: "Offline" });
+}
 
 /* "check" from a page: refresh the shell and, if index.html changed, tell
    every open window so each can offer a reload. */
