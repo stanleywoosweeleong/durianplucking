@@ -72,6 +72,24 @@ header .spikes{position:absolute;inset:0;opacity:.13;pointer-events:none}
 #langpick button{width:min(18rem,84vw);min-height:58px;border:1.5px solid rgba(246,239,223,.35);background:rgba(246,239,223,.1);color:var(--cream);border-radius:14px;font-size:19px;font-weight:800;font-family:inherit;cursor:pointer}
 #langpick button.cur{background:var(--flesh);border-color:var(--flesh);color:var(--shell)}
 body.picking{overflow:hidden}
+/* ---- first-time-user redesign ---- */
+.linkbtn{display:block;border:none;background:none;padding:9px 0 2px;color:var(--thorn);font-size:13px;font-weight:700;font-family:inherit;cursor:pointer;text-align:left;text-decoration:underline;text-underline-offset:3px}
+#quickBox{margin-top:4px;background:#fffaf0;border:1.5px solid var(--flesh);border-radius:12px;padding:13px 14px}
+.qc-title{font-weight:800;font-size:14px;color:var(--shell)}
+.qc-sub{font-size:12.5px;color:var(--ink-soft);margin-top:3px;line-height:1.5}
+.qc-row{display:flex;align-items:flex-start;gap:10px;margin-top:9px;padding:10px 11px;background:#fff;border:1.5px solid var(--line);border-radius:11px;font-size:13.5px;line-height:1.45;cursor:pointer}
+.qc-row input{flex:none;width:20px;height:20px;margin-top:1px;accent-color:var(--shell)}
+.ansrow{display:flex;gap:7px;margin-top:10px}
+.ansrow>div{flex:1;min-width:0;background:rgba(255,255,255,.16);border-radius:10px;padding:7px 5px;text-align:center}
+.ansrow b{display:block;font-size:19px;font-weight:800;line-height:1.15}
+.ansrow span{display:block;font-size:10.5px;font-weight:700;opacity:.9;line-height:1.25;margin-top:2px}
+.ansbasis{font-size:11px;opacity:.85;margin-top:8px;line-height:1.4}
+details.fold>summary{list-style:none;cursor:pointer;font-weight:800;font-size:14px;color:var(--shell);display:flex;align-items:center;gap:8px}
+details.fold>summary::-webkit-details-marker{display:none}
+details.fold>summary::after{content:'▾';margin-left:auto;color:var(--thorn);font-size:15px}
+details.fold[open]>summary::after{content:'▴'}
+details.fold[open]>summary{margin-bottom:10px}
+.foldhint{font-size:11.5px;color:var(--ink-soft);text-align:center;margin:2px 0 10px}
 /* ---- tabs ---- */
 .tabs{display:flex;background:var(--shell-2);position:sticky;top:0;z-index:5}
 .tab{
@@ -298,15 +316,15 @@ body.lang-en .en.blk{display:block}
 </header>
 
 <div class="tabs">
-  <button class="tab active" data-p="guide"><span class="zh">成熟科学</span><span class="en">The Science</span><span class="ms">Sains</span></button>
-  <button class="tab" data-p="tool"><span class="zh">采收决策</span><span class="en">Harvest Decision</span><span class="ms">Keputusan Tuai</span></button>
+  <button class="tab active" data-p="tool"><span class="zh">采收决策</span><span class="en">Harvest Decision</span><span class="ms">Keputusan Tuai</span></button>
   <button class="tab" data-p="farms"><span class="zh">我的果园</span><span class="en">My Farms</span><span class="ms">Kebun Saya</span></button>
   <button class="tab" data-p="insights"><span class="zh">数据洞察</span><span class="en">Insights</span><span class="ms">Analisis</span></button>
+  <button class="tab" data-p="guide"><span class="zh">成熟科学</span><span class="en">The Science</span><span class="ms">Sains</span></button>
 </div>
 
 <main>
 <!-- ============ GUIDE ============ -->
-<section class="panel active" id="guide">
+<section class="panel" id="guide">
   <div class="lead">
     <span class="zh">2026年，「榴莲海啸」来袭 —— 各州同时爆量，园地价一度低过成本价。有人主张改学泰国「割果」保命，有人坚持「树熟」才是马来西亚风味的招牌。本工具不选边。它只用科学告诉你：每个品种能在多接近自然落果的时机安全割下、风味损失多少、货架期换来多少 —— 决定权在你，取决于你的市场与这一季的局势。</span>
     <span class="en blk">2026: the "durian tsunami" — every state fruiting at once, farm-gate prices briefly falling below cost. Some argue Malaysia should adopt Thai-style cut-harvest to survive; others hold that tree-ripening is the flavour signature that sets Malaysia apart. This tool takes no side. It uses science to show, for each clone, how close to natural drop you can safely cut, how much flavour that costs, and how much shelf life it buys — the decision stays yours, and depends on your market and this season's conditions.</span><span class="ms blk">2026: "tsunami durian" — semua negeri berbuah serentak, harga ladang sempat jatuh di bawah kos. Ada yang berhujah Malaysia patut ikut cara Thailand memotong buah untuk bertahan; ada pula yang berpegang bahawa masak di pokok ialah ciri rasa yang membezakan Malaysia. Alat ini tidak memihak. Ia menggunakan sains untuk menunjukkan, bagi setiap klon, sedekat mana dengan gugur semula jadi anda boleh memotong dengan selamat, berapa banyak rasa yang dikorbankan, dan berapa lama hayat simpanan yang diperoleh — keputusan tetap di tangan anda, bergantung pada pasaran anda dan keadaan musim ini.</span>
@@ -372,8 +390,7 @@ body.lang-en .en.blk{display:block}
 
   <div class="card" style="background:var(--shell);border-color:var(--shell)">
     <h3 style="color:var(--flesh-hi)"><span class="zh" style="color:var(--flesh-hi)">这个工具怎么用</span><span class="en" style="color:var(--flesh-hi)">How to use this tool</span><span class="ms">Cara menggunakan alat ini</span></h3>
-    <p style="color:var(--cream)"><span class="zh">在「采收决策」中，依序选：目标市场 → 采收方式（割果／树熟）→ 品种 → 开花（授粉）日期 → 割果成熟度。工具会向前推算<b>预计割果日</b>，并给出<b>成熟度</b>、<b>该割点的风味保留率</b>与<b>换来的货架期</b>。数字是中立的科学参考 —— 是否值得为出口牺牲一点风味，由你的市场和这一季的价格决定。</span>
-    <span class="en">In "Harvest Decision," work through them in order: target market → harvest method (cut/tree-drop) → clone → flowering (anthesis) date → cut ripeness. The tool projects the <b>expected cut date</b> and returns <b>maturity</b>, <b>flavour retained at that cut point</b>, and <b>shelf life gained</b>. The numbers are a neutral scientific reference — whether trading a little flavour for export reach is worth it depends on your market and this season's prices, which only you can weigh.</span><span class="ms">Dalam "Keputusan Tuai", ikut turutan: pasaran sasaran → kaedah tuaian (potong/gugur) → klon → tarikh berbunga (antesis) → tahap masak ketika potong. Alat ini mengunjurkan <b>tarikh potong dijangka</b> dan memberikan <b>kematangan</b>, <b>rasa yang dikekalkan pada titik potong itu</b> dan <b>hayat simpanan yang diperoleh</b>. Angka-angka ini rujukan saintifik yang neutral — sama ada berbaloi menukar sedikit rasa dengan capaian eksport bergantung pada pasaran anda dan harga musim ini, yang hanya anda boleh timbang.</span></p>
+    <p style="color:var(--cream)"><span class="zh">在「采收决策」选品种、填开花日，就会得到<b>预计割果日</b>、<b>该割点保留的风味</b>与<b>可存放的天数</b>；之后可再调整采收方式、割果成熟度与市场。不知道开花日，也可以改用「看果判断」。数字是中立的科学参考 —— 是否值得用一点风味换出口，取决于你的市场与这一季的价格，只有你能衡量。</span><span class="en">In "Harvest Decision", pick the durian and the flowering date to get the <b>expected cut date</b>, the <b>flavour kept at that cut</b> and the <b>days it will keep</b>; you can then adjust the harvest method, cut ripeness and market. If you do not know the flowering date, use "judge from the fruit" instead. The numbers are a neutral scientific reference — whether trading a little flavour for export reach is worth it depends on your market and this season's prices, which only you can weigh.</span><span class="ms">Dalam "Keputusan Tuai", pilih durian dan tarikh berbunga untuk mendapat <b>tarikh potong dijangka</b>, <b>rasa yang dikekalkan pada potongan itu</b> dan <b>bilangan hari ia tahan</b>; kemudian anda boleh melaras kaedah tuaian, tahap masak dan pasaran. Jika tidak tahu tarikh berbunga, gunakan "nilai daripada buah". Angka-angka ini rujukan saintifik yang neutral — sama ada berbaloi menukar sedikit rasa dengan capaian eksport bergantung pada pasaran anda dan harga musim ini, yang hanya anda boleh timbang.</span></p>
   <div class="card" style="border-left:4px solid var(--shell);margin-top:18px">
     <h3><span class="n" style="background:var(--shell)">🔬</span><span class="zh">送验实验室：该看哪些参数</span><span class="en">Lab panel: what to measure</span><span class="ms">Panel makmal: apa yang perlu diukur</span></h3>
     <p><span class="zh">Brix（甜度）只是一个维度。榴梿的好吃是<b>干物质、质地、酸度、硫化物、酯类</b>共同决定的。若你把样本送到实验室，请求以下参数，能大幅加快割果时机的校准 —— 把「几天割」对应到「实测品质」，一两季就能建立自己树的基准。</span>
@@ -496,32 +513,15 @@ body.lang-en .en.blk{display:block}
 </section>
 
 <!-- ============ TOOL ============ -->
-<section class="panel" id="tool">
-  <p class="tool-intro"><span class="zh">输入你的情况，工具用科学给出这批果的<b>成熟度</b>、<b>风味保留率</b>与<b>货架期</b>。它不替你决定割或不割 —— 只把代价与收益摊开，让你依自己的市场判断。</span><span class="en">Enter your situation; the tool uses science to show this batch's <b>maturity</b>, <b>flavour retention</b> and <b>shelf life</b>. It won't decide cut-or-not for you — it lays out the cost and the gain so you can judge against your own market.</span><span class="ms">Masukkan situasi anda; alat ini menggunakan sains untuk menunjukkan <b>kematangan</b>, <b>pengekalan rasa</b> dan <b>hayat simpanan</b> kelompok ini. Ia tidak memutuskan potong atau tidak bagi pihak anda — ia membentangkan kos dan faedah supaya anda boleh menilai mengikut pasaran anda sendiri.</span></p>
+<section class="panel active" id="tool">
+  <p class="tool-intro"><span class="zh"><b>一分钟算出割果日。</b>选品种、填开花日就有答案 —— 其余的可改可不改。</span><span class="en"><b>Find your cut date in a minute.</b> Pick the durian and the flowering date for an answer — the rest is optional.</span><span class="ms"><b>Cari tarikh potong anda dalam seminit.</b> Pilih durian dan tarikh berbunga untuk mendapat jawapan — selebihnya pilihan.</span></p>
 
   <div class="field">
-    <div class="flabel"><span class="zh">1. 目标市场 / 运输距离</span><span class="en">1. Target market / transport</span><span class="ms">1. Pasaran sasaran / pengangkutan</span></div>
-    <div class="opts tiles three" id="q-market">
-      <div class="opt" data-k="local"><div class="dot"></div><div><div class="lbl"><span class="zh">本地即食 / 高端</span><span class="en">Local fresh / premium</span><span class="ms">Segar tempatan / premium</span></div><div class="desc"><span class="zh">当天至隔天食用</span><span class="en">Eaten same/next day</span><span class="ms">Dimakan hari yang sama/esoknya</span></div></div></div>
-      <div class="opt" data-k="short"><div class="dot"></div><div><div class="lbl"><span class="zh">短程运输</span><span class="en">Short-haul transport</span><span class="ms">Pengangkutan jarak dekat</span></div><div class="desc"><span class="zh">国内陆运 · 数小时至隔天到达</span><span class="en">Domestic road · hours to next day</span><span class="ms">Jalan darat dalam negara · beberapa jam hingga esok</span></div></div></div>
-      <div class="opt" data-k="export"><div class="dot"></div><div><div class="lbl"><span class="zh">长程出口</span><span class="en">Long-haul export</span><span class="ms">Eksport jarak jauh</span></div><div class="desc"><span class="zh">需控温延长货架期</span><span class="en">Needs climate control & shelf life</span><span class="ms">Perlu kawalan suhu & hayat simpanan</span></div></div></div>
-    </div>
-  </div>
-
-  <div class="field">
-    <div class="flabel"><span class="zh">2. 采收方式</span><span class="en">2. Harvest method</span><span class="ms">2. Kaedah tuaian</span></div>
-    <div class="opts tiles" id="q-method">
-      <div class="opt" data-m="pluck"><div class="dot"></div><div><div class="lbl"><span class="zh">人工采摘</span><span class="en">Plucked / cut</span><span class="ms">Dipetik / dipotong</span></div><div class="desc"><span class="zh">达生理成熟后剪下，离树后熟</span><span class="en">Cut at maturity, ripens off-tree</span><span class="ms">Dipotong apabila matang, masak selepas dipetik</span></div></div></div>
-      <div class="opt" data-m="tree"><div class="dot"></div><div><div class="lbl"><span class="zh">树熟自然落果</span><span class="en">Tree-ripened (natural drop)</span><span class="ms">Masak pokok (gugur semula jadi)</span></div><div class="desc"><span class="zh">在树上后熟至峰值后落果</span><span class="en">Ripens to peak on tree before dropping</span><span class="ms">Masak hingga kemuncak di pokok sebelum gugur</span></div></div></div>
-    </div>
-  </div>
-
-  <div class="field">
-    <div class="flabel"><span class="zh">3. 品种</span><span class="en">3. Clone / variety</span><span class="ms">3. Klon / varieti</span>
-      <div class="hint"><span class="zh">每个品种的成熟窗口（授粉后天数 DAA）不同 —— 这是判断的核心。猫山王、D24、Chanee、金枕头用有出处的数字；其余品种的窗口是本工具在农业局通用参考（约 90 天起）之上的估算 —— 田间会因气候、树龄、海拔而浮动，请用你自己的落果记录取代。</span><span class="en">Each clone has its own maturity window (days after anthesis, DAA) — the core of the judgment. Musang King, D24, Chanee and Monthong use sourced figures; the other windows are this tool's estimates on top of the DOA general guide (from ~day 90) — they shift with climate, tree age and elevation, so replace them with your own drop record.</span><span class="ms">Setiap klon ada tempoh kematangannya sendiri (hari selepas antesis, DAA) — inilah teras pertimbangan. Musang King, D24, Chanee dan Monthong menggunakan angka bersumber; tempoh lain ialah anggaran alat ini di atas panduan umum Jabatan Pertanian (dari ~hari ke-90) — ia berubah mengikut iklim, umur pokok dan ketinggian, jadi gantikan dengan rekod gugur anda sendiri.</span></div>
+    <div class="flabel"><span class="stepnum" id="stepClone">1. </span><span class="zh">哪一种榴梿？</span><span class="en">Which durian?</span><span class="ms">Durian apa?</span>
+      <div class="hint"><span class="zh">每个品种成熟的天数不同。不确定就选「其他」。</span><span class="en">Each variety ripens on its own schedule. Not sure? Choose "Other".</span><span class="ms">Setiap varieti masak mengikut tempohnya sendiri. Tidak pasti? Pilih "Lain-lain".</span></div>
     </div>
     <button id="cloneToggle" style="width:100%;border:1.5px solid var(--line);background:#fff;border-radius:12px;padding:13px 15px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:10px;text-align:left">
-      <span id="cloneSummary" style="font-weight:700;font-size:14.5px;color:var(--ink-soft)"><span class="zh">点击选择品种…</span><span class="en">Tap to choose a clone…</span><span class="ms">Ketik untuk memilih klon…</span></span>
+      <span id="cloneSummary" style="font-weight:700;font-size:14.5px;color:var(--ink-soft)"><span class="zh">点这里选品种…</span><span class="en">Tap to choose a durian…</span><span class="ms">Ketik untuk memilih durian…</span></span>
       <span id="cloneChevron" style="flex:0 0 auto;color:var(--thorn);font-size:13px;font-weight:800;transition:.2s">▼</span>
     </button>
     <div class="opts tiles clone-tiles" id="q-variety" style="display:none;margin-top:9px">
@@ -537,6 +537,7 @@ body.lang-en .en.blk{display:block}
       <div class="opt" data-v="kampung"><div class="dot"></div><div><div class="lbl"><span class="zh">甘榜 / 实生</span><span class="en">Kampung / seedling</span><span class="ms">Durian kampung / biji benih</span></div><div class="desc"><span class="zh">窗口因树而异 · 一般落果 100–120 DAA</span><span class="en">Window varies by tree · typically drops 100–120 DAA</span><span class="ms">Tempoh berbeza mengikut pokok · biasanya gugur 100–120 DAA</span></div></div></div>
       <div class="opt" data-v="other"><div class="dot"></div><div><div class="lbl"><span class="zh">其他 / 不确定</span><span class="en">Other / unsure</span><span class="ms">Lain-lain / tidak pasti</span></div><div class="desc"><span class="zh">按通用跃变型果实处理（保守窗口）</span><span class="en">General climacteric handling (conservative window)</span><span class="ms">Pengendalian klimakterik umum (tempoh konservatif)</span></div></div></div>
     </div>
+    <button type="button" id="customDaaToggle" class="linkbtn" style="display:none"><span class="zh">⚙ 我知道自己果树的落果天数</span><span class="en">⚙ I know my own trees' drop day</span><span class="ms">⚙ Saya tahu hari gugur pokok saya sendiri</span></button>
     <div id="customDaaBox" style="display:none;margin-top:11px;background:#eef5ec;border:1.5px solid var(--good);border-radius:12px;padding:12px 14px">
       <div style="font-size:12.5px;font-weight:800;color:var(--good);margin-bottom:3px"><span class="zh">🌳 用我自己的落果天数（DAA）</span><span class="en">🌳 Use my own natural-drop DAA</span><span class="ms">🌳 Guna DAA gugur semula jadi saya sendiri</span></div>
       <div style="font-size:11.5px;color:var(--ink-soft);line-height:1.5;margin-bottom:9px"><span class="zh">DAA 一律指<b>自然落果那天</b>（授粉→落果的天数）—— 这是固定基准。若你记录过自己园地的落果天数，填在这里，整个割果窗口会跟着重新校准。留空＝用通用参考值。此设定自动存在本机，下次自动带出。</span><span class="en">DAA always means <b>the natural-drop day</b> (anthesis→drop). That's the fixed benchmark. If you've logged your orchard's own drop day, enter it here and the whole cut window re-centres on it. Blank = use the generic reference. Saved on this device automatically.</span><span class="ms">DAA sentiasa bermaksud <b>hari gugur semula jadi</b> (antesis→gugur). Itulah penanda aras tetap. Jika anda telah merekodkan hari gugur kebun anda sendiri, masukkan di sini dan seluruh tempoh potong akan berpusat padanya. Kosong = guna rujukan umum. Disimpan secara automatik pada peranti ini.</span></div>
@@ -549,23 +550,23 @@ body.lang-en .en.blk{display:block}
     </div>
   </div>
 
-  <div class="field" id="targetField" style="display:none">
-    <div class="flabel"><span class="stepnum" id="stepRipe">4. </span><span class="zh">割果成熟度（田间实验）</span><span class="en">Cut ripeness (field experiment)</span><span class="ms">Tahap masak ketika potong (eksperimen lapangan)</span>
-      <div class="hint"><span class="zh">这是一个田间实验室。95% 已很接近自然落果（约早 4 天），风味损失最小；有信心后，再逐季往前推（90%、85%）割得更早、更硬，换取更长货架期。每一季记录数据，慢慢调出最适合自己树与市场的时机。（想要 100% 全熟风味？选「树熟自然落果」即可。）</span><span class="en">This is a field lab. 95% is already very close to natural drop (~4 days earlier), least flavour loss; once confident, step earlier season by season (90%, 85%) — firmer, earlier cuts that buy more shelf life. Log it each season and tune to your trees and market. (Want full 100% flavour? Just choose "tree-drop" method.)</span><span class="ms">Ini makmal lapangan. 95% sudah sangat hampir dengan gugur semula jadi (~4 hari lebih awal), kehilangan rasa paling sedikit; setelah yakin, awalkan musim demi musim (90%, 85%) — potongan lebih awal dan lebih pejal yang memberi hayat simpanan lebih panjang. Rekodkan setiap musim dan laraskan mengikut pokok serta pasaran anda. (Mahu rasa penuh 100%? Pilih sahaja kaedah "gugur semula jadi".)</span></div>
-    </div>
-    <div class="seg" id="q-target">
-      <button data-t="85"><span class="zh">85%</span><span class="en">85%</span><span class="ms">85%</span></button>
-      <button data-t="90"><span class="zh">90%</span><span class="en">90%</span><span class="ms">90%</span></button>
-      <button data-t="95" class="sel"><span class="zh">95%</span><span class="en">95%</span><span class="ms">95%</span></button>
-    </div>
-  </div>
-
   <div class="field">
-    <div class="flabel"><span class="stepnum" id="stepDate">5. </span><span class="zh">开花 / 授粉日期（Anthesis）</span><span class="en">Flowering / anthesis date</span><span class="ms">Tarikh berbunga / antesis</span>
-      <div class="hint"><span class="zh">看到这批花盛开当天，就记下日期 —— 无需事后回推。工具会<b>向前推算</b>成熟与落果的预计日期。今天或过去的日期都可以。<br>📋 农业局（DOA 2026）定义：以<b>超过 70% 的花盛开</b>当天为起算日。</span><span class="en">Log the date the moment you see this batch bloom — no need to back-count later. The tool projects <b>forward</b> to the expected maturity and drop dates. Today's date or a past one both work.<br>📋 DOA (2026) definition: start counting from the day <b>more than 70% of the flowers</b> are open.</span><span class="ms">Rekodkan tarikh sebaik sahaja anda melihat kelompok bunga ini kembang — tidak perlu mengira ke belakang kemudian. Alat ini mengunjur <b>ke hadapan</b> kepada tarikh matang dan gugur yang dijangka. Tarikh hari ini atau yang lepas kedua-duanya boleh.<br>📋 Takrif Jabatan Pertanian (2026): mula mengira dari hari <b>bunga kembang melebihi 70%</b>.</span></div>
+    <div class="flabel"><span class="stepnum" id="stepDate">2. </span><span class="zh">什么时候开花？</span><span class="en">When did it flower?</span><span class="ms">Bila ia berbunga?</span>
+      <div class="hint"><span class="zh">大部分花盛开的那一天（农业局：超过 70% 的花开）。大概的日期也可以。</span><span class="en">The day most of the flowers were open (DOA: more than 70% in bloom). An approximate date is fine.</span><span class="ms">Hari kebanyakan bunga kembang (Jabatan Pertanian: melebihi 70% kembang). Tarikh anggaran pun boleh.</span></div>
     </div>
-    <div style="position:relative">
+    <div id="flowerWrap" style="position:relative">
       <input type="date" id="flowerDate" name="flowerDate" aria-label="Flowering / anthesis date" autocomplete="off" style="width:100%;border:1.5px solid var(--line);border-radius:12px;padding:13px 15px;font-size:15px;font-weight:700;color:var(--shell);background:#fff;font-family:inherit;cursor:pointer">
+    </div>
+    <button type="button" id="noDateBtn" class="linkbtn"><span class="zh">不知道开花日？果已经在树上 →</span><span class="en">Don't know the date? Fruit is already on the tree →</span><span class="ms">Tidak tahu tarikhnya? Buah sudah di pokok →</span></button>
+    <div id="quickBox" style="display:none">
+      <div class="qc-title"><span class="zh">看果实本身来判断</span><span class="en">Judge from the fruit itself</span><span class="ms">Nilai daripada buah itu sendiri</span></div>
+      <div class="qc-sub"><span class="zh">农业局指南的三个特征。看到的就打勾：</span><span class="en">The three signs in the DOA guideline. Tick what you can see:</span><span class="ms">Tiga ciri dalam garis panduan Jabatan Pertanian. Tandakan apa yang anda nampak:</span></div>
+      <label class="qc-row"><input type="checkbox" id="qcS1"><span><span class="zh">果柄上的离层线<b>膨大、清晰、带褐色</b></span><span class="en">The line on the stalk is <b>swollen, clear and brownish</b></span><span class="ms">Garis absis pada tangkai <b>membengkak, jelas dan keperangan</b></span></span></label>
+      <label class="qc-row"><input type="checkbox" id="qcS2"><span><span class="zh">果壳上<b>瓣与瓣之间的线清楚可见</b></span><span class="en">The <b>lines between segments</b> show clearly on the husk</span><span class="ms"><b>Garis antara pangsa</b> kelihatan jelas pada kulit</span></span></label>
+      <label class="qc-row"><input type="checkbox" id="qcS3"><span><span class="zh">刺<b>稍软</b>，刺与刺之间<b>变宽</b></span><span class="en">The spines are <b>slightly soft</b> and <b>spaced wide</b></span><span class="ms">Duri <b>sedikit lembut</b> dan <b>jaraknya lebar</b></span></span></label>
+      <div class="qc-sub" style="margin-top:12px"><span class="zh">这棵树（这批）已经有果自己掉下来吗？有的话填第一颗落下的日期（选填）：</span><span class="en">Has any fruit from this tree or batch already fallen? If so, the date the first one fell (optional):</span><span class="ms">Sudah ada buah daripada pokok atau kelompok ini yang gugur? Jika ada, tarikh buah pertama gugur (pilihan):</span></div>
+      <input type="date" id="qcFirst" name="firstFell" aria-label="First fruit fell date" autocomplete="off" style="width:100%;border:1.5px solid var(--line);border-radius:12px;padding:11px 13px;font-size:15px;font-weight:700;color:var(--shell);background:#fff;font-family:inherit;margin-top:6px">
+      <button type="button" id="qcBack" class="linkbtn"><span class="zh">← 我知道开花日期</span><span class="en">← I do know the flowering date</span><span class="ms">← Saya tahu tarikh berbunga</span></button>
     </div>
     <div id="projBox" style="margin-top:12px;background:#fffaf0;border:1.5px solid var(--flesh);border-radius:12px;padding:14px 15px">
       <div style="display:flex;align-items:baseline;justify-content:space-between;gap:10px">
@@ -578,6 +579,34 @@ body.lang-en .en.blk{display:block}
         <span class="zh">参考落果窗口：<span id="projWindow"></span>。田间实际会因土壤、树龄、气候提前或延后 —— 以你的观察为准，记录后逐季校准。</span>
         <span class="en">Reference drop window: <span id="projWindowEn"></span>. Real field timing shifts with soil, tree age, and weather — trust your observation and calibrate season by season.</span><span class="ms">Tempoh gugur rujukan: <span id="projWindowMs"></span>. Masa sebenar di lapangan berubah mengikut tanah, umur pokok dan cuaca — percayai pemerhatian anda dan tentukurkan musim demi musim.</span>
       </div>
+    </div>
+  </div>
+
+  <div class="field">
+    <div class="flabel"><span class="stepnum" id="stepMethod">3. </span><span class="zh">打算怎么采收？</span><span class="en">How will you harvest?</span><span class="ms">Bagaimana anda menuai?</span></div>
+    <div class="opts tiles" id="q-method">
+      <div class="opt" data-m="pluck"><div class="dot"></div><div><div class="lbl"><span class="zh">人工采摘</span><span class="en">Plucked / cut</span><span class="ms">Dipetik / dipotong</span></div><div class="desc"><span class="zh">达生理成熟后剪下，离树后熟</span><span class="en">Cut at maturity, ripens off-tree</span><span class="ms">Dipotong apabila matang, masak selepas dipetik</span></div></div></div>
+      <div class="opt" data-m="tree"><div class="dot"></div><div><div class="lbl"><span class="zh">树熟自然落果</span><span class="en">Tree-ripened (natural drop)</span><span class="ms">Masak pokok (gugur semula jadi)</span></div><div class="desc"><span class="zh">在树上后熟至峰值后落果</span><span class="en">Ripens to peak on tree before dropping</span><span class="ms">Masak hingga kemuncak di pokok sebelum gugur</span></div></div></div>
+    </div>
+  </div>
+
+  <div class="field" id="targetField" style="display:none">
+    <div class="flabel"><span class="stepnum" id="stepRipe">4. </span><span class="zh">割的时候要多熟？</span><span class="en">How ripe when you cut?</span><span class="ms">Semasak mana ketika dipotong?</span>
+      <div class="hint"><span class="zh">95% 最接近自然落果，风味保留最多。数字越小，割得越早、越硬，较耐运。不确定就用 95%。</span><span class="en">95% is closest to natural drop and keeps the most flavour. Lower numbers cut earlier and firmer, for longer transport. Not sure? Stay on 95%.</span><span class="ms">95% paling hampir dengan gugur semula jadi dan mengekalkan rasa paling banyak. Angka lebih rendah bermaksud potong lebih awal dan lebih pejal, untuk pengangkutan lebih jauh. Tidak pasti? Kekal pada 95%.</span></div>
+    </div>
+    <div class="seg" id="q-target">
+      <button data-t="85"><span class="zh">85%</span><span class="en">85%</span><span class="ms">85%</span></button>
+      <button data-t="90"><span class="zh">90%</span><span class="en">90%</span><span class="ms">90%</span></button>
+      <button data-t="95" class="sel"><span class="zh">95%</span><span class="en">95%</span><span class="ms">95%</span></button>
+    </div>
+  </div>
+
+  <div class="field">
+    <div class="flabel"><span class="stepnum" id="stepMarket">5. </span><span class="zh">要卖到哪里？</span><span class="en">Where is it going?</span><span class="ms">Ke mana ia dijual?</span></div>
+    <div class="opts tiles three" id="q-market">
+      <div class="opt" data-k="local"><div class="dot"></div><div><div class="lbl"><span class="zh">本地即食 / 高端</span><span class="en">Local fresh / premium</span><span class="ms">Segar tempatan / premium</span></div><div class="desc"><span class="zh">当天至隔天食用</span><span class="en">Eaten same/next day</span><span class="ms">Dimakan hari yang sama/esoknya</span></div></div></div>
+      <div class="opt" data-k="short"><div class="dot"></div><div><div class="lbl"><span class="zh">短程运输</span><span class="en">Short-haul transport</span><span class="ms">Pengangkutan jarak dekat</span></div><div class="desc"><span class="zh">国内陆运 · 数小时至隔天到达</span><span class="en">Domestic road · hours to next day</span><span class="ms">Jalan darat dalam negara · beberapa jam hingga esok</span></div></div></div>
+      <div class="opt" data-k="export"><div class="dot"></div><div><div class="lbl"><span class="zh">长程出口</span><span class="en">Long-haul export</span><span class="ms">Eksport jarak jauh</span></div><div class="desc"><span class="zh">需控温延长货架期</span><span class="en">Needs climate control & shelf life</span><span class="ms">Perlu kawalan suhu & hayat simpanan</span></div></div></div>
     </div>
   </div>
 
@@ -792,6 +821,11 @@ function cloneCfgFor(variety){
 wireOpts('q-variety','variety','v');
 wireOpts('q-method','method','m');
 wireOpts('q-market','market','k');
+// Sensible defaults so a newcomer gets an answer from two inputs (durian + flowering date):
+// cut harvest, sold locally. Both can be changed in steps 3 and 5.
+state.method='pluck'; state.market='local';
+document.querySelector('#q-method .opt[data-m="pluck"]').classList.add('sel');
+document.querySelector('#q-market .opt[data-k="local"]').classList.add('sel');
 // option tiles are divs — make them reachable and operable by keyboard / screen reader
 document.querySelectorAll('.opt').forEach(o=>{ o.setAttribute('role','button'); o.tabIndex=0; });
 document.addEventListener('keydown',e=>{
@@ -826,8 +860,8 @@ const customDaa=document.getElementById('customDaa');
 const customDaaGeneric=document.getElementById('customDaaGeneric');
 const customDaaReset=document.getElementById('customDaaReset');
 function updateCustomDaaBox(){
-  if(!state.variety){ customDaaBox.style.display='none'; return; }
-  customDaaBox.style.display='block';
+  const customDaaToggle=document.getElementById('customDaaToggle');
+  if(!state.variety){ customDaaBox.style.display='none'; customDaaToggle.style.display='none'; return; }
   const base=CLONES[state.variety]||CLONES.other;
   const custom=getCustomDrop(state.variety);
   customDaa.value = custom!=null ? custom : '';
@@ -843,8 +877,15 @@ function updateCustomDaaBox(){
         hints+=`<div style="display:flex;align-items:center;gap:8px;margin-top:6px"><span style="flex:1;min-width:0;font-size:11.5px;color:var(--ink-soft);line-height:1.4"><b style="color:var(--shell)">${escapeHtml(f.name)}</b> · ${basisText(c)}</span><button type="button" data-usecalib="${c.dropHi}" style="flex:none;border:1.5px solid var(--line);background:#fff;color:var(--shell);border-radius:8px;padding:4px 10px;font-size:11.5px;font-weight:700;cursor:pointer">${T('采用','Use','Guna')}</button></div>`;
     });
   }catch(e){}
+  // opt-in for newcomers: shown once asked for, when a figure is already set, or when the
+  // grower's own farms already have a figure for this durian
+  const open = customDaaOpen || custom!=null || !!hints;
+  customDaaBox.style.display = open ? 'block' : 'none';
+  customDaaToggle.style.display = open ? 'none' : 'block';
   customDaaFarms.innerHTML = hints ? `<div style="font-size:11.5px;font-weight:800;color:var(--shell);margin-top:9px">${T('你的果园已有的数字','Figures from your farms','Angka daripada kebun anda')}</div>`+hints : '';
 }
+let customDaaOpen=false;
+document.getElementById('customDaaToggle').addEventListener('click',()=>{ customDaaOpen=true; updateCustomDaaBox(); });
 const customDaaFarms=document.createElement('div');
 customDaaBox.appendChild(customDaaFarms);
 customDaaFarms.addEventListener('click',e=>{
@@ -980,7 +1021,7 @@ function updateTargetVisibility(){
   // Show the ripeness dial as soon as pluck + clone are chosen — BEFORE the date —
   // so the farmer deliberately picks 85/90/95% first, rather than seeing it appear
   // together with an already-computed result.
-  const showTarget = state.method==='pluck' && state.variety;
+  const showTarget = state.method==='pluck' && state.variety && !quickMode;
   if(state.method==='tree'){
     targetField.style.display='none';
     projBox.style.display='none';
@@ -989,7 +1030,7 @@ function updateTargetVisibility(){
     targetField.style.display='block';
     if(state.target>=100){ state.target=getSavedTarget(); } // restore the grower's saved pick
     syncTargetButtons();
-    projBox.style.display = flowerDate.value ? 'block' : 'none';
+    projBox.style.display = (flowerDate.value && !quickMode) ? 'block' : 'none';
   } else {
     targetField.style.display='none';
     projBox.style.display='none';
@@ -1000,12 +1041,13 @@ function updateTargetVisibility(){
 // so when it's hidden the date step slides up from 5 to 4 — no gap in the sequence.
 function updateStepNumbers(){
   const ripeVisible = targetField.style.display!=='none';
-  const sr=document.getElementById('stepRipe'), sd=document.getElementById('stepDate');
+  const sr=document.getElementById('stepRipe'), sm=document.getElementById('stepMarket');
   if(sr) sr.textContent = ripeVisible ? '4. ' : '';
-  if(sd) sd.textContent = ripeVisible ? '5. ' : '4. ';
+  if(sm) sm.textContent = ripeVisible ? '5. ' : '4. ';
 }
 // initial paint: reflect the persisted ripeness pick and number the (hidden-ripeness) steps
 syncTargetButtons(); updateStepNumbers();
+projBox.style.display='none';   // nothing to project until a durian and a date are chosen
 // re-project when clone changes (called from clone-select handler)
 function syncFromDate(){
   updateTargetVisibility();
@@ -1014,7 +1056,76 @@ function syncFromDate(){
 
 // Auto-compute: the moment all required inputs exist, render the result live.
 // No button — every field change re-runs decide() so the answer updates instantly.
+/* ---- "fruit is already on the tree": judge from the fruit, no flowering date needed ----
+   Uses only what the grower can see today: the three DOA maturity signs and, if any fruit
+   has fallen, the date the first one fell (DOA: check maturity 5 days after it). */
+let quickMode=false;
+const flowerWrap=document.getElementById('flowerWrap'), noDateBtn=document.getElementById('noDateBtn'), quickBox=document.getElementById('quickBox');
+const qcFirst=document.getElementById('qcFirst'), qcSigns=['qcS1','qcS2','qcS3'].map(id=>document.getElementById(id));
+function setQuickMode(on){
+  quickMode=on;
+  flowerWrap.style.display=on?'none':''; noDateBtn.style.display=on?'none':'block'; quickBox.style.display=on?'block':'none';
+  if(on) qcFirst.max=todayISO();
+  updateTargetVisibility(); maybeAutoRun();
+}
+noDateBtn.addEventListener('click',()=>setQuickMode(true));
+document.getElementById('qcBack').addEventListener('click',()=>setQuickMode(false));
+qcSigns.concat([qcFirst]).forEach(el=>el.addEventListener('change',()=>maybeAutoRun()));
+function renderQuickCheck(){
+  const c=cloneCfg(), n=qcSigns.filter(x=>x.checked).length, el=document.getElementById('result');
+  const today=new Date(); today.setHours(0,0,0,0);
+  let first=null; if(qcFirst.value && qcFirst.value<=todayISO()){ const d=new Date(qcFirst.value+'T00:00:00'); if(!isNaN(d)) first=d; }
+  if(!n && !first){ clearResult(); return; }
+  let cls,title,body;
+  if(n===3){ cls='v-tree'; title=T('可以割了','Ready to cut','Sedia dipotong');
+    body=T('三个特征都出现了 —— 按农业局指南，这颗果已达可割的成熟度。这几天内割下最好。','All three signs are showing — by the DOA guideline this fruit is mature enough to cut. Cut it within the next few days.','Ketiga-tiga ciri sudah kelihatan — mengikut garis panduan Jabatan Pertanian buah ini cukup matang untuk dipotong. Potong dalam beberapa hari ini.'); }
+  else if(n===2){ cls='v-high'; title=T('快了 —— 过两三天再看','Nearly — look again in 2–3 days','Hampir — lihat semula dalam 2–3 hari');
+    body=T('已有两个特征。等第三个也出现再割，后熟才完整。（再看的间隔是本工具的建议，指南没有规定。）','Two signs are showing. Wait for the third before cutting so the fruit ripens fully. (The re-check interval is this tool\'s suggestion; the guideline sets none.)','Dua ciri sudah kelihatan. Tunggu ciri ketiga sebelum memotong supaya buah masak sepenuhnya. (Selang semakan semula ialah cadangan alat ini; garis panduan tidak menetapkannya.)'); }
+  else { cls='v-early'; title=T('还没到 —— 约一周后再看','Not yet — look again in about a week','Belum lagi — lihat semula dalam kira-kira seminggu');
+    body=T('特征还不够。现在割，果多半不能完整后熟。（再看的间隔是本工具的建议。）','Not enough signs yet. Cut now and the fruit will probably not ripen properly. (The re-check interval is this tool\'s suggestion.)','Ciri belum mencukupi. Jika dipotong sekarang, buah mungkin tidak masak dengan baik. (Selang semakan semula ialah cadangan alat ini.)'); }
+  let firstLine='';
+  if(first){
+    const since=Math.round((today-first)/86400000), span=Math.max(1,c.dropHi-c.dropLo);
+    const chk=new Date(first); chk.setDate(chk.getDate()+5);
+    const end=new Date(first); end.setDate(end.getDate()+span);
+    if(since>span+8) firstLine=T(`⚠️ 第一颗果已落下 ${since} 天。按此品种的常见情况，其余的果多半已落或过熟 —— 请马上巡树。`,`⚠️ The first fruit fell ${since} days ago. For this variety the rest have usually dropped or gone over-ripe by now — walk the trees today.`,`⚠️ Buah pertama gugur ${since} hari lalu. Bagi varieti ini, buah lain biasanya sudah gugur atau terlebih masak — periksa pokok hari ini.`);
+    else if(since<5) firstLine=T(`第一颗果 ${since} 天前落下。农业局指南：满 5 天（${fmtDate(chk)}）起检查其余的果。此品种其余的果通常在约 ${fmtDate(end)} 前落完。`,`The first fruit fell ${since} day${since===1?'':'s'} ago. DOA guideline: start checking the rest from day 5 (${fmtDate(chk)}). For this variety the rest usually drop by about ${fmtDate(end)}.`,`Buah pertama gugur ${since} hari lalu. Garis panduan Jabatan Pertanian: mula memeriksa buah lain dari hari ke-5 (${fmtDate(chk)}). Bagi varieti ini, buah lain biasanya gugur sebelum kira-kira ${fmtDate(end)}.`);
+    else firstLine=T(`第一颗果 ${since} 天前落下，已过农业局说的 5 天 —— 现在就该逐颗检查。此品种其余的果通常在约 ${fmtDate(end)} 前落完。`,`The first fruit fell ${since} days ago, past the DOA's 5 days — check each fruit now. For this variety the rest usually drop by about ${fmtDate(end)}.`,`Buah pertama gugur ${since} hari lalu, melepasi 5 hari Jabatan Pertanian — periksa setiap buah sekarang. Bagi varieti ini, buah lain biasanya gugur sebelum kira-kira ${fmtDate(end)}.`);
+  }
+  const sh=shelfLifeDays(c,c.dropHi-4,'pluck');
+  const keep = c.fast
+    ? T(`割下后常温大约可放 ${sh.ambient} 天。这个品种后熟快 —— 出远门只宜空运或急冻。`,`Once cut it keeps about ${sh.ambient} days at room temperature. This variety ripens fast — for distant markets use air freight or freezing only.`,`Selepas dipotong ia tahan kira-kira ${sh.ambient} hari pada suhu bilik. Varieti ini cepat masak — untuk pasaran jauh guna kargo udara atau sejuk beku sahaja.`)
+    : T(`割下后常温大约可放 ${sh.ambient} 天，冷链约 ${sh.cold} 天（估算）。`,`Once cut it keeps about ${sh.ambient} days at room temperature, or about ${sh.cold} in a cold chain (estimates).`,`Selepas dipotong ia tahan kira-kira ${sh.ambient} hari pada suhu bilik, atau kira-kira ${sh.cold} hari dalam rantaian sejuk (anggaran).`);
+  el.innerHTML=`
+    <div class="verdict ${cls}" style="margin-bottom:12px">
+      <div class="vk">${T('看果判断','From the fruit','Daripada buah')} · ${n}/3 ${T('个特征','signs','ciri')}</div>
+      <div class="vt">${title}</div>
+      <div class="vd" style="margin-top:10px">${body}</div>
+      ${firstLine?`<div class="vd" style="margin-top:9px;padding-top:9px;border-top:1px solid rgba(255,255,255,.25)">${firstLine}</div>`:''}
+    </div>
+    <div class="rcard"><h4>📦 ${T('割下之后','After cutting','Selepas dipotong')}</h4><div style="font-size:13.5px;line-height:1.6">${keep}</div></div>
+    ${doaCardHTML(state.market==='export')}
+    <div class="disc">${T('下一季在「我的果园」记下开花日，本工具就能提前算出割果日，不必等到果在树上才判断。','Next season, log the flowering date in My Farms and this tool will project the cut date ahead of time, so you need not wait until the fruit is on the tree.','Musim depan, rekodkan tarikh berbunga dalam Kebun Saya dan alat ini akan mengunjurkan tarikh potong lebih awal, tanpa perlu menunggu buah berada di pokok.')}</div>`;
+  el.classList.add('show');
+  foldCards(el,['📦']);
+}
+/* ---- result layout: one answer card on top, everything else folded away ---- */
+const foldState={};   // remembers what the user opened or closed across re-renders
+function foldCards(el,openByDefault){
+  [...el.querySelectorAll(':scope > .rcard')].forEach(card=>{
+    const h=card.querySelector(':scope > h4'); if(!h) return;
+    const key=[...h.textContent.trim()][0];
+    if(key==='🌡'){ card.remove(); return; }       // the maturity bar now only repeats the chosen target
+    const d=document.createElement('details'); d.className=card.className+' fold'; d.style.cssText=card.style.cssText;
+    const sum=document.createElement('summary'); sum.innerHTML=h.innerHTML; h.remove();
+    d.appendChild(sum); while(card.firstChild) d.appendChild(card.firstChild);
+    d.open = (key in foldState) ? foldState[key] : (openByDefault||[]).indexOf(key)>=0;
+    d.addEventListener('toggle',()=>{ foldState[key]=d.open; });
+    card.replaceWith(d);
+  });
+}
 function maybeAutoRun(){
+  if(quickMode){ if(state.variety) renderQuickCheck(); else clearResult(); return; }
   if(!(state.variety && state.method && state.market)) return;
   if(state.days==='date' && state.daa){ decide(); return; }
   if(state.method==='tree'){
@@ -1327,8 +1438,18 @@ function render(key,cls,title,desc,mat,harvest,handle,tr){
           <div style="font-size:16px;font-weight:800;line-height:1.1;white-space:nowrap">${cdText}</div>
         </div>
       </div>`:''}
+      ${(tr.flav!=null && !tr.overRipe)?`
+      <div class="ansrow">
+        <div><b>${tr.flav}%</b><span>${T('风味保留','flavour kept','rasa dikekalkan')}</span></div>
+        <div><b>${tr.shelf.ambient}${T(' 天',' d',' hari')}</b><span>${T('常温可放','at room temp','pada suhu bilik')}</span></div>
+        ${tr.market==='local'?'':`<div><b>${tr.shelf.cold}${T(' 天',' d',' hari')}</b><span>${T('冷链可放','in cold chain','rantaian sejuk')}</span></div>`}
+      </div>
+      <div class="ansbasis">${cloneCfg().own
+        ? T('按你自己的落果天数计算。','Worked out from your own drop day.','Dikira daripada hari gugur anda sendiri.')
+        : T('按这个品种常见的天数计算 —— 记下你自己的落果日后会更准。','Worked out from typical days for this variety — it gets more accurate once you log your own drops.','Dikira daripada hari lazim bagi varieti ini — semakin tepat apabila anda merekodkan gugur anda sendiri.')}</div>`:''}
       <div class="vd" style="margin-top:10px">${desc}</div>
-    </div>`;
+    </div>
+    <div class="foldhint">${T('想知道原因和细节？点开下面各项 ▾','Want the reasons and details? Open the sections below ▾','Mahu tahu sebab dan butirannya? Buka bahagian di bawah ▾')}</div>`;
   }
 
   // ---- tradeoff centrepiece ----
@@ -1405,6 +1526,7 @@ function render(key,cls,title,desc,mat,harvest,handle,tr){
     <button class="share" id="shareBtn"><svg viewBox="0 0 24 24" width="20" height="20" fill="#fff" aria-hidden="true"><path d="M17.47 14.38c-.3-.15-1.76-.87-2.03-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.95 1.17-.17.2-.35.22-.65.07-.3-.15-1.26-.46-2.4-1.48-.89-.79-1.49-1.77-1.66-2.07-.17-.3-.02-.46.13-.61.13-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.07-.15-.67-1.62-.92-2.22-.24-.58-.49-.5-.67-.51l-.57-.01c-.2 0-.52.07-.79.37-.27.3-1.04 1.02-1.04 2.48 0 1.46 1.06 2.87 1.21 3.07.15.2 2.1 3.2 5.08 4.49.71.31 1.26.49 1.69.62.71.23 1.36.2 1.87.12.57-.09 1.76-.72 2.01-1.41.25-.7.25-1.29.17-1.42-.07-.13-.27-.2-.57-.35zM12.04 21.5h-.01a9.4 9.4 0 0 1-4.8-1.31l-.34-.2-3.57.93.96-3.48-.22-.36a9.38 9.38 0 0 1-1.44-5.01c0-5.19 4.23-9.42 9.43-9.42 2.52 0 4.88.98 6.66 2.76a9.35 9.35 0 0 1 2.76 6.67c0 5.19-4.23 9.42-9.42 9.42zm8.02-17.44A11.32 11.32 0 0 0 12.04.75C5.8.75.72 5.83.72 12.07c0 2 .52 3.95 1.52 5.67L.62 23.25l5.65-1.48a11.28 11.28 0 0 0 5.77 1.58h.01c6.24 0 11.32-5.08 11.32-11.32 0-3.03-1.18-5.87-3.31-8.01z"/></svg>WhatsApp</button>
     <div class="disc">${T('本工具用科学呈现权衡，中立、不替你决定割或不割 —— 是否值得，取决于你的市场与这一季的价格。数值为参考，田间请结合品种、树龄、气候与买家要求。','This tool presents the tradeoff via science — neutral, and does not decide cut-or-not for you; whether it pays off depends on your market and this season prices. Figures are a reference; in the field, combine with clone, tree age, climate and buyer specs.','Alat ini membentangkan pertukaran melalui sains — neutral, dan tidak memutuskan potong atau tidak bagi pihak anda; sama ada berbaloi bergantung pada pasaran anda dan harga musim ini. Angka ialah rujukan; di lapangan, gabungkan dengan klon, umur pokok, iklim dan spesifikasi pembeli.')}</div>
   `;
+  foldCards(el, tr.market==='export' ? ['⚖'] : []);   // export: keep the route check open
   const firstReveal = !el.classList.contains('show');
   el.classList.add('show');
   // Auto-scroll to the result only on desktop (fine pointer). On touch devices the
@@ -1757,7 +1879,7 @@ function basisText(c){
     case 'first':  return T(`按「首果落下」推算：首果约第 ${b.first} 天落，窗口到第 ${d} 天（${b.n} 笔记录）`,`estimated from "first fruit fell": first fruit at about day ${b.first}, window to day ${d} (${b.n} record${b.n>1?'s':''})`,`dianggar daripada "buah pertama gugur": buah pertama pada kira-kira hari ke-${b.first}, tempoh hingga hari ke-${d} (${b.n} rekod)`);
     case 'stated': return T(`你为本果园填的数字：${d} 天（尚无实测）`,`your own figure for this farm: ${d} days (no measured drops yet)`,`angka anda sendiri bagi kebun ini: ${d} hari (belum ada gugur diukur)`);
     case 'device': return T(`你在「采收决策」填的数字：${d} 天`,`the figure you entered on the Harvest Decision tab: ${d} days`,`angka yang anda masukkan dalam tab Keputusan Tuai: ${d} hari`);
-    default:       return T(`通用参考 ${d} 天 —— 尚未校准`,`generic default ${d} days — not yet calibrated`,`rujukan umum ${d} hari — belum ditentukur`);
+    default:       return T(`这个品种常见的 ${d} 天 —— 你记录落果后会更准`,`typical for this variety: ${d} days — gets more accurate as you log drops`,`lazim bagi varieti ini: ${d} hari — semakin tepat apabila anda merekodkan gugur`);
   }
 }
 // The calibration panel on a farm card: one row per clone grown there.
@@ -1766,7 +1888,7 @@ function calibBlock(farm,activeTrees){
   if(!vs.length) return '';
   const rows=vs.map(v=>{
     const c=windowFor(v,farm,null), b=c.basis, measured=b.kind==='farm'||b.kind==='first';
-    const col=measured?'var(--good)':b.kind==='generic'?'var(--warn)':'var(--shell)';
+    const col=measured?'var(--good)':b.kind==='generic'?'var(--ink-soft)':'var(--shell)';
     const wide=(b.kind==='farm'&&b.hi-b.lo>14)
       ? `<div style="font-size:11px;color:var(--danger);font-weight:700;margin-top:2px">⚠ ${T('记录之间相差超过两周 —— 请检查日期是否记错，或是否混了不同花期。','Records differ by more than two weeks — check for a mistyped date or mixed flowering flushes.','Rekod berbeza lebih dua minggu — semak tarikh yang tersalah taip atau kelompok bunga yang bercampur.')}</div>` : '';
     return `<div style="display:flex;align-items:flex-start;gap:8px;padding:7px 0;border-top:1px solid var(--line)">
@@ -1784,9 +1906,9 @@ function calibBlock(farm,activeTrees){
 async function askCalib(farm,variety){
   const base=CLONES[variety]||CLONES.other, cur=(farm.calib&&farm.calib[variety])||'';
   const raw=await fdPrompt(T(
-    '在「'+farm.name+'」，'+cloneLabel(variety)+' 从开花到自然落果大约几天？\n填 60–180 之间的数字；不确定就留空（通用参考 '+base.dropHi+' 天）。\n之后只要记下落果日，实测数字会自动取代它。',
-    'At "'+farm.name+'", about how many days from flowering to natural drop for '+cloneLabel(variety)+'?\nEnter a number from 60 to 180, or leave it blank if unsure (generic default '+base.dropHi+' days).\nOnce you log drop dates, the measured figure takes over automatically.',
-    'Di "'+farm.name+'", kira-kira berapa hari dari berbunga hingga gugur semula jadi bagi '+cloneLabel(variety)+'?\nMasukkan nombor antara 60 hingga 180, atau biarkan kosong jika tidak pasti (rujukan umum '+base.dropHi+' hari).\nSetelah anda merekodkan tarikh gugur, angka terukur akan mengambil alih secara automatik.'), String(cur));
+    '（选填，不知道可直接按「取消」跳过）\n在「'+farm.name+'」，'+cloneLabel(variety)+' 从开花到自然落果大约几天？\n填 60–180 之间的数字（这个品种常见约 '+base.dropHi+' 天）。\n之后只要记下落果日，实测数字会自动取代它。',
+    '(Optional — tap Cancel to skip if you are not sure.)\nAt "'+farm.name+'", about how many days from flowering to natural drop for '+cloneLabel(variety)+'?\nEnter a number from 60 to 180 (typical for this variety: about '+base.dropHi+' days).\nOnce you log drop dates, the measured figure takes over automatically.',
+    '(Pilihan — ketik Batal untuk langkau jika tidak pasti.)\nDi "'+farm.name+'", kira-kira berapa hari dari berbunga hingga gugur semula jadi bagi '+cloneLabel(variety)+'?\nMasukkan nombor antara 60 hingga 180 (lazim bagi varieti ini: kira-kira '+base.dropHi+' hari).\nSetelah anda merekodkan tarikh gugur, angka terukur akan mengambil alih secara automatik.'), String(cur));
   if(raw===null) return false;
   const t=raw.trim();
   if(t===''){ if(farm.calib) delete farm.calib[variety]; return true; }
@@ -1814,7 +1936,7 @@ function renderFarms(){
 
   const activeFarms=d.farms.filter(f=>!f.deletedAt);
   if(!activeFarms.length){
-    html+=`<div style="text-align:center;color:var(--ink-soft);font-size:13px;padding:24px 10px;line-height:1.7">${T('还没有果园。先加一个果园，再往里加树。','No farms yet. Add a farm, then add trees to it.','Belum ada kebun. Tambah kebun, kemudian tambah pokok ke dalamnya.')}</div>`;
+    html+=`<div style="text-align:center;color:var(--ink-soft);font-size:13px;padding:24px 10px;line-height:1.7">${T('还没有果园。<br><b>① 加一个果园</b>　<b>② 加一棵树</b>　<b>③ 记下开花日</b><br>之后这里会倒数每棵树的割果日，并在你回填落果日后，越来越准。','No farms yet.<br><b>① Add a farm</b>　<b>② Add a tree</b>　<b>③ Log its flowering date</b><br>After that, this page counts down each tree\'s cut date, and gets more accurate every time you log a drop.','Belum ada kebun.<br><b>① Tambah kebun</b>　<b>② Tambah pokok</b>　<b>③ Rekod tarikh berbunga</b><br>Selepas itu, halaman ini mengira detik tarikh potong setiap pokok, dan semakin tepat setiap kali anda merekodkan gugur.')}</div>`;
   }
 
   // ---- harvest-approaching summary: the daily "what needs attention" view ----
@@ -2810,7 +2932,7 @@ function renderInsights(){
 /* restore last-selected tab on launch (runs after all handlers/functions are defined) */
 (function(){
   const p=getSavedTab();
-  if(p && p!=='guide'){ const el=document.querySelector(`.tab[data-p="${p}"]`); if(el) el.click(); }
+  if(p && p!=='tool'){ const el=document.querySelector(`.tab[data-p="${p}"]`); if(el) el.click(); }
 })();
 
 /* ---- service worker: self-updating, no version to bump ----
