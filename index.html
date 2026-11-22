@@ -90,6 +90,17 @@ details.fold>summary::after{content:'▾';margin-left:auto;color:var(--thorn);fo
 details.fold[open]>summary::after{content:'▴'}
 details.fold[open]>summary{margin-bottom:10px}
 .foldhint{font-size:11.5px;color:var(--ink-soft);text-align:center;margin:2px 0 10px}
+.tag{display:inline-block;font-size:10px;font-weight:800;border-radius:6px;padding:1px 6px;vertical-align:1px;white-space:nowrap}
+.tag.est{background:#f6e8d2;color:#8a5a12}
+.tag.src{background:#e3ecdf;color:#2f6142}
+.tag.own{background:#e6eaf3;color:#1f3a2e}
+.ansrow b.sm{font-size:13.5px;line-height:1.25;padding:3px 0}
+.facts{background:#fff;border:1px solid var(--line);border-radius:11px;padding:10px 12px;margin-bottom:12px}
+.facts-t{font-size:12px;font-weight:800;color:var(--shell);margin-bottom:4px}
+.fact{display:flex;gap:10px;padding:6px 0;border-top:1px solid var(--line);font-size:12.5px;line-height:1.45}
+.fact .fl{flex:0 0 38%;font-weight:700;color:var(--ink-soft)}
+.fact .fv{flex:1;min-width:0;color:var(--ink)}
+.facts-n{font-size:10.5px;color:var(--ink-soft);line-height:1.45;margin-top:6px;padding-top:6px;border-top:1px solid var(--line)}
 /* ---- tabs ---- */
 .tabs{display:flex;background:var(--shell-2);position:sticky;top:0;z-index:5}
 .tab{
@@ -427,7 +438,7 @@ body.lang-en .en.blk{display:block}
     <h3><span class="n" style="background:var(--good)">📋</span><span class="zh">本工具的依据顺序</span><span class="en">Which source this tool follows</span><span class="ms">Sumber yang diikuti alat ini</span></h3>
     <p><span class="zh"><b>① 以农业局（Jabatan Pertanian）2026 年 8 月 6 日发出的《Garis Panduan Kaedah Penuaian Durian Potong Matang Malaysia》为准。</b>起算日（超过 70% 花盛开）、成熟判断法（天数初判 → 首果落下 5 天后看离层线、瓣线与刺）、割果方法、催熟、包装标签、预冷（12°C ± 1）与运输条件，都照指南。</span>
     <span class="en"><b>① The Malaysia DOA guideline "Garis Panduan Kaedah Penuaian Durian Potong Matang Malaysia" (circulated 6 Aug 2026) is the default.</b> The start date (more than 70% bloom), the way maturity is judged (days as a first guide → 5 days after the first fruit drops, check the abscission line, segment lines and spines), cutting method, ripening induction, packing and labelling, pre-cooling (12°C ± 1) and transport conditions all follow it.</span><span class="ms"><b>① "Garis Panduan Kaedah Penuaian Durian Potong Matang Malaysia" oleh Jabatan Pertanian (diedarkan 6 Ogos 2026) ialah rujukan utama.</b> Tarikh mula kiraan (bunga kembang melebihi 70%), cara menentukan kematangan (bilangan hari sebagai panduan awal → 5 hari selepas buah pertama gugur, periksa garis absis, garis antara pangsa dan duri), kaedah penuaian, aruhan pemasakan, pembungkusan dan pelabelan, pra-penyejukan (12°C ± 1) dan syarat pengangkutan semuanya mengikut garis panduan itu.</span></p>
-    <p style="margin-top:10px"><span class="zh"><b>② 只有在有依据时，才保留本工具自己的数字</b>，并标明出处：猫山王约 90 天落果（Agrimag，业界杂志，反映果农做法 —— 不是研究量测；泰国勿洞一位果农称 95 天）；D24、Chanee、Monthong 的采收成熟天数（ITFNet 品种表：105–115、100–115、120–135 天 —— 这是适合采收的果龄，不是落果日）；冷藏与冷害（USDA Handbook 66；Romphophak 等 1997）；85%／75%／95% 成熟度的后熟表现（USDA Handbook 66）。<b>不采用：</b>MARDI 试验（JTAFS 2024）的天数 —— 那是马来西亚唯一的试验，其中猫山王到第 15 周仍在树上，比果农的经验迟。如果你的树落果较迟，请填入你自己的落果天数。</span><span class="en"><b>② The tool keeps a figure of its own only where a source supports it</b>, and names it: Musang King dropping at about 90 days (Agrimag, a trade magazine reflecting grower practice — not a research measurement; a grower in Betong, Thailand gives 95 days); harvest-maturity days for D24, Chanee and Monthong (ITFNet cultivar table: 105–115, 100–115 and 120–135 days — the fruit age suitable for cutting, not drop days); cold storage and chilling injury (USDA Handbook 66; Romphophak et al. 1997); how 85% / 75% / 95% mature fruit ripens (USDA Handbook 66). <b>Not used:</b> the day numbers of the MARDI trial (JTAFS 2024) — the only Malaysian trial, in which Musang King was still on the tree at 15 weeks, later than growers report. If your own trees drop later, enter your own drop day.</span><span class="ms"><b>② Alat ini mengekalkan angkanya sendiri hanya jika ada sumber yang menyokongnya</b>, dan sumber itu dinyatakan: Musang King gugur pada kira-kira 90 hari (Agrimag, majalah industri yang mencerminkan amalan pekebun — bukan ukuran penyelidikan; seorang pekebun di Betong, Thailand menyatakan 95 hari); hari kematangan tuai bagi D24, Chanee dan Monthong (jadual kultivar ITFNet: 105–115, 100–115 dan 120–135 hari — umur buah yang sesuai dipotong, bukan hari gugur); simpanan sejuk dan kecederaan sejuk (USDA Handbook 66; Romphophak et al. 1997); cara buah matang 85% / 75% / 95% masak (USDA Handbook 66). <b>Tidak digunakan:</b> bilangan hari kajian MARDI (JTAFS 2024) — satu-satunya kajian Malaysia, yang mendapati Musang King masih di pokok pada minggu ke-15, lebih lewat daripada pengalaman pekebun. Jika pokok anda gugur lebih lewat, masukkan hari gugur anda sendiri.</span></p>
+    <p style="margin-top:10px"><span class="zh"><b>② 只有在有依据时，才保留本工具自己的数字</b>，并标明出处：D24、Chanee、Monthong 的采收成熟天数（ITFNet 品种表：105–115、100–115、120–135 天 —— 这是适合采收的果龄，不是落果日）；割后几天后熟（USDA Handbook 66；ITFNet；Trends in Sciences 2023 的 3 颗小试验）；冷藏与冷害（USDA Handbook 66；Romphophak 等 1997）；85%／75%／95% 成熟度的后熟表现（USDA Handbook 66）。<b>猫山王尚无定论：</b>业界杂志 Agrimag 报道的果农做法是约 90 天落果（泰国勿洞一位果农称 95 天）；马来西亚唯一的试验（MARDI，JTAFS 2024）则在第 15 周、约 105 天割的果品质最好。本工具以较早的数字为默认，但过熟线设在第 113 天之后，并请你以果上的特征与自己的落果记录为准。</span><span class="en"><b>② The tool keeps a figure of its own only where a source supports it</b>, and names it: harvest-maturity days for D24, Chanee and Monthong (ITFNet cultivar table: 105–115, 100–115 and 120–135 days — the fruit age suitable for cutting, not drop days); days from cutting to ripe (USDA Handbook 66; ITFNet; a 3-fruit trial in Trends in Sciences 2023); cold storage and chilling injury (USDA Handbook 66; Romphophak et al. 1997); how 85% / 75% / 95% mature fruit ripens (USDA Handbook 66). <b>Musang King is unresolved:</b> grower practice reported by the trade magazine Agrimag puts natural drop at about 90 days (a grower in Betong, Thailand gives 95); the only Malaysian trial (MARDI, JTAFS 2024) found its best cut at 15 weeks, about 105 days. The tool defaults to the earlier figure, sets its over-ripe line past day 113, and asks you to go by the signs on the fruit and your own drop record.</span><span class="ms"><b>② Alat ini mengekalkan angkanya sendiri hanya jika ada sumber yang menyokongnya</b>, dan sumber itu dinyatakan: hari kematangan tuai bagi D24, Chanee dan Monthong (jadual kultivar ITFNet: 105–115, 100–115 dan 120–135 hari — umur buah yang sesuai dipotong, bukan hari gugur); bilangan hari dari potong hingga masak (USDA Handbook 66; ITFNet; kajian 3 biji dalam Trends in Sciences 2023); simpanan sejuk dan kecederaan sejuk (USDA Handbook 66; Romphophak et al. 1997); cara buah matang 85% / 75% / 95% masak (USDA Handbook 66). <b>Musang King belum muktamad:</b> amalan pekebun yang dilaporkan majalah industri Agrimag meletakkan gugur semula jadi pada kira-kira 90 hari (seorang pekebun di Betong, Thailand menyatakan 95); satu-satunya kajian Malaysia (MARDI, JTAFS 2024) mendapati potongan terbaik pada minggu ke-15, kira-kira 105 hari. Alat ini menggunakan angka lebih awal sebagai lalai, meletakkan garis terlebih masak selepas hari ke-113, dan meminta anda berpandukan ciri pada buah serta rekod gugur anda sendiri.</span></p>
     <p style="margin-top:10px"><span class="zh"><b>③ 其余是本工具的估算，会清楚标明</b>：黑刺、Tekka、IOI、红虾、红肉、甘榜等品种没有可核对的专属数字，只能显示农业局的通用参考（约第 13 周／90 天，视品种而定）—— 那是参考，不是下限；各品种的落果窗口、85／90／95% 的天数换算、风味保留与货架期天数都是模型估算 —— 农业局指南没有这些数字，请用你自己的落果记录与送验结果校准。已取得的论文收在本工具 GitHub 仓库的 <b>references/</b> 文件夹。</span><span class="en"><b>③ Everything else is this tool's estimate and is labelled as such</b>: Black Thorn, Tekka, IOI, Red Prawn, Red Flesh and kampung have no verifiable clone-specific figure, so only the DOA general guide (about week 13 / day 90, depending on variety) is shown — it is a guide, not a minimum; each clone's drop window, the day conversion of the 85/90/95% dial, flavour retention and shelf-life days are model estimates — the DOA guideline gives none of these, so calibrate them with your own drop records and lab results. The retrieved papers are in the <b>references/</b> folder of this tool's GitHub repository.</span><span class="ms"><b>③ Selebihnya ialah anggaran alat ini dan dilabel sedemikian</b>: Duri Hitam, Tekka, IOI, Udang Merah, Isi Merah dan durian kampung tiada angka khusus klon yang dapat disahkan, maka hanya panduan umum Jabatan Pertanian (kira-kira minggu ke-13 / hari ke-90, bergantung pada varieti) ditunjukkan — ia panduan, bukan had minimum; tempoh gugur setiap klon, penukaran hari bagi skala 85/90/95%, pengekalan rasa dan hari hayat simpanan ialah anggaran model — garis panduan Jabatan Pertanian tidak memberikan angka-angka ini, jadi tentukurkan dengan rekod gugur dan keputusan makmal anda sendiri. Kertas kajian yang diperoleh ada dalam folder <b>references/</b> di repositori GitHub alat ini.</span></p>
   </div>
 
@@ -444,7 +455,7 @@ body.lang-en .en.blk{display:block}
         <span><span class="zh">独立来源与 DAA</span><span class="en">Independent sources & DAA</span><span class="ms">Sumber bebas & DAA</span></span>
       </div>
       <div class="labrow"><span><b>D197 Musang King</b></span>
-        <span><span class="zh">Agrimag（业界杂志）：约 90 天自然落果，85% 以上成熟度约第 77 天起采摘，鲜果只耐放约 5 天、须走空运。泰国勿洞一位果农（Agrimag）：生长期 95 天。Trends in Sciences 2023：泰国种植、95 天割下的果还要约 5 天才后熟（仅 3 颗）。芹苴大学 2025（摘要）：坐果后 90 天。MARDI（JTAFS 2024，摘要）：在第 13、14、15 周割果，只有第 15 周的与落果相当 —— 其较迟的时间本工具不采用。</span><span class="en">Agrimag (trade magazine): natural drop at about 90 days, picked at 85%+ maturity from about day 77, keeps about 5 days and goes by air. A grower in Betong, Thailand (Agrimag): growth period 95 days. Trends in Sciences 2023: Thai-grown fruit cut at 95 days needed about 5 more days to ripen (3 fruit). Can Tho University 2025 (abstract): 90 days from fruit set. MARDI (JTAFS 2024, abstract): fruit cut at 13, 14 and 15 weeks, only the 15-week cut matching dropped fruit — its later timing is not used here.</span><span class="ms">Agrimag (majalah industri): gugur semula jadi pada kira-kira 90 hari, dipetik pada kematangan 85% ke atas mulai kira-kira hari ke-77, tahan kira-kira 5 hari dan dihantar melalui udara. Seorang pekebun di Betong, Thailand (Agrimag): tempoh pertumbuhan 95 hari. Trends in Sciences 2023: buah tanaman Thailand yang dipotong pada 95 hari memerlukan kira-kira 5 hari lagi untuk masak (3 biji). Universiti Can Tho 2025 (abstrak): 90 hari dari pembentukan buah. MARDI (JTAFS 2024, abstrak): buah dipotong pada minggu ke-13, 14 dan 15, hanya potongan minggu ke-15 setanding dengan buah gugur — masa yang lebih lewat itu tidak digunakan di sini.</span></span></div>
+        <span><span class="zh">Agrimag（业界杂志）：约 90 天自然落果，85% 以上成熟度约第 77 天起采摘，鲜果只耐放约 5 天、须走空运。泰国勿洞一位果农（Agrimag）：生长期 95 天。Trends in Sciences 2023：泰国种植、95 天割下的果还要约 5 天才后熟（仅 3 颗）。芹苴大学 2025（摘要）：坐果后 90 天 —— 从坐果算起，不是从开花，所以不能直接当作落果天数。MARDI（JTAFS 2024，摘要）：在第 13、14、15 周割果，只有第 15 周的与落果相当 —— 两者尚无定论，见上方说明。</span><span class="en">Agrimag (trade magazine): natural drop at about 90 days, picked at 85%+ maturity from about day 77, keeps about 5 days and goes by air. A grower in Betong, Thailand (Agrimag): growth period 95 days. Trends in Sciences 2023: Thai-grown fruit cut at 95 days needed about 5 more days to ripen (3 fruit). Can Tho University 2025 (abstract): 90 days from fruit set — counted from fruit set, not flowering, so it is not directly a drop day. MARDI (JTAFS 2024, abstract): fruit cut at 13, 14 and 15 weeks, only the 15-week cut matching dropped fruit — the two are unresolved; see the note above.</span><span class="ms">Agrimag (majalah industri): gugur semula jadi pada kira-kira 90 hari, dipetik pada kematangan 85% ke atas mulai kira-kira hari ke-77, tahan kira-kira 5 hari dan dihantar melalui udara. Seorang pekebun di Betong, Thailand (Agrimag): tempoh pertumbuhan 95 hari. Trends in Sciences 2023: buah tanaman Thailand yang dipotong pada 95 hari memerlukan kira-kira 5 hari lagi untuk masak (3 biji). Universiti Can Tho 2025 (abstrak): 90 hari dari pembentukan buah — dikira dari pembentukan buah, bukan berbunga, maka ia bukan hari gugur secara langsung. MARDI (JTAFS 2024, abstrak): buah dipotong pada minggu ke-13, 14 dan 15, hanya potongan minggu ke-15 setanding dengan buah gugur — kedua-duanya belum muktamad; lihat nota di atas.</span></span></div>
       <div class="labrow"><span><b>D24 Sultan / XO</b></span>
         <span><span class="zh">ITFNet 品种表：105–115 天适合采收，之后约 5 天后熟。没有另外发表的落果天数。</span><span class="en">ITFNet cultivar table: suitable for harvest at 105–115 days, then about 5 days to ripen. No separate drop figure is published.</span><span class="ms">Jadual kultivar ITFNet: sesuai dituai pada 105–115 hari, kemudian kira-kira 5 hari untuk masak. Tiada angka gugur yang diterbitkan secara berasingan.</span></span></div>
       <div class="labrow"><span><b>D123 Chanee</b></span>
@@ -460,12 +471,11 @@ body.lang-en .en.blk{display:block}
   </div>
 
   <div class="card" style="border-left:4px solid var(--flesh)">
-    <h3><span class="n" style="background:var(--flesh);color:#3a2708">%</span><span class="zh">「风味保留率」是怎么算的</span><span class="en">How "flavour retention %" is calculated</span><span class="ms">Cara "% pengekalan rasa" dikira</span></h3>
-    <p><span class="zh"><b>先说清楚：这是一个模型估算，不是实验室实测。</b>它的<b>形状与锚点有研究依据</b>，但每个百分比是锚点之间的<b>线性插值</b>，方便你直观比较不同割果时机 —— 不代表「割在90%就一定保留84%风味」。真正的校准，靠你自己的感官记录。</span>
-    <span class="en"><b>Up front: this is a model estimate, not a lab measurement.</b> Its <b>shape and anchor points are research-based</b>, but each percentage is a <b>linear interpolation</b> between those anchors — a way to compare cut timings at a glance, not a claim that "cutting at 90% retains exactly 84% of flavour." Real calibration comes from your own sensory log.</span><span class="ms"><b>Terus terang: ini anggaran model, bukan ukuran makmal.</b> <b>Bentuk dan titik sauhnya berasaskan kajian</b>, tetapi setiap peratusan ialah <b>interpolasi linear</b> antara titik sauh itu — cara membandingkan masa potong sepintas lalu, bukan dakwaan bahawa "potong pada 90% mengekalkan tepat 84% rasa". Penentukuran sebenar datang daripada rekod deria anda sendiri.</span></p>
+    <h3><span class="n" style="background:var(--flesh);color:#3a2708">%</span><span class="zh">风味为什么只分级、不给百分比</span><span class="en">Why flavour is shown as a band, not a percentage</span><span class="ms">Mengapa rasa ditunjukkan sebagai jalur, bukan peratusan</span></h3>
+    <p><span class="zh"><b>研究只说明一个方向：割得越早，风味越差。</b>没有任何研究验证过「90% 成熟保留 84% 风味」这类精确数字。所以本工具只把割果点分成四级 —— 接近树熟、略低于树熟、有所下降、明显不足 —— 用来比较不同的割果时机，而不是量测值。真正的校准来自你自己的感官记录。</span><span class="en"><b>The research shows only a direction: the earlier you cut, the worse the flavour.</b> No study has validated a precise figure such as "cutting at 90% keeps 84% of the flavour". So this tool sorts a cut into four bands — close to tree-ripe, slightly below tree-ripe, somewhat reduced, clearly reduced — as a way to compare cut timings, not as a measurement. Real calibration comes from your own sensory log.</span><span class="ms"><b>Kajian hanya menunjukkan satu arah: semakin awal dipotong, semakin kurang rasanya.</b> Tiada kajian yang mengesahkan angka tepat seperti "potong pada 90% mengekalkan 84% rasa". Maka alat ini mengelaskan potongan kepada empat jalur — hampir masak pokok, sedikit di bawah masak pokok, agak berkurang, jelas berkurang — sebagai cara membandingkan masa potong, bukan sebagai ukuran. Penentukuran sebenar datang daripada rekod deria anda sendiri.</span></p>
 
     <div style="margin-top:12px;background:#fffaf0;border:1.5px solid var(--flesh);border-radius:12px;padding:13px 14px">
-      <div style="font-size:12.5px;font-weight:800;color:var(--shell);margin-bottom:8px"><span class="zh">锚点（相对自然落果 = 100%）</span><span class="en">Anchor points (vs natural drop = 100%)</span><span class="ms">Titik sauh (berbanding gugur semula jadi = 100%)</span></div>
+      <div style="font-size:12.5px;font-weight:800;color:var(--shell);margin-bottom:8px"><span class="zh">四个分级怎么定</span><span class="en">How the four bands are set</span><span class="ms">Cara empat jalur ditetapkan</span></div>
       <svg viewBox="0 0 300 120" style="width:100%;height:auto;display:block">
         <line x1="34" y1="8" x2="34" y2="100" stroke="var(--line)" stroke-width="1"/>
         <line x1="34" y1="100" x2="292" y2="100" stroke="var(--line)" stroke-width="1"/>
@@ -474,25 +484,19 @@ body.lang-en .en.blk{display:block}
         <circle cx="130" cy="31" r="3.5" fill="#c98a2b"/>
         <circle cx="210" cy="19" r="3.5" fill="#3f7d55"/>
         <circle cx="270" cy="16" r="3.5" fill="#3f7d55"/>
-        <text x="52" y="80" font-size="9" font-weight="700" fill="#b4482f" text-anchor="start">78%</text>
-        <text x="130" y="24" font-size="9" font-weight="700" fill="#c98a2b" text-anchor="middle">95%</text>
-        <text x="204" y="14" font-size="9" font-weight="700" fill="#3f7d55" text-anchor="end">99%</text>
-        <text x="276" y="14" font-size="9" font-weight="700" fill="#3f7d55" text-anchor="start">100%</text>
         <text x="46" y="112" font-size="8" fill="var(--ink-soft)" text-anchor="middle">min</text>
         <text x="130" y="112" font-size="8" fill="var(--ink-soft)" text-anchor="middle">dropLo</text>
         <text x="210" y="112" font-size="8" fill="var(--ink-soft)" text-anchor="middle">dropHi</text>
         <text x="270" y="112" font-size="8" fill="var(--ink-soft)" text-anchor="middle">drop+</text>
       </svg>
       <div style="font-size:11.5px;color:var(--ink-soft);line-height:1.6;margin-top:6px">
-        <span class="zh">· <b>自然落果后</b>（drop+）：<b>100%</b> 风味（峰值基准）<br>· <b>落果窗口内</b>（dropHi）：≈ <b>99%</b><br>· <b>可采下限</b>（dropLo）：≈ <b>95%</b><br>· <b>最早割果日</b>（min：有专属依据的品种用其依据，否则为农业局通用的约 90 天）：≈ <b>78%</b>（可割但风味未满）<br>· <b>门槛以下</b>：每早一天约 −4%，急剧下滑（后熟不完整）</span>
-        <span class="en">· <b>After natural drop</b> (drop+): <b>100%</b> flavour (peak baseline)<br>· <b>In drop window</b> (dropHi): ≈ <b>99%</b><br>· <b>Earliest good cut</b> (dropLo): ≈ <b>95%</b><br>· <b>Earliest cut day</b> (min: the clone's own sourced figure, otherwise the DOA general ~day 90): ≈ <b>78%</b> (cuttable but not full flavour)<br>· <b>Below threshold</b>: ~−4% per day earlier, steep drop (incomplete ripening)</span><span class="ms">· <b>Selepas gugur semula jadi</b> (drop+): rasa <b>100%</b> (garis dasar kemuncak)<br>· <b>Dalam tempoh gugur</b> (dropHi): ≈ <b>99%</b><br>· <b>Potongan baik terawal</b> (dropLo): ≈ <b>95%</b><br>· <b>Hari potong terawal</b> (min: angka bersumber bagi klon itu, jika tiada, angka umum Jabatan Pertanian ~hari ke-90): ≈ <b>78%</b> (boleh dipotong tetapi rasa belum penuh)<br>· <b>Di bawah ambang</b>: ~−4% bagi setiap hari lebih awal, merosot mendadak (pemasakan tidak lengkap)</span>
+        <span class="zh">· <b>自然落果</b>：树熟（基准）<br>· <b>在该品种的窗口内割</b>：接近树熟<br>· <b>窗口前一周左右</b>：略低于树熟 → 有所下降<br>· <b>最早可割日或更早</b>：明显不足（后熟可能不完整）</span><span class="en">· <b>Natural drop</b>: tree-ripe (the reference)<br>· <b>Cut inside the variety's window</b>: close to tree-ripe<br>· <b>About a week before the window</b>: slightly below tree-ripe → somewhat reduced<br>· <b>At or before the earliest cut day</b>: clearly reduced (ripening may be incomplete)</span><span class="ms">· <b>Gugur semula jadi</b>: masak pokok (rujukan)<br>· <b>Dipotong dalam tempoh varieti itu</b>: hampir masak pokok<br>· <b>Kira-kira seminggu sebelum tempoh itu</b>: sedikit di bawah masak pokok → agak berkurang<br>· <b>Pada atau sebelum hari potong terawal</b>: jelas berkurang (pemasakan mungkin tidak lengkap)</span>
       </div>
     </div>
 
     <div style="margin-top:12px;font-size:12.5px;color:var(--ink);line-height:1.6">
       <b><span class="zh">锚点的研究依据：</span><span class="en">What the anchors rest on:</span><span class="ms">Asas titik sauh:</span></b>
-      <span class="zh"><br>① 自然落果 = 100% —— 这是本刻度的基准定义，不是量测值。<br>② 近落果割果 ≈ 落果品质（95–99% 锚点）—— MARDI 的猫山王试验：最贴近落果的一批在干物质上与落果相当，更早则不足（本工具不采用该试验的天数）。<br>③ 早割品质变差 —— USDA Handbook 66：75% 成熟的果后熟品质可能较差。<br>④ 成熟度分级有依据 —— USDA Handbook 66 以 75%／85%／95% 成熟度描述后熟表现。<br>⑤ 中间的百分比（78% 等）与每天的斜率是<b>本工具的内插估算</b>，没有文献数字。</span>
-      <span class="en"><br>① Natural drop = 100% — this is the scale's reference point by definition, not a measurement.<br>② Near-drop cut ≈ dropped-fruit quality (the 95–99% anchors) — a MARDI Musang King trial: the cut closest to drop matched dropped fruit in dry matter, and earlier cuts fell short (that trial's day numbers are not used here).<br>③ Early cutting is worse — USDA Handbook 66: fruit cut at 75% maturity may ripen with inferior quality.<br>④ Maturity classes are sourced — USDA Handbook 66 describes ripening behaviour at 75%, 85% and 95% maturity.<br>⑤ The in-between percentages (78% and so on) and the per-day slope are <b>this tool's interpolation</b>, with no published figure behind them.</span><span class="ms"><br>① Gugur semula jadi = 100% — ini titik rujukan skala mengikut takrif, bukan ukuran.<br>② Potong hampir gugur ≈ kualiti buah gugur (titik sauh 95–99%) — kajian MARDI ke atas Musang King: potongan paling hampir dengan gugur setanding dengan buah gugur dari segi bahan kering, dan potongan lebih awal tidak mencapainya (bilangan hari kajian itu tidak digunakan di sini).<br>③ Potong awal lebih teruk — USDA Handbook 66: buah yang dipotong pada kematangan 75% mungkin masak dengan kualiti rendah.<br>④ Kelas kematangan ada sumbernya — USDA Handbook 66 menerangkan kelakuan pemasakan pada kematangan 75%, 85% dan 95%.<br>⑤ Peratusan di antaranya (78% dan seterusnya) serta kecerunan sehari ialah <b>interpolasi alat ini</b>, tanpa angka terbitan di sebaliknya.</span>
+      <span class="zh"><br>① 自然落果是基准 —— 这是定义，不是量测值。<br>② 近落果割果 ≈ 落果品质 —— MARDI 的猫山王试验：最贴近落果的一批在干物质上与落果相当，更早则不足。<br>③ 早割品质变差 —— USDA Handbook 66：75% 成熟的果后熟品质可能较差，85% 的可后熟至优良。<br>④ 各级之间的分界是<b>本工具自己定的</b>，没有文献数字。</span><span class="en"><br>① Natural drop is the reference — by definition, not by measurement.<br>② Near-drop cut ≈ dropped-fruit quality — a MARDI Musang King trial: the cut closest to drop matched dropped fruit in dry matter, and earlier cuts fell short.<br>③ Early cutting is worse — USDA Handbook 66: fruit cut at 75% maturity may ripen with inferior quality, while 85% ripens to excellent quality.<br>④ Where one band ends and the next begins is <b>this tool's own choice</b>, with no published figure behind it.</span><span class="ms"><br>① Gugur semula jadi ialah rujukan — mengikut takrif, bukan ukuran.<br>② Potong hampir gugur ≈ kualiti buah gugur — kajian MARDI ke atas Musang King: potongan paling hampir dengan gugur setanding dengan buah gugur dari segi bahan kering, dan potongan lebih awal tidak mencapainya.<br>③ Potong awal lebih teruk — USDA Handbook 66: buah yang dipotong pada kematangan 75% mungkin masak dengan kualiti rendah, manakala 85% masak dengan kualiti sangat baik.<br>④ Sempadan antara satu jalur dengan jalur seterusnya ialah <b>pilihan alat ini sendiri</b>, tanpa angka terbitan di sebaliknya.</span>
     </div>
 
     <div class="quote" style="border-color:var(--good);margin-top:13px"><span class="zh"><b>怎么让它更准：</b>用「送验实验室」面板 —— 每个割果目标各留几颗，实测干物质/糖度/硬度并配感官评分。把你的实测覆盖这条通用曲线，风味保留率就从「估算」变成「你园地的实测」。</span>
@@ -525,7 +529,7 @@ body.lang-en .en.blk{display:block}
       <span id="cloneChevron" style="flex:0 0 auto;color:var(--thorn);font-size:13px;font-weight:800;transition:.2s">▼</span>
     </button>
     <div class="opts tiles clone-tiles" id="q-variety" style="display:none;margin-top:9px">
-      <div class="opt" data-v="d197"><div class="dot"></div><div><div class="lbl"><span class="zh">D197 猫山王 Musang King</span><span class="en">D197 Musang King</span><span class="ms">D197 Musang King</span></div><div class="desc"><span class="zh">早–中季 · 落果约 90–95 DAA（依果农做法；比多数品种早）</span><span class="en">Early–mid season · drops ~90–95 DAA (by grower practice; earlier than most clones)</span><span class="ms">Awal–pertengahan musim · gugur ~90–95 DAA (mengikut amalan pekebun; lebih awal daripada kebanyakan klon)</span></div></div></div>
+      <div class="opt" data-v="d197"><div class="dot"></div><div><div class="lbl"><span class="zh">D197 猫山王 Musang King</span><span class="en">D197 Musang King</span><span class="ms">D197 Musang King</span></div><div class="desc"><span class="zh">早–中季 · 约 90–95 天落果（果农做法）；一项试验指向约 105 天 —— 尚无定论</span><span class="en">Early–mid season · drops at about 90–95 days by grower practice; one trial points to about 105 — unresolved</span><span class="ms">Awal–pertengahan musim · gugur pada kira-kira 90–95 hari mengikut amalan pekebun; satu kajian menunjukkan kira-kira 105 — belum muktamad</span></div></div></div>
       <div class="opt" data-v="d24"><div class="dot"></div><div><div class="lbl"><span class="zh">D24 苏丹王 Sultan / XO</span><span class="en">D24 Sultan / XO</span><span class="ms">D24 Sultan / XO</span></div><div class="desc"><span class="zh">中季 · 采收成熟期 105–115 DAA（ITFNet）</span><span class="en">Mid-season · harvest maturity 105–115 DAA (ITFNet)</span><span class="ms">Pertengahan musim · kematangan tuai 105–115 DAA (ITFNet)</span></div></div></div>
       <div class="opt" data-v="d200"><div class="dot"></div><div><div class="lbl"><span class="zh">D200 黑刺 Black Thorn</span><span class="en">D200 Black Thorn</span><span class="ms">D200 Duri Hitam (Black Thorn)</span></div><div class="desc"><span class="zh">迟季 · 落果约 115–128 DAA</span><span class="en">Late-season · drops ~115–128 DAA</span><span class="ms">Lewat musim · gugur ~115–128 DAA</span></div></div></div>
       <div class="opt" data-v="d160"><div class="dot"></div><div><div class="lbl"><span class="zh">D160 竹脚 Tekka</span><span class="en">D160 Tekka</span><span class="ms">D160 Tekka</span></div><div class="desc"><span class="zh">中季 · 落果约 110–120 DAA · 果肉带竹青色</span><span class="en">Mid-season · drops ~110–120 DAA · bamboo-green tint</span><span class="ms">Pertengahan musim · gugur ~110–120 DAA · rona hijau buluh</span></div></div></div>
@@ -570,14 +574,14 @@ body.lang-en .en.blk{display:block}
     </div>
     <div id="projBox" style="margin-top:12px;background:#fffaf0;border:1.5px solid var(--flesh);border-radius:12px;padding:14px 15px">
       <div style="display:flex;align-items:baseline;justify-content:space-between;gap:10px">
-        <span style="font-size:13px;font-weight:700;color:var(--ink-soft)"><span class="zh">预计割果日</span><span class="en">Projected cut date</span><span class="ms">Tarikh potong dijangka</span></span>
+        <span style="font-size:13px;font-weight:700;color:var(--ink-soft)"><span class="zh">预计割果时段（估算）</span><span class="en">Estimated cut window</span><span class="ms">Anggaran tempoh potong</span></span>
         <span id="projDate" style="font-size:17px;font-weight:800;color:var(--shell)">—</span>
       </div>
       <div id="projCountdown" style="font-size:13px;font-weight:700;margin-top:4px"></div>
       <div id="projDaa" style="font-size:12px;color:var(--ink-soft);margin-top:5px"></div>
       <div style="border-top:1px dashed var(--line);margin-top:10px;padding-top:9px;font-size:12px;color:var(--ink-soft);line-height:1.5">
-        <span class="zh">参考落果窗口：<span id="projWindow"></span>。田间实际会因土壤、树龄、气候提前或延后 —— 以你的观察为准，记录后逐季校准。</span>
-        <span class="en">Reference drop window: <span id="projWindowEn"></span>. Real field timing shifts with soil, tree age, and weather — trust your observation and calibrate season by season.</span><span class="ms">Tempoh gugur rujukan: <span id="projWindowMs"></span>. Masa sebenar di lapangan berubah mengikut tanah, umur pokok dan cuaca — percayai pemerhatian anda dan tentukurkan musim demi musim.</span>
+        <span class="zh">参考：<span id="projWindow"></span>。田间实际会因土壤、树龄、气候提前或延后 —— 以你的观察为准，记录后逐季校准。</span>
+        <span class="en">Reference: <span id="projWindowEn"></span>. Real field timing shifts with soil, tree age, and weather — trust your observation and calibrate season by season.</span><span class="ms">Rujukan: <span id="projWindowMs"></span>. Masa sebenar di lapangan berubah mengikut tanah, umur pokok dan cuaca — percayai pemerhatian anda dan tentukurkan musim demi musim.</span>
       </div>
     </div>
   </div>
@@ -751,23 +755,30 @@ const DOA_MIN=90;   // the DOA general guide day — a reference point, never a 
    ev  = retrieved evidence about cut QUALITY that does not set a threshold.
    Papers are in the repo's references/ folder; see references/README.md. */
 const CLONES={
-  // Musang King: the window follows GROWER PRACTICE (drop at about 90 days), reported by a
-  // trade magazine — not a research measurement. The only Malaysian trial (MARDI, JTAFS
-  // 2024) had fruit on the tree at 15 weeks; its day numbers are not used because growers
-  // report dropped/over-ripe fruit long before that. Growers whose trees drop later are
-  // told to enter their own drop day.
-  d197:{min:77, dropLo:90, dropHi:95, over:103, fragile:true,  fast:true,
+  /* Per clone:
+       win   — what [dropLo,dropHi] actually is: 'harvest' = a published harvest-maturity
+               range (ITFNet; NOT a drop window), 'drop' = a reported natural-drop window,
+               absent = this tool's estimate of the drop window
+       ripen — published days from cutting to ripe (not the same thing as shelf life)
+       keepCap — a published limit on fresh storage days, where one exists
+     Musang King is UNRESOLVED: a trade magazine reporting grower practice puts natural drop
+     at about 90 days; the only Malaysian trial (MARDI, JTAFS 2024) found its best cut at 15
+     weeks (~105 days). The default follows the earlier figure so growers look early, but
+     the over-ripe line sits past the later one (105 + 8) so the magazine figure alone can
+     never classify fruit as over-ripe. */
+  d197:{min:77, dropLo:90, dropHi:95, over:113, fragile:true,  fast:true, win:'drop', keepCap:5,
+    ripen:{d:'5',s:['Trends in Sciences 2023，仅 3 颗','Trends in Sciences 2023, 3 fruit only','Trends in Sciences 2023, 3 biji sahaja']},
     src:['Agrimag（业界杂志，反映果农做法，非研究量测）：约 90 天自然落果，85% 以上成熟度约第 77 天起采摘','Agrimag (a trade magazine reflecting grower practice, not a research measurement): natural drop at about 90 days, picked at 85%+ maturity from about day 77','Agrimag (majalah industri yang mencerminkan amalan pekebun, bukan ukuran penyelidikan): gugur semula jadi pada kira-kira 90 hari, dipetik pada kematangan 85% ke atas mulai kira-kira hari ke-77'],
-    ev:['猫山王落果早：按果农做法约 90 天落果，比农业局通用的「约 90 天成熟」还早就可割。<b>如果你的树落果较迟，请填入你自己的落果天数</b> —— 马来西亚唯一的试验（MARDI）中，果实到第 15 周仍在树上，只有那一批的干物质与落果相当。','Musang King drops early: by grower practice it drops at about 90 days, so it is cut before the DOA general "mature at about day 90" guide. <b>If your trees drop later, enter your own drop day</b> — in the only Malaysian trial (MARDI) fruit was still on the tree at 15 weeks, and only that cut matched dropped fruit in dry matter.','Musang King gugur awal: mengikut amalan pekebun ia gugur pada kira-kira 90 hari, maka ia dipotong sebelum panduan umum Jabatan Pertanian "matang pada kira-kira hari ke-90". <b>Jika pokok anda gugur lebih lewat, masukkan hari gugur anda sendiri</b> — dalam satu-satunya kajian Malaysia (MARDI) buah masih di pokok pada minggu ke-15, dan hanya potongan itu setanding dengan buah gugur dari segi bahan kering.']},
-  d24: {min:105,dropLo:105, dropHi:115, over:123, fragile:false, src:['ITFNet 品种表：D24 在 105–115 天适合采收（这是采收成熟期，不是落果日；没有已发表的落果天数，故以此为窗口）','ITFNet cultivar table: D24 is suitable for harvest at 105–115 days (a harvest-maturity range, not a drop day; no drop figure is published, so it serves as the window)','Jadual kultivar ITFNet: D24 sesuai dituai pada 105–115 hari (julat kematangan tuai, bukan hari gugur; tiada angka gugur diterbitkan, maka ia dijadikan tempoh)']},
-  d200:{min:DOA_MIN,dropLo:115, dropHi:128, over:135, fragile:false, fast:true,
+    ev:['<b>猫山王的时间尚无定论。</b>业界杂志报道的果农做法是约 90 天落果；马来西亚唯一的试验（MARDI）则在第 15 周（约 105 天）割的果品质最好。本工具以较早的数字为默认，好让你早点开始看果；但要过了第 113 天才判为过熟。<b>以果上的三个特征和你自己的落果记录为准</b>，不要只靠任何一个天数。','<b>Musang King timing is unresolved.</b> Grower practice reported by a trade magazine puts natural drop at about 90 days; the only Malaysian trial (MARDI) found its best cut at 15 weeks (about 105 days). This tool defaults to the earlier figure so that you start checking early, but does not call fruit over-ripe until past day 113. <b>Go by the three signs on the fruit and your own drop record</b>, not by either number alone.','<b>Masa Musang King belum muktamad.</b> Amalan pekebun yang dilaporkan majalah industri meletakkan gugur semula jadi pada kira-kira 90 hari; satu-satunya kajian Malaysia (MARDI) mendapati potongan terbaik pada minggu ke-15 (kira-kira 105 hari). Alat ini menggunakan angka yang lebih awal sebagai lalai supaya anda mula memeriksa awal, tetapi tidak menganggap buah terlebih masak sehingga melepasi hari ke-113. <b>Berpandukan tiga ciri pada buah dan rekod gugur anda sendiri</b>, bukan mana-mana satu angka sahaja.']},
+  d24: {min:105,dropLo:105, dropHi:115, over:123, fragile:false, win:'harvest', ripen:{d:'5',s:['ITFNet','ITFNet','ITFNet']}, src:['ITFNet 品种表：D24 在 105–115 天适合采收（这是采收成熟期，不是落果日；没有已发表的落果天数，故以此为窗口）','ITFNet cultivar table: D24 is suitable for harvest at 105–115 days (a harvest-maturity range, not a drop day; no drop figure is published, so it serves as the window)','Jadual kultivar ITFNet: D24 sesuai dituai pada 105–115 hari (julat kematangan tuai, bukan hari gugur; tiada angka gugur diterbitkan, maka ia dijadikan tempoh)']},
+  d200:{min:DOA_MIN,dropLo:115, dropHi:128, over:135, fragile:false, fast:true, ripen:{d:'4–5',s:['Trends in Sciences 2023，仅 3 颗','Trends in Sciences 2023, 3 fruit only','Trends in Sciences 2023, 3 biji sahaja']},
     ev:['黑刺的窗口是本工具的估算：泰国勿洞一位果农称生长期约 115 天（Agrimag）；Trends in Sciences 2023 在盛花后 105 天割下、约 4–5 天后熟（仅 3 颗）。请用你自己的落果记录校准。','Black Thorn\'s window is this tool\'s estimate: a grower in Betong, Thailand gives a growth period of about 115 days (Agrimag); Trends in Sciences 2023 cut it 105 days after full bloom and it ripened in about 4–5 days (3 fruit only). Calibrate with your own drop record.','Tempoh Duri Hitam ialah anggaran alat ini: seorang pekebun di Betong, Thailand menyatakan tempoh pertumbuhan kira-kira 115 hari (Agrimag); Trends in Sciences 2023 memotongnya 105 hari selepas bunga kembang penuh dan ia masak dalam kira-kira 4–5 hari (3 biji sahaja). Tentukurkan dengan rekod gugur anda sendiri.']},
   d160:{min:DOA_MIN,dropLo:110, dropHi:120, over:128, fragile:true},
   d168:{min:DOA_MIN,dropLo:105, dropHi:115, over:123, fragile:false},
   d175:{min:DOA_MIN,dropLo:110, dropHi:120, over:128, fragile:false},
   d101:{min:DOA_MIN,dropLo:100, dropHi:112, over:120, fragile:false},
-  d123:{min:100,dropLo:100, dropHi:115, over:123, fragile:true,  src:['ITFNet 品种表：Chanee 在 100–115 天适合采收（采收成熟期，不是落果日）','ITFNet cultivar table: Chanee is suitable for harvest at 100–115 days (a harvest-maturity range, not a drop day)','Jadual kultivar ITFNet: Chanee sesuai dituai pada 100–115 hari (julat kematangan tuai, bukan hari gugur)']},
-  d159:{min:105,dropLo:120, dropHi:135, over:143, fragile:true,  src:['Frontiers in Plant Science 2021：Trat 一果园在 105 天以商业成熟采收；但 Scientific Reports 2021 指约 120 天才是适宜成熟度、更早的果不会后熟；ITFNet 表：120–135 天适合采收','Frontiers in Plant Science 2021: one Trat orchard harvested at 105 days as commercially mature; but Scientific Reports 2021 says about 120 days is the optimal maturity and earlier fruit will not ripen; ITFNet table: suitable for harvest at 120–135 days','Frontiers in Plant Science 2021: sebuah kebun di Trat menuai pada 105 hari sebagai matang komersial; tetapi Scientific Reports 2021 menyatakan kira-kira 120 hari ialah kematangan optimum dan buah lebih awal tidak akan masak; jadual ITFNet: sesuai dituai pada 120–135 hari']},
+  d123:{min:100,dropLo:100, dropHi:115, over:123, fragile:true,  win:'harvest', ripen:{d:'2–4',s:['USDA Handbook 66','USDA Handbook 66','USDA Handbook 66']}, src:['ITFNet 品种表：Chanee 在 100–115 天适合采收（采收成熟期，不是落果日）','ITFNet cultivar table: Chanee is suitable for harvest at 100–115 days (a harvest-maturity range, not a drop day)','Jadual kultivar ITFNet: Chanee sesuai dituai pada 100–115 hari (julat kematangan tuai, bukan hari gugur)']},
+  d159:{min:105,dropLo:120, dropHi:135, over:143, fragile:true,  win:'harvest', ripen:{d:'4–6',s:['USDA Handbook 66','USDA Handbook 66','USDA Handbook 66']}, src:['Frontiers in Plant Science 2021：Trat 一果园在 105 天以商业成熟采收；但 Scientific Reports 2021 指约 120 天才是适宜成熟度、更早的果不会后熟；ITFNet 表：120–135 天适合采收','Frontiers in Plant Science 2021: one Trat orchard harvested at 105 days as commercially mature; but Scientific Reports 2021 says about 120 days is the optimal maturity and earlier fruit will not ripen; ITFNet table: suitable for harvest at 120–135 days','Frontiers in Plant Science 2021: sebuah kebun di Trat menuai pada 105 hari sebagai matang komersial; tetapi Scientific Reports 2021 menyatakan kira-kira 120 hari ialah kematangan optimum dan buah lebih awal tidak akan masak; jadual ITFNet: sesuai dituai pada 120–135 hari']},
   kampung:{min:DOA_MIN,dropLo:100,dropHi:120,over:128,fragile:false},
   other:{min:DOA_MIN,dropLo:105,dropHi:120,over:128,fragile:false}
 };
@@ -814,7 +825,7 @@ function cloneCfgFor(variety){
   const shift=custom-base.dropHi;
   return {
     min:base.min+shift, dropLo:base.dropLo+shift,
-    dropHi:custom, over:base.over+shift, fragile:base.fragile, src:base.src, ev:base.ev, fast:base.fast, own:true
+    dropHi:custom, over:custom+Math.min(8,base.over-base.dropHi), fragile:base.fragile, src:base.src, ev:base.ev, fast:base.fast, keepCap:base.keepCap, win:base.win, ripen:base.ripen, own:true
   };
 }
 
@@ -971,7 +982,7 @@ function fmtDate(d){
 function project(){
   if(!state.variety||!flowerDate.value){
     // no date (or it was cleared): drop the old projection so a stale answer can't linger
-    state.daa=null; state.days=null; state.cutDateStr=null; state.daysToGo=null;
+    state.daa=null; state.days=null; state.cutDateStr=null; state.daysToGo=null; state.cutISO=null;
     checkReady(); return;
   }
   const c=cloneCfg();
@@ -981,22 +992,19 @@ function project(){
   state.daa=targetDaa;state.days='date';
   // projected cut date = anthesis + targetDaa
   const cut=new Date(d0);cut.setDate(cut.getDate()+targetDaa);
-  state.cutDateStr=fmtDate(cut);
+  state.cutDateStr=fmtDate(cut); state.cutISO=isoLocal(cut);
   const daysToGo=Math.round((cut-now)/86400000);
   state.daysToGo=daysToGo;
-  projDate.textContent=fmtDate(cut);
-  projDaa.textContent=T(`目标 ${state.target}% 成熟 ≈ 授粉后 ${targetDaa} 天`,`Target ${state.target}% ripe ≈ ${targetDaa} days after anthesis`,`Sasaran ${state.target}% masak ≈ ${targetDaa} hari selepas antesis`);
+  projDate.textContent=windowText(cut,dateTol(c));
+  projDaa.textContent=T(`目标 ${state.target}% 成熟 ≈ 授粉后约 ${targetDaa} 天（估算）`,`Target ${state.target}% ripe ≈ about ${targetDaa} days after anthesis (estimate)`,`Sasaran ${state.target}% masak ≈ kira-kira ${targetDaa} hari selepas antesis (anggaran)`);
   const usingCustom = !!c.own;
   const winTag = usingCustom ? T('（你的记录）',' (your record)',' (rekod anda)') : '';
-  projWindow.textContent=`${c.dropLo}–${c.dropHi} DAA${winTag}`;
-  if(projWindowEn)projWindowEn.textContent=`${c.dropLo}–${c.dropHi} DAA${winTag}`;
-  if(projWindowMs)projWindowMs.textContent=`${c.dropLo}–${c.dropHi} DAA${winTag}`;
-  let cd,col;
-  if(daysToGo>1){cd=T(`还有 <b>${daysToGo}</b> 天`,`<b>${daysToGo}</b> days to go`,`<b>${daysToGo}</b> hari lagi`);col='#3f7d55';}
-  else if(daysToGo===1){cd=T('明天','Tomorrow','Esok');col='#c98a2b';}
-  else if(daysToGo===0){cd=T('就是今天','Today','Hari ini');col='#c98a2b';}
-  else {cd=T(`已过 <b>${-daysToGo}</b> 天 —— 尽快检查/采收`,`<b>${-daysToGo}</b> days past — check/harvest soon`,`<b>${-daysToGo}</b> hari terlepas — periksa/tuai segera`);col='#b4482f';}
-  projCountdown.innerHTML=cd;projCountdown.style.color=col;
+  projWindow.textContent=winLabel(c);
+  if(projWindowEn)projWindowEn.textContent=winLabel(c);
+  if(projWindowMs)projWindowMs.textContent=winLabel(c);
+  { const tol=dateTol(c);
+    projCountdown.textContent=winCountdown(daysToGo,tol);
+    projCountdown.style.color = daysToGo+tol<0 ? '#b4482f' : (daysToGo-tol<=1 ? '#c98a2b' : '#3f7d55'); }
   checkReady();
 }
 flowerDate.addEventListener('change',()=>{
@@ -1194,12 +1202,12 @@ function shelfLifeDays(c,daa,method){
   // - Temperature itself: DOA 2026 pre-cools at 12°C ± 1; USDA recommends 15°C.
   if(method==='tree'||daa==null) return {ambient:2,cold:7};
   const daysBeforeDrop=Math.max(0,c.dropHi-daa);
-  return {
-    // fast = Musang King / Black Thorn: ripened ~5 days after harvest (Trends in Sciences 2023)
-    ambient:Math.min(c.fast?5:8, 3+Math.round(daysBeforeDrop*0.5)),
-    // fast clones: no cold-chain figure is published; hold at the 7-day baseline
-    cold:Math.min(c.fast?7:14, 7+Math.round(daysBeforeDrop*0.6))
-  };
+  // keepCap = a published fresh-storage limit (Musang King: about 5 days, Agrimag)
+  const ambient=Math.min(c.keepCap||8, 3+Math.round(daysBeforeDrop*0.5));
+  // fast clones: no cold-chain figure is published; hold at the 7-day baseline.
+  // Cold storage is never shown as shorter than room temperature.
+  const cold=Math.max(ambient, Math.min(c.fast?7:14, 7+Math.round(daysBeforeDrop*0.6)));
+  return {ambient:ambient, cold:cold};
 }
 
 /* ---- real China-market transit routes (door-to-arrival, incl. handling) ----
@@ -1257,7 +1265,7 @@ function decide(){
   const flav=flavourRetention(c,daa,s.method);
   const shelf=shelfLifeDays(c,daa,s.method);
 
-  const win=T(`落果窗口 ${c.dropLo}–${c.dropHi} DAA · 过熟 >${c.over}`,`Drop window ${c.dropLo}–${c.dropHi} DAA · over-ripe >${c.over}`,`Tempoh gugur ${c.dropLo}–${c.dropHi} DAA · terlebih masak >${c.over}`);
+  const win=winLabel(c)+T(` · 过熟线 >${c.over}`,` · over-ripe line >${c.over}`,` · garis terlebih masak >${c.over}`)+' '+tagEst();
   let key,cls,title,desc;
 
   // 1. over-ripe guard (the "dangerously long" case)
@@ -1348,10 +1356,10 @@ function decide(){
       if(s.method==='tree' || c.fast){
         const why = s.method==='tree'
           ? T('落果只能放约 2–3 天 —— 只宜空运或急冻','dropped fruit keeps only about 2–3 days — air freight or freezing only','buah gugur hanya tahan kira-kira 2–3 hari — kargo udara atau sejuk beku sahaja')
-          : T('此品种后熟快（约 5 天）—— 宜空运或急冻','this clone ripens fast (about 5 days) — use air freight or freezing','klon ini cepat masak (kira-kira 5 hari) — guna kargo udara atau sejuk beku');
+          : T('不建议：小型试验中常温约 5 天就后熟，且没有冷链数据 —— 宜空运或急冻','not advised: it ripened in about 5 days at room temperature in a small trial, and there is no cold-chain data — prefer air freight or freezing','tidak disyorkan: ia masak dalam kira-kira 5 hari pada suhu bilik dalam kajian kecil, dan tiada data rantaian sejuk — utamakan kargo udara atau sejuk beku');
         return `<div class="routerow" style="border-top:1px solid var(--line)">
         <span class="rr-name">${r.rail?'🚄 ':''}${T(r.zh,r.en,r.ms)} <span style="color:var(--ink-soft)">(${r.days}${T('天','d',' hari')})</span></span>
-        <span class="rr-stat" style="color:#b4482f">✕ ${why}</span></div>`;
+        <span class="rr-stat" style="color:${s.method==='tree'?'#b4482f':'#c98a2b'}">${s.method==='tree'?'✕':'⚠'} ${why}</span></div>`;
       }
       const col = arriveOk? '#3f7d55' : (margin>=0? '#c98a2b' : '#b4482f');
       const mark = arriveOk? '✓' : (margin>=0? '⚠' : '✕');
@@ -1383,7 +1391,7 @@ function decide(){
     // don't yet know the real numbers for. Shown whenever export is selected.
     const railTip = `<div style="font-size:11.5px;color:var(--ink-soft);margin-top:8px;line-height:1.5;border-top:1px dashed var(--line);padding-top:8px">${T('🚄 关于「东盟快铁」：从雪兰莪 KNICD 货运场（双溪威／Setia Jaya，非格拉那再也 LRT 站）出发，经泰国、老挝到重庆，约 <b>9 天</b>（KTMB，每周两班；约为空运 1/5 成本、比海运快约一半）。9 天对鲜果偏紧，实务上多走<b>急冻榴梿</b>。这是马来西亚出发的真实数字 —— 不同于泰国（老挝口岸出发）常见的 3–5 天。','🚄 About the ASEAN Express: departs the KNICD freight depot in Selangor (Sungai Way / Setia Jaya — a cargo terminal, not the Kelana Jaya LRT station), via Thailand & Laos to Chongqing, about <b>9 days</b> (KTMB, 2×/week; ~⅕ of air cost, ~50% faster than sea). Nine days is tight for fresh, so in practice it carries <b>frozen durian</b>. These are the real Malaysia-origin figures — different from the 3–5 days often quoted for Thai (Laos-border) origins.','🚄 Tentang ASEAN Express: bertolak dari depoh kargo KNICD di Selangor (Sungai Way / Setia Jaya — terminal kargo, bukan stesen LRT Kelana Jaya), melalui Thailand & Laos ke Chongqing, kira-kira <b>9 hari</b> (KTMB, 2×/minggu; ~⅕ kos udara, ~50% lebih cepat daripada laut). Sembilan hari adalah ketat untuk buah segar, maka pada praktiknya ia membawa <b>durian sejuk beku</b>. Ini angka sebenar dari Malaysia — berbeza daripada 3–5 hari yang sering disebut bagi asal Thailand (sempadan Laos).')}</div>`;
     transitCheck=`<div style="margin-top:12px;background:#fff;border:1.5px solid var(--shell);border-radius:12px;padding:12px 13px">
-      <div style="font-size:12.5px;font-weight:800;color:var(--shell);margin-bottom:2px">${T('出口中国：路线可行性','Export to China: route feasibility','Eksport ke China: kebolehlaksanaan laluan')}</div>
+      <div style="font-size:12.5px;font-weight:800;color:var(--shell);margin-bottom:2px">${T('出口中国：在途时间核对（不代表已获准出口）','Export to China: transit-time check (not an export approval)','Eksport ke China: semakan masa perjalanan (bukan kelulusan eksport)')}</div>
       <div style="font-size:11px;color:var(--ink-soft);margin-bottom:4px">${T(`按冷链整果寿命估算 ${coldLife} 天（模型估算；上限约两周，Romphophak 等 1997），预留 ${RIPEN_RESERVE} 天到港后熟`,`Based on an estimated ${coldLife}d cold-chain whole-fruit life (model estimate; ceiling about two weeks, Romphophak et al. 1997), ${RIPEN_RESERVE}d reserved to ripen on arrival`,`Berdasarkan anggaran hayat buah utuh dalam rantaian sejuk ${coldLife} hari (anggaran model; had kira-kira dua minggu, Romphophak et al. 1997), ${RIPEN_RESERVE} hari dikhaskan untuk masak selepas tiba`)}</div>
       ${rows}
       <div style="font-size:11.5px;color:var(--danger);font-weight:700;margin-top:8px;line-height:1.5">${T('⚠️ 任何路线都须符合进口国所定条件（农业局指南第 9 节）。据《马来西亚前锋报》报道，农业局 2026 年 7 月 2 日声明：<b>目前未批准以陆路出口鲜榴梿到中国</b>，须待双方议定新协议或修订。上表的陆运／铁路天数仅供规划参考，出货前请向农业局确认。','⚠️ Every route must meet the importing country\'s conditions (DOA guideline, section 9). As reported by Utusan Malaysia, the DOA stated on 2 July 2026 that <b>overland export of fresh durian to China is not currently approved</b>, pending a new or amended protocol agreed by both sides. The road/rail day counts above are for planning only — confirm with the DOA before shipping.','⚠️ Setiap laluan mesti mematuhi syarat negara pengimport (garis panduan Jabatan Pertanian, seksyen 9). Seperti dilaporkan Utusan Malaysia, Jabatan Pertanian menyatakan pada 2 Julai 2026 bahawa <b>eksport durian segar ke China melalui laluan darat belum dibenarkan buat masa ini</b>, sehingga protokol baharu atau pindaan dipersetujui kedua-dua pihak. Bilangan hari jalan/kereta api di atas hanya untuk perancangan — sahkan dengan Jabatan Pertanian sebelum menghantar.')}</div>
@@ -1395,14 +1403,15 @@ function decide(){
     </div>`;
   }
 
-  render(key,cls,title,desc,mat,harvest,handle,{flav,shelf,method:s.method,market:s.market,overRipe,target:s.target,cutDateStr:s.cutDateStr,daysToGo:s.daysToGo,transitCheck});
+  render(key,cls,title,desc,mat,harvest,handle,{flav,shelf,method:s.method,market:s.market,overRipe,target:s.target,cutDateStr:s.cutDateStr,daysToGo:s.daysToGo,transitCheck,
+    cfg:c, tol:dateTol(c), band:flavourBand(c,daa,s.method), winText:(s.cutISO?windowText(new Date(s.cutISO+'T00:00:00'),dateTol(c)):null)});
 }
 
 /* ---- Malaysia DOA guideline (Garis Panduan Kaedah Penuaian Durian Potong Matang
    Malaysia, Jabatan Pertanian, circulated 6 Aug 2026; export scope) ----
    Shown ALONGSIDE the tool's own research-based figures, never replacing them. */
 function DOA_TEMP_NOTE(){
-  return `<div style="margin-top:8px;padding:8px 10px;border:1px dashed var(--shell);border-radius:9px;background:#fff;color:var(--shell);font-weight:600">${T('📋 <b>官方数字（农业局 DOA 2026 指南）：预冷 12°C ± 1，4–5 小时</b>；其输华标签范例的储存温度为 10–12°C。<br>📚 文献较保守：USDA Handbook 66（Paull & Ketsa）建议预冷与储存在 <b>15°C</b>，并指整果低于 15°C 果壳会冷害（变黑／褐）；Romphophak 等 (1997) 的金枕头试验中，118 天的果在 13.5°C 出现冷害，125 天的果在 13.5°C 可存 15 天。两者有差距 —— 以农业局与出口协议／买家规格为准，越生的果越要留意冷害。','📋 <b>Official figure (Malaysia DOA 2026 guideline): pre-cool at 12°C ± 1 for 4–5 hours</b>; its sample China label shows storage at 10–12°C.<br>📚 The literature is more cautious: USDA Handbook 66 (Paull & Ketsa) recommends pre-cooling and storing at <b>15°C</b> and reports husk chilling injury (blackening/browning) in whole fruit below 15°C; in Romphophak et al. (1997), Monthong fruit aged 118 days was chill-injured at 13.5°C while 125-day fruit kept 15 days at 13.5°C. The two differ — follow the DOA and your export protocol or buyer specification, and watch for chilling injury in less-mature fruit.','📋 <b>Angka rasmi (garis panduan Jabatan Pertanian 2026): pra-penyejukan pada 12°C ± 1 selama 4–5 jam</b>; contoh label ke China menunjukkan suhu simpanan 10–12°C.<br>📚 Literatur lebih berhati-hati: USDA Handbook 66 (Paull & Ketsa) mengesyorkan pra-penyejukan dan penyimpanan pada <b>15°C</b> dan melaporkan kecederaan sejuk pada kulit (menjadi hitam/perang) bagi buah utuh di bawah 15°C; dalam Romphophak et al. (1997), buah Monthong berumur 118 hari mengalami kecederaan sejuk pada 13.5°C manakala buah 125 hari tahan 15 hari pada 13.5°C. Kedua-duanya berbeza — ikut Jabatan Pertanian dan protokol eksport atau spesifikasi pembeli anda, dan awasi kecederaan sejuk pada buah yang kurang matang.')}</div>`;
+  return `<div style="margin-top:8px;padding:8px 10px;border:1px dashed var(--shell);border-radius:9px;background:#fff;color:var(--shell);font-weight:600">${T('📋 <b>官方数字（农业局 DOA 2026 指南）：预冷 12°C ± 1，4–5 小时</b>；其输华标签范例的储存温度为 10–12°C。<br>📚 文献较保守：USDA Handbook 66（Paull & Ketsa）建议预冷与储存在 <b>15°C</b>，并指整果低于 15°C 果壳会冷害（变黑／褐）；Romphophak 等 (1997) 的金枕头试验中，118 天的果在 13.5°C 出现冷害，125 天的果在 13.5°C 可存 15 天。两者有差距 —— 以农业局与出口协议／买家规格为准，越生的果越要留意冷害。注意：预冷只是 4–5 小时的短步骤；冷害的研究针对的是长时间的储存与运输。','📋 <b>Official figure (Malaysia DOA 2026 guideline): pre-cool at 12°C ± 1 for 4–5 hours</b>; its sample China label shows storage at 10–12°C.<br>📚 The literature is more cautious: USDA Handbook 66 (Paull & Ketsa) recommends pre-cooling and storing at <b>15°C</b> and reports husk chilling injury (blackening/browning) in whole fruit below 15°C; in Romphophak et al. (1997), Monthong fruit aged 118 days was chill-injured at 13.5°C while 125-day fruit kept 15 days at 13.5°C. The two differ — follow the DOA and your export protocol or buyer specification, and watch for chilling injury in less-mature fruit. Note: pre-cooling is a short 4–5 hour step; the chilling-injury findings concern prolonged storage and transit.','📋 <b>Angka rasmi (garis panduan Jabatan Pertanian 2026): pra-penyejukan pada 12°C ± 1 selama 4–5 jam</b>; contoh label ke China menunjukkan suhu simpanan 10–12°C.<br>📚 Literatur lebih berhati-hati: USDA Handbook 66 (Paull & Ketsa) mengesyorkan pra-penyejukan dan penyimpanan pada <b>15°C</b> dan melaporkan kecederaan sejuk pada kulit (menjadi hitam/perang) bagi buah utuh di bawah 15°C; dalam Romphophak et al. (1997), buah Monthong berumur 118 hari mengalami kecederaan sejuk pada 13.5°C manakala buah 125 hari tahan 15 hari pada 13.5°C. Kedua-duanya berbeza — ikut Jabatan Pertanian dan protokol eksport atau spesifikasi pembeli anda, dan awasi kecederaan sejuk pada buah yang kurang matang. Nota: pra-penyejukan ialah langkah singkat 4–5 jam; dapatan kecederaan sejuk berkaitan simpanan dan perjalanan yang lama.')}</div>`;
 }
 function doaCardHTML(isExport){
   const li=a=>a.map(x=>`<li>${x}</li>`).join('');
@@ -1438,6 +1447,70 @@ function doaCardHTML(isExport){
   return h+'</div>';
 }
 
+/* ---- no false precision ----
+   The flavour model interpolates between a few anchors; its percentages are not
+   measurements, so the app shows a band. Projected dates are shown as a window. */
+function flavourBand(c,daa,method){
+  const v=flavourRetention(c,daa,method); if(v==null) return null;
+  if(method==='tree') return {lv:3, col:'#3f7d55', text:T('树熟（最高）','Tree-ripe (peak)','Masak pokok (kemuncak)')};
+  const lv = v>=95?3 : v>=88?2 : v>=78?1 : 0;
+  const n=[['明显不足','Clearly reduced','Jelas berkurang'],['有所下降','Somewhat reduced','Agak berkurang'],['略低于树熟','Slightly below tree-ripe','Sedikit di bawah masak pokok'],['接近树熟','Close to tree-ripe','Hampir masak pokok']][lv];
+  return {lv:lv, col:lv>=3?'#3f7d55':lv===2?'#c98a2b':'#b4482f', text:T(n[0],n[1],n[2])};
+}
+const tagEst=()=>`<span class="tag est">${T('估算','estimate','anggaran')}</span>`;
+const tagSrc=()=>`<span class="tag src">${T('有出处','sourced','bersumber')}</span>`;
+const tagOwn=()=>`<span class="tag own">${T('你的记录','your record','rekod anda')}</span>`;
+// allowance either side of a projected date: half the clone's window, between 2 and 5 days
+function dateTol(c){ return Math.max(2,Math.min(5,Math.round((c.dropHi-c.dropLo)/2))); }
+function windowText(center,tol){
+  const a=new Date(center); a.setDate(a.getDate()-tol); const b=new Date(center); b.setDate(b.getDate()+tol);
+  const EN=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'], MS=['Jan','Feb','Mac','Apr','Mei','Jun','Jul','Ogo','Sep','Okt','Nov','Dis'];
+  return T(`${a.getMonth()+1}月${a.getDate()}日 – ${b.getMonth()+1}月${b.getDate()}日`,`${a.getDate()} ${EN[a.getMonth()]} – ${b.getDate()} ${EN[b.getMonth()]} ${b.getFullYear()}`,`${a.getDate()} ${MS[a.getMonth()]} – ${b.getDate()} ${MS[b.getMonth()]} ${b.getFullYear()}`);
+}
+function winCountdown(daysToGo,tol){
+  const st=daysToGo-tol, en=daysToGo+tol;
+  if(st>1) return T(`${st} 天后开始`,`starts in ${st} days`,`bermula dalam ${st} hari`);
+  if(st===1) return T('明天开始','starts tomorrow','bermula esok');
+  if(en>=0) return T('现在就在时段内','in the window now','dalam tempoh sekarang');
+  return T(`时段已过 ${-en} 天`,`window passed ${-en} days ago`,`tempoh berlalu ${-en} hari lalu`);
+}
+// what a clone's window is — a harvest-maturity range and a drop window are different things
+function winLabel(c){
+  const r=` ${c.dropLo}–${c.dropHi} DAA`;
+  if(c.own) return T('你的落果窗口','Your drop window','Tempoh gugur anda')+r;
+  if(c.win==='harvest') return T('采收成熟期（ITFNet，不是落果日）','Harvest-maturity range (ITFNet; not a drop window)','Julat kematangan tuai (ITFNet; bukan tempoh gugur)')+r;
+  if(c.win==='drop') return T('落果窗口（果农做法，尚无定论）','Drop window (grower practice; unresolved)','Tempoh gugur (amalan pekebun; belum muktamad)')+r;
+  return T('落果窗口（本工具估算）','Drop window (this tool\'s estimate)','Tempoh gugur (anggaran alat ini)')+r;
+}
+// harvest maturity, natural drop, time to ripen and shelf life are four separate quantities
+function factsTable(c,tr){
+  const row=(label,val,tag)=>`<div class="fact"><span class="fl">${label}</span><span class="fv">${val} ${tag}</span></div>`;
+  let harv,drop;
+  if(c.own){
+    harv=[T(`约第 ${c.min} 天起`,`from about day ${c.min}`,`dari kira-kira hari ke-${c.min}`),tagEst()];
+    drop=[T(`第 ${c.dropLo}–${c.dropHi} 天`,`day ${c.dropLo}–${c.dropHi}`,`hari ke-${c.dropLo}–${c.dropHi}`),tagOwn()];
+  } else if(c.win==='harvest'){
+    harv=[T(`第 ${c.dropLo}–${c.dropHi} 天（ITFNet）`,`day ${c.dropLo}–${c.dropHi} (ITFNet)`,`hari ke-${c.dropLo}–${c.dropHi} (ITFNet)`),tagSrc()];
+    drop=[T('未发表 —— 晚于采收成熟期','not published — later than harvest maturity','tidak diterbitkan — lebih lewat daripada kematangan tuai'),''];
+  } else if(c.win==='drop'){
+    harv=[T(`约第 ${c.min} 天起（业界报道）`,`from about day ${c.min} (trade report)`,`dari kira-kira hari ke-${c.min} (laporan industri)`),tagSrc()];
+    drop=[T(`约第 ${c.dropLo}–${c.dropHi} 天（果农做法）；一项试验指向约第 105 天 —— 尚无定论`,`about day ${c.dropLo}–${c.dropHi} (grower practice); one trial points to about day 105 — unresolved`,`kira-kira hari ke-${c.dropLo}–${c.dropHi} (amalan pekebun); satu kajian menunjukkan kira-kira hari ke-105 — belum muktamad`),tagSrc()];
+  } else {
+    harv=[T('未发表 —— 农业局通用参考约第 90 天','not published — DOA general guide about day 90','tidak diterbitkan — panduan umum Jabatan Pertanian kira-kira hari ke-90'),''];
+    drop=[T(`约第 ${c.dropLo}–${c.dropHi} 天`,`about day ${c.dropLo}–${c.dropHi}`,`kira-kira hari ke-${c.dropLo}–${c.dropHi}`),tagEst()];
+  }
+  const rip=c.ripen ? [T(`约 ${c.ripen.d} 天（${c.ripen.s[0]}）`,`about ${c.ripen.d} days (${c.ripen.s[1]})`,`kira-kira ${c.ripen.d} hari (${c.ripen.s[2]})`),tagSrc()] : [T('未发表','not published','tidak diterbitkan'),''];
+  const keep=[tr.market==='local'
+    ? T(`常温约 ${tr.shelf.ambient} 天`,`about ${tr.shelf.ambient} days at room temperature`,`kira-kira ${tr.shelf.ambient} hari pada suhu bilik`)
+    : T(`常温约 ${tr.shelf.ambient} 天 · 冷链约 ${tr.shelf.cold} 天`,`about ${tr.shelf.ambient} days at room temperature · about ${tr.shelf.cold} in a cold chain`,`kira-kira ${tr.shelf.ambient} hari pada suhu bilik · kira-kira ${tr.shelf.cold} hari dalam rantaian sejuk`),tagEst()];
+  return `<div class="facts"><div class="facts-t">${T('四件不同的事，分开看','Four different things, kept apart','Empat perkara berbeza, diasingkan')}</div>`
+    +row(T('可采收的果龄','Harvest maturity','Kematangan tuai'),harv[0],harv[1])
+    +row(T('自然落果','Natural drop','Gugur semula jadi'),drop[0],drop[1])
+    +row(T('割后几天后熟','Ripens after cutting','Masak selepas dipotong'),rip[0],rip[1])
+    +row(T('可以放多久','Keeps for','Tahan selama'),keep[0],keep[1])
+    +`<div class="facts-n">${T('果龄从开花日算起。「有出处」= 来自列明的文献或报道；「估算」= 本工具自己的推算，未经验证。','Fruit age is counted from flowering. "Sourced" = from a named paper or report; "estimate" = this tool\'s own working, not validated.','Umur buah dikira dari tarikh berbunga. "Bersumber" = daripada kertas atau laporan yang dinamakan; "anggaran" = kiraan alat ini sendiri, belum disahkan.')}</div></div>`;
+}
+
 function render(key,cls,title,desc,mat,harvest,handle,tr){
   const matColor=mat>=80?'#3f7d55':mat>=55?'#c98a2b':'#b4482f';
   const el=document.getElementById('result');
@@ -1447,10 +1520,7 @@ function render(key,cls,title,desc,mat,harvest,handle,tr){
   let leadBlock='';
   {
     const showCut = tr.cutDateStr && !tr.overRipe;
-    const cdText = tr.daysToGo===1 ? T('明天','Tomorrow','Esok')
-                 : tr.daysToGo>0 ? T(`还有 ${tr.daysToGo} 天`,`${tr.daysToGo} days to go`,`${tr.daysToGo} hari lagi`)
-                 : tr.daysToGo===0 ? T('就是今天','Today','Hari ini')
-                 : T(`已过 ${-tr.daysToGo} 天`,`${-tr.daysToGo} days past`,`${-tr.daysToGo} hari terlepas`);
+    const cdText = winCountdown(tr.daysToGo, tr.tol||0);
     leadBlock=`
     <div class="verdict ${cls}" style="margin-bottom:12px">
       <div class="vk">${T('建议采收线','Recommended line','Laluan yang disyorkan')}</div>
@@ -1458,8 +1528,8 @@ function render(key,cls,title,desc,mat,harvest,handle,tr){
       ${showCut?`
       <div style="display:flex;align-items:center;gap:10px;margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,.25)">
         <div style="flex:1">
-          <div style="font-size:11px;opacity:.85;font-weight:700">${tr.method==='tree' ? T('预计落果日','Projected drop date','Tarikh gugur dijangka') : T('目标 '+tr.target+'% 成熟 · 预计割果日','Target '+tr.target+'% · projected cut date','Sasaran '+tr.target+'% · tarikh potong dijangka')}</div>
-          <div style="font-size:16px;font-weight:800">${tr.cutDateStr}</div>
+          <div style="font-size:11px;opacity:.85;font-weight:700">${tr.method==='tree' ? T('预计落果时段（估算）','Estimated drop window','Anggaran tempoh gugur') : T('目标 '+tr.target+'% 成熟 · 预计割果时段（估算）','Target '+tr.target+'% · estimated cut window','Sasaran '+tr.target+'% · anggaran tempoh potong')}</div>
+          <div style="font-size:16px;font-weight:800">${tr.winText||tr.cutDateStr}</div>
         </div>
         <div style="text-align:right;background:rgba(255,255,255,.16);border-radius:9px;padding:6px 11px">
           <div style="font-size:16px;font-weight:800;line-height:1.1;white-space:nowrap">${cdText}</div>
@@ -1467,13 +1537,17 @@ function render(key,cls,title,desc,mat,harvest,handle,tr){
       </div>`:''}
       ${(tr.flav!=null && !tr.overRipe)?`
       <div class="ansrow">
-        <div><b>${tr.flav}%</b><span>${T('风味保留','flavour kept','rasa dikekalkan')}</span></div>
-        <div><b>${tr.shelf.ambient}${T(' 天',' d',' hari')}</b><span>${T('常温可放','at room temp','pada suhu bilik')}</span></div>
-        ${tr.market==='local'?'':`<div><b>${tr.shelf.cold}${T(' 天',' d',' hari')}</b><span>${T('冷链可放','in cold chain','rantaian sejuk')}</span></div>`}
+        <div><b class="sm">${tr.band.text}</b><span>${T('风味','flavour','rasa')}</span></div>
+        <div><b>~${tr.shelf.ambient}${T(' 天',' d',' hari')}</b><span>${T('常温可放','at room temp','pada suhu bilik')}</span></div>
+        ${tr.market==='local'?'':`<div><b>~${tr.shelf.cold}${T(' 天',' d',' hari')}</b><span>${T('冷链可放','in cold chain','rantaian sejuk')}</span></div>`}
       </div>
-      <div class="ansbasis">${cloneCfg().own
-        ? T('按你自己的落果天数计算。','Worked out from your own drop day.','Dikira daripada hari gugur anda sendiri.')
-        : T('按这个品种常见的天数计算 —— 记下你自己的落果日后会更准。','Worked out from typical days for this variety — it gets more accurate once you log your own drops.','Dikira daripada hari lazim bagi varieti ini — semakin tepat apabila anda merekodkan gugur anda sendiri.')}</div>`:''}
+      <div class="ansbasis">${tr.cfg.own
+        ? T('按你自己的落果天数推算。','Worked out from your own drop day.','Dikira daripada hari gugur anda sendiri.')
+        : T('按这个品种常见的天数推算 —— 记下你自己的落果日后会更准。','Worked out from typical days for this variety — it gets more accurate once you log your own drops.','Dikira daripada hari lazim bagi varieti ini — semakin tepat apabila anda merekodkan gugur anda sendiri.')}
+        ${(tr.method==='tree' && tr.cfg.win==='harvest' && !tr.cfg.own) ? T('这个品种没有已发表的落果天数，这里以采收成熟期的末段估算。','No drop day is published for this variety; this is estimated from the end of its harvest-maturity range.','Tiada hari gugur diterbitkan bagi varieti ini; ia dianggar daripada hujung julat kematangan tuainya.') : ''}
+        <b>${tr.method==='tree'
+          ? T('日期与数字都是估算。','Dates and figures are estimates.','Tarikh dan angka ialah anggaran.')
+          : T('日期与数字都是估算 —— 割之前先看果上的三个特征。','Dates and figures are estimates — check the three signs on the fruit before you cut.','Tarikh dan angka ialah anggaran — periksa tiga ciri pada buah sebelum memotong.')}</b></div>`:''}
       <div class="vd" style="margin-top:10px">${desc}</div>
     </div>
     <div class="foldhint">${T('想知道原因和细节？点开下面各项 ▾','Want the reasons and details? Open the sections below ▾','Mahu tahu sebab dan butirannya? Buka bahagian di bawah ▾')}</div>`;
@@ -1482,10 +1556,10 @@ function render(key,cls,title,desc,mat,harvest,handle,tr){
   // ---- tradeoff centrepiece ----
   let tradeoff='';
   if(tr.flav!=null && !tr.overRipe){
-    const fColor=tr.flav>=95?'#3f7d55':tr.flav>=80?'#c98a2b':'#b4482f';
+    const fColor=tr.band.col;
     const flavLine = tr.method==='tree'
       ? T('自然落果 = 风味基准（最高）','Natural drop = flavour baseline (peak)','Gugur semula jadi = garis dasar rasa (kemuncak)')
-      : T(`此割点保留约 <b style="color:${fColor}">${tr.flav}%</b> 的树熟风味`,`This cut keeps ~<b style="color:${fColor}">${tr.flav}%</b> of tree-ripe flavour`,`Potongan ini mengekalkan ~<b style="color:${fColor}">${tr.flav}%</b> rasa masak pokok`);
+      : T(`此割点的风味：<b style="color:${fColor}">${tr.band.text}</b>`,`Flavour at this cut: <b style="color:${fColor}">${tr.band.text}</b>`,`Rasa pada potongan ini: <b style="color:${fColor}">${tr.band.text}</b>`);
 
     const isLocal = tr.market==='local';
     const isExport = tr.market==='export';
@@ -1516,10 +1590,11 @@ function render(key,cls,title,desc,mat,harvest,handle,tr){
     tradeoff=`
     <div class="rcard" style="border:1.5px solid var(--flesh);background:#fffaf0">
       <h4>⚖️ ${T('风味 ↔ 货架期 权衡','Flavour ↔ shelf-life tradeoff','Pertukaran rasa ↔ hayat simpanan')}</h4>
-      <div style="font-size:14px;margin-bottom:10px">${flavLine}</div>
-      <div class="matbar"><i style="width:${tr.flav}%;background:${fColor}"></i></div>
-      <div class="matlabel"><span>${T('风味保留','Flavour kept','Rasa dikekalkan')}</span><span style="color:${fColor};font-weight:800">${tr.flav}%</span><span>${T('树熟峰值','Tree-ripe','Masak pokok')}</span></div>
-      <div style="font-size:10.5px;color:var(--ink-soft);margin-top:5px;line-height:1.4">${T('※ 模型估算（依据在「成熟科学」页），非实验室实测 —— 以你的感官记录为准。','※ Model estimate (basis in the Science tab), not a lab measurement — trust your own sensory log.','※ Anggaran model (asasnya dalam tab Sains), bukan ukuran makmal — percayai rekod deria anda sendiri.')}</div>
+      ${factsTable(tr.cfg,tr)}
+      <div style="font-size:14px;margin-bottom:10px">${flavLine} ${tagEst()}</div>
+      <div class="matbar"><i style="width:${(tr.band.lv+1)*25}%;background:${fColor}"></i></div>
+      <div class="matlabel"><span>${T('割得早','Cut early','Potong awal')}</span><span style="color:${fColor};font-weight:800">${tr.band.text}</span><span>${T('树熟峰值','Tree-ripe','Masak pokok')}</span></div>
+      <div style="font-size:10.5px;color:var(--ink-soft);margin-top:5px;line-height:1.4">${T('※ 这是粗略的分级，不是量测值 —— 研究只说明越早割风味越差，没有验证过具体百分比。以你的感官记录为准。','※ This is a rough band, not a measurement — the research shows earlier cuts taste worse but validates no exact percentage. Trust your own sensory log.','※ Ini jalur kasar, bukan ukuran — kajian menunjukkan potongan lebih awal kurang sedap tetapi tidak mengesahkan sebarang peratusan tepat. Percayai rekod deria anda sendiri.')}</div>
       <div style="display:flex;gap:8px;margin-top:14px">
         <div style="flex:1;background:#fff;border:1px solid var(--line);border-radius:10px;padding:9px 6px;text-align:center">
           <div style="font-size:20px;font-weight:800;color:var(--shell)">${tr.shelf.ambient}${T('天','d',' hari')}</div>
@@ -1571,13 +1646,13 @@ function share(title,desc,mat,harvest,handle,tr){
     const cd = tr.daysToGo>0 ? T(`还有 ${tr.daysToGo} 天`,`${tr.daysToGo} days to go`,`${tr.daysToGo} hari lagi`)
              : tr.daysToGo===0 ? T('就是今天','Today','Hari ini')
              : T('已过期','Overdue','Terlepas tarikh');
-    lines.push(T(`预计割果：${tr.cutDateStr}（${cd}）`,`Cut by: ${tr.cutDateStr} (${cd})`,`Potong pada: ${tr.cutDateStr} (${cd})`));
+    lines.push(T(`预计割果时段（估算）：${tr.winText||tr.cutDateStr}`,`Estimated cut window: ${tr.winText||tr.cutDateStr}`,`Anggaran tempoh potong: ${tr.winText||tr.cutDateStr}`));
     if(tr.target!=null) lines.push(T(`目标成熟度：${tr.target}%`,`Target ripeness: ${tr.target}%`,`Sasaran tahap masak: ${tr.target}%`));
   }
   lines.push(T(`成熟度：${mat}%`,`Maturity: ${mat}%`,`Kematangan: ${mat}%`));
   if(tr && tr.flav!=null && !tr.overRipe){
-    lines.push(T(`风味保留：约 ${tr.flav}% · 货架期：${tr.shelf.ambient}天常温 / ${tr.shelf.cold}天冷链`,
-                 `Flavour: ~${tr.flav}% · Shelf: ${tr.shelf.ambient}d room / ${tr.shelf.cold}d reefer`,`Rasa: ~${tr.flav}% · Hayat simpanan: ${tr.shelf.ambient} hari suhu bilik / ${tr.shelf.cold} hari rantaian sejuk`));
+    lines.push(T(`风味：${tr.band.text} · 常温约 ${tr.shelf.ambient} 天 / 冷链约 ${tr.shelf.cold} 天（估算）`,
+                 `Flavour: ${tr.band.text} · Keeps about ${tr.shelf.ambient}d room / ${tr.shelf.cold}d cold chain (estimates)`,`Rasa: ${tr.band.text} · Tahan kira-kira ${tr.shelf.ambient} hari suhu bilik / ${tr.shelf.cold} hari rantaian sejuk (anggaran)`));
   }
   lines.push('— '+T('树熟·割果·决策','Tree-drop·Cut·Decide','Gugur·Potong·Keputusan'));
   openWaPreview(lines.join('\n'));
@@ -1879,7 +1954,7 @@ function farmCloneStats(farm,variety){
 function windowFor(variety,farm,tree){
   const base=CLONES[variety]||CLONES.other;
   const at=(dropHi,basis)=>{ const sh=dropHi-base.dropHi;
-    return {min:base.min+sh, dropLo:base.dropLo+sh, dropHi:dropHi, over:base.over+sh, fragile:base.fragile, src:base.src, ev:base.ev, fast:base.fast, own:true, basis:basis}; };
+    return {min:base.min+sh, dropLo:base.dropLo+sh, dropHi:dropHi, over:dropHi+Math.min(8,base.over-base.dropHi), fragile:base.fragile, src:base.src, ev:base.ev, fast:base.fast, keepCap:base.keepCap, win:base.win, ripen:base.ripen, own:true, basis:basis}; };
   const span=a=>({n:a.length, lo:Math.min.apply(null,a), hi:Math.max.apply(null,a)});
   if(tree){
     const own=(tree.logs||[]).filter(l=>l.flowerDate&&l.actualDropStr).map(l=>daysBetween(l.flowerDate,l.actualDropStr)).filter(n=>n>40&&n<200);
@@ -2229,18 +2304,18 @@ function renderInlineCalc(farm, tree, calcKey){
   const shelf=shelfLifeDays(c,targetDaa,'pluck');
   const cd = days<0?T(`已过 ${-days} 天`,`${-days}d past`,`${-days} hari terlepas`):days===0?T('就是今天','today','hari ini'):T(`还有 ${days} 天`,`${days}d to go`,`${days} hari lagi`);
   const cdCol = days<0?'#b4482f':days<=3?'#c98a2b':'#3f7d55';
-  const fColor=flav>=95?'#3f7d55':flav>=80?'#c98a2b':'#b4482f';
+  const band=flavourBand(c,targetDaa,'pluck'), fColor=band.col;
   const isLocal=cs.market==='local', isExport=cs.market==='export';
 
   out+=`<div style="padding-top:9px;border-top:1px dashed var(--line)">
     <div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px">
-      <div><div style="font-size:11px;color:var(--ink-soft);font-weight:700">${T('预计割果日','Projected cut date','Tarikh potong dijangka')}</div>
-      <div style="font-size:14px;font-weight:800;color:var(--shell)">${fmtDate(cut)}</div></div>
+      <div><div style="font-size:11px;color:var(--ink-soft);font-weight:700">${T('预计割果时段（估算）','Estimated cut window','Anggaran tempoh potong')}</div>
+      <div style="font-size:14px;font-weight:800;color:var(--shell)">${windowText(cut,dateTol(c))}</div></div>
       <div style="font-size:13px;font-weight:800;color:${cdCol};white-space:nowrap">${cd}</div>
     </div>
     <div style="display:flex;gap:8px;margin-top:9px;font-size:11.5px">
       <div style="flex:1"><span style="color:var(--ink-soft)">${T('成熟度','Maturity','Kematangan')}</span> <b style="color:var(--shell)">${mat}%</b></div>
-      <div style="flex:1"><span style="color:var(--ink-soft)">${T('风味','Flavour','Rasa')}</span> <b style="color:${fColor}">${flav}%</b></div>
+      <div style="flex:1"><span style="color:var(--ink-soft)">${T('风味','Flavour','Rasa')}</span> <b style="color:${fColor}">${band.text}</b></div>
     </div>
     <div style="margin-top:7px;font-size:11.5px;color:var(--ink-soft);line-height:1.5">`;
   if(isLocal){
