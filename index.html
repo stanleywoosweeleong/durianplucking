@@ -1066,46 +1066,73 @@ function setQuickMode(on){
   quickMode=on;
   flowerWrap.style.display=on?'none':''; noDateBtn.style.display=on?'none':'block'; quickBox.style.display=on?'block':'none';
   if(on) qcFirst.max=todayISO();
-  updateTargetVisibility(); maybeAutoRun();
+  updateTargetVisibility();
+  // Leaving quick mode restores the saved cut ripeness; any projection made meanwhile
+  // (e.g. while "tree-drop" was selected) used another target, so work it out again.
+  if(!on && state.variety && flowerDate.value) project(); else maybeAutoRun();
 }
 noDateBtn.addEventListener('click',()=>setQuickMode(true));
 document.getElementById('qcBack').addEventListener('click',()=>setQuickMode(false));
 qcSigns.concat([qcFirst]).forEach(el=>el.addEventListener('change',()=>maybeAutoRun()));
 function renderQuickCheck(){
   const c=cloneCfg(), n=qcSigns.filter(x=>x.checked).length, el=document.getElementById('result');
+  const tree = state.method==='tree';        // the grower lets fruit drop: no cutting advice
   const today=new Date(); today.setHours(0,0,0,0);
   let first=null; if(qcFirst.value && qcFirst.value<=todayISO()){ const d=new Date(qcFirst.value+'T00:00:00'); if(!isNaN(d)) first=d; }
   if(!n && !first){ clearResult(); return; }
-  let cls,title,body;
-  if(n===3){ cls='v-tree'; title=T('可以割了','Ready to cut','Sedia dipotong');
-    body=T('三个特征都出现了 —— 按农业局指南，这颗果已达可割的成熟度。这几天内割下最好。','All three signs are showing — by the DOA guideline this fruit is mature enough to cut. Cut it within the next few days.','Ketiga-tiga ciri sudah kelihatan — mengikut garis panduan Jabatan Pertanian buah ini cukup matang untuk dipotong. Potong dalam beberapa hari ini.'); }
-  else if(n===2){ cls='v-high'; title=T('快了 —— 过两三天再看','Nearly — look again in 2–3 days','Hampir — lihat semula dalam 2–3 hari');
-    body=T('已有两个特征。等第三个也出现再割，后熟才完整。（再看的间隔是本工具的建议，指南没有规定。）','Two signs are showing. Wait for the third before cutting so the fruit ripens fully. (The re-check interval is this tool\'s suggestion; the guideline sets none.)','Dua ciri sudah kelihatan. Tunggu ciri ketiga sebelum memotong supaya buah masak sepenuhnya. (Selang semakan semula ialah cadangan alat ini; garis panduan tidak menetapkannya.)'); }
-  else { cls='v-early'; title=T('还没到 —— 约一周后再看','Not yet — look again in about a week','Belum lagi — lihat semula dalam kira-kira seminggu');
-    body=T('特征还不够。现在割，果多半不能完整后熟。（再看的间隔是本工具的建议。）','Not enough signs yet. Cut now and the fruit will probably not ripen properly. (The re-check interval is this tool\'s suggestion.)','Ciri belum mencukupi. Jika dipotong sekarang, buah mungkin tidak masak dengan baik. (Selang semakan semula ialah cadangan alat ini.)'); }
-  let firstLine='';
-  if(first){
-    const since=Math.round((today-first)/86400000), span=Math.max(1,c.dropHi-c.dropLo);
+  const span=Math.max(1,c.dropHi-c.dropLo);
+  const since = first ? Math.round((today-first)/86400000) : null;
+  // Long after the first fruit fell, the rest have usually dropped or gone over-ripe.
+  // That overrides whatever the signs say: no "ready", no shelf-life figures.
+  const overRipe = first!=null && since>span+8;
+  let cls,title,body,firstLine='',after,afterTitle,showDoa=false;
+  if(overRipe){
+    cls='v-early'; title=T('可能已过熟 —— 今天就巡树','Probably over-ripe — walk the trees today','Mungkin terlebih masak — periksa pokok hari ini');
+    body=T(`第一颗果已落下 ${since} 天。按此品种的常见情况，其余的果多半已落或过熟。`,`The first fruit fell ${since} days ago. For this variety the rest have usually dropped or gone over-ripe by now.`,`Buah pertama gugur ${since} hari lalu. Bagi varieti ini, buah lain biasanya sudah gugur atau terlebih masak.`);
+    afterTitle=T('现在怎么处理','What to do now','Apa yang perlu dibuat sekarang');
+    after=T('这么迟的果只适合就地即食、冷冻果肉或加工，不宜运输。还挂在树上的要马上检查。','Fruit this late is for eating locally straight away, freezing the flesh or processing — not for transport. Check anything still on the tree now.','Buah selewat ini hanya sesuai dimakan segera di tempat, disejuk beku isinya atau diproses — bukan untuk pengangkutan. Periksa mana-mana yang masih di pokok sekarang.');
+  } else if(tree){
+    if(n===3){ cls='v-tree'; title=T('快落果了 —— 张好网，每天巡收','About to drop — set the nets and collect daily','Hampir gugur — pasang jaring dan kutip setiap hari');
+      body=T('三个特征都出现了，离自然落果很近。你选的是树熟落果：让果留在树上，确认网或绳已就位，每天收。','All three signs are showing, so natural drop is close. You chose tree-drop: leave the fruit on the tree, make sure nets or ropes are in place, and collect every day.','Ketiga-tiga ciri sudah kelihatan, maka gugur semula jadi sudah hampir. Anda memilih gugur sendiri: biarkan buah di pokok, pastikan jaring atau tali sudah dipasang, dan kutip setiap hari.'); }
+    else if(n===2){ cls='v-high'; title=T('接近了 —— 过两三天再看','Getting close — look again in 2–3 days','Semakin hampir — lihat semula dalam 2–3 hari');
+      body=T('已有两个特征，自然落果在接近。先把网备好。（再看的间隔是本工具的建议。）','Two signs are showing; natural drop is approaching. Get the nets ready. (The re-check interval is this tool\'s suggestion.)','Dua ciri sudah kelihatan; gugur semula jadi semakin hampir. Sediakan jaring. (Selang semakan semula ialah cadangan alat ini.)'); }
+    else { cls='v-early'; title=T('还没到 —— 约一周后再看','Not yet — look again in about a week','Belum lagi — lihat semula dalam kira-kira seminggu');
+      body=T('特征还不够，果还没接近落果。（再看的间隔是本工具的建议。）','Not enough signs yet; the fruit is not close to dropping. (The re-check interval is this tool\'s suggestion.)','Ciri belum mencukupi; buah belum hampir gugur. (Selang semakan semula ialah cadangan alat ini.)'); }
+    afterTitle=T('落果之后','After it drops','Selepas ia gugur');
+    after=T('落果常温只能放约 2–3 天（USDA Handbook 66）。尽快卖出或食用；要卖到远处只宜空运，或取肉急冻。','Dropped fruit keeps only about 2–3 days at room temperature (USDA Handbook 66). Sell or eat it quickly; for distant markets use air freight only, or freeze the flesh.','Buah gugur hanya tahan kira-kira 2–3 hari pada suhu bilik (USDA Handbook 66). Jual atau makan segera; untuk pasaran jauh guna kargo udara sahaja, atau sejuk bekukan isinya.');
+  } else {
+    showDoa=true;
+    if(n===3){ cls='v-tree'; title=T('可以割了','Ready to cut','Sedia dipotong');
+      body=T('三个特征都出现了 —— 按农业局指南，这颗果已达可割的成熟度。这几天内割下最好。','All three signs are showing — by the DOA guideline this fruit is mature enough to cut. Cut it within the next few days.','Ketiga-tiga ciri sudah kelihatan — mengikut garis panduan Jabatan Pertanian buah ini cukup matang untuk dipotong. Potong dalam beberapa hari ini.'); }
+    else if(n===2){ cls='v-high'; title=T('快了 —— 过两三天再看','Nearly — look again in 2–3 days','Hampir — lihat semula dalam 2–3 hari');
+      body=T('已有两个特征。等第三个也出现再割，后熟才完整。（再看的间隔是本工具的建议，指南没有规定。）','Two signs are showing. Wait for the third before cutting so the fruit ripens fully. (The re-check interval is this tool\'s suggestion; the guideline sets none.)','Dua ciri sudah kelihatan. Tunggu ciri ketiga sebelum memotong supaya buah masak sepenuhnya. (Selang semakan semula ialah cadangan alat ini; garis panduan tidak menetapkannya.)'); }
+    else { cls='v-early'; title=T('还没到 —— 约一周后再看','Not yet — look again in about a week','Belum lagi — lihat semula dalam kira-kira seminggu');
+      body=T('特征还不够。现在割，果多半不能完整后熟。（再看的间隔是本工具的建议。）','Not enough signs yet. Cut now and the fruit will probably not ripen properly. (The re-check interval is this tool\'s suggestion.)','Ciri belum mencukupi. Jika dipotong sekarang, buah mungkin tidak masak dengan baik. (Selang semakan semula ialah cadangan alat ini.)'); }
+    const sh=shelfLifeDays(c,c.dropHi-4,'pluck');
+    afterTitle=T('割下之后','After cutting','Selepas dipotong');
+    after = c.fast
+      ? T(`割下后常温大约可放 ${sh.ambient} 天。这个品种后熟快 —— 出远门只宜空运或急冻。`,`Once cut it keeps about ${sh.ambient} days at room temperature. This variety ripens fast — for distant markets use air freight or freezing only.`,`Selepas dipotong ia tahan kira-kira ${sh.ambient} hari pada suhu bilik. Varieti ini cepat masak — untuk pasaran jauh guna kargo udara atau sejuk beku sahaja.`)
+      : T(`割下后常温大约可放 ${sh.ambient} 天，冷链约 ${sh.cold} 天（估算）。`,`Once cut it keeps about ${sh.ambient} days at room temperature, or about ${sh.cold} in a cold chain (estimates).`,`Selepas dipotong ia tahan kira-kira ${sh.ambient} hari pada suhu bilik, atau kira-kira ${sh.cold} hari dalam rantaian sejuk (anggaran).`);
+  }
+  if(first && !overRipe){
     const chk=new Date(first); chk.setDate(chk.getDate()+5);
     const end=new Date(first); end.setDate(end.getDate()+span);
-    if(since>span+8) firstLine=T(`⚠️ 第一颗果已落下 ${since} 天。按此品种的常见情况，其余的果多半已落或过熟 —— 请马上巡树。`,`⚠️ The first fruit fell ${since} days ago. For this variety the rest have usually dropped or gone over-ripe by now — walk the trees today.`,`⚠️ Buah pertama gugur ${since} hari lalu. Bagi varieti ini, buah lain biasanya sudah gugur atau terlebih masak — periksa pokok hari ini.`);
-    else if(since<5) firstLine=T(`第一颗果 ${since} 天前落下。农业局指南：满 5 天（${fmtDate(chk)}）起检查其余的果。此品种其余的果通常在约 ${fmtDate(end)} 前落完。`,`The first fruit fell ${since} day${since===1?'':'s'} ago. DOA guideline: start checking the rest from day 5 (${fmtDate(chk)}). For this variety the rest usually drop by about ${fmtDate(end)}.`,`Buah pertama gugur ${since} hari lalu. Garis panduan Jabatan Pertanian: mula memeriksa buah lain dari hari ke-5 (${fmtDate(chk)}). Bagi varieti ini, buah lain biasanya gugur sebelum kira-kira ${fmtDate(end)}.`);
-    else firstLine=T(`第一颗果 ${since} 天前落下，已过农业局说的 5 天 —— 现在就该逐颗检查。此品种其余的果通常在约 ${fmtDate(end)} 前落完。`,`The first fruit fell ${since} days ago, past the DOA's 5 days — check each fruit now. For this variety the rest usually drop by about ${fmtDate(end)}.`,`Buah pertama gugur ${since} hari lalu, melepasi 5 hari Jabatan Pertanian — periksa setiap buah sekarang. Bagi varieti ini, buah lain biasanya gugur sebelum kira-kira ${fmtDate(end)}.`);
+    const rest=T(`此品种其余的果通常在约 ${fmtDate(end)} 前落完。`,`For this variety the rest usually drop by about ${fmtDate(end)}.`,`Bagi varieti ini, buah lain biasanya gugur sebelum kira-kira ${fmtDate(end)}.`);
+    const ago=T(`第一颗果 ${since} 天前落下。`,`The first fruit fell ${since} day${since===1?'':'s'} ago.`,`Buah pertama gugur ${since} hari lalu.`);
+    if(tree) firstLine=ago+' '+rest;
+    else if(since<5) firstLine=ago+' '+T(`农业局指南：满 5 天（${fmtDate(chk)}）起检查其余的果。`,`DOA guideline: start checking the rest from day 5 (${fmtDate(chk)}).`,`Garis panduan Jabatan Pertanian: mula memeriksa buah lain dari hari ke-5 (${fmtDate(chk)}).`)+' '+rest;
+    else firstLine=ago+' '+T('已过农业局说的 5 天 —— 现在就该逐颗检查。','That is past the DOA\'s 5 days — check each fruit now.','Itu sudah melepasi 5 hari Jabatan Pertanian — periksa setiap buah sekarang.')+' '+rest;
   }
-  const sh=shelfLifeDays(c,c.dropHi-4,'pluck');
-  const keep = c.fast
-    ? T(`割下后常温大约可放 ${sh.ambient} 天。这个品种后熟快 —— 出远门只宜空运或急冻。`,`Once cut it keeps about ${sh.ambient} days at room temperature. This variety ripens fast — for distant markets use air freight or freezing only.`,`Selepas dipotong ia tahan kira-kira ${sh.ambient} hari pada suhu bilik. Varieti ini cepat masak — untuk pasaran jauh guna kargo udara atau sejuk beku sahaja.`)
-    : T(`割下后常温大约可放 ${sh.ambient} 天，冷链约 ${sh.cold} 天（估算）。`,`Once cut it keeps about ${sh.ambient} days at room temperature, or about ${sh.cold} in a cold chain (estimates).`,`Selepas dipotong ia tahan kira-kira ${sh.ambient} hari pada suhu bilik, atau kira-kira ${sh.cold} hari dalam rantaian sejuk (anggaran).`);
   el.innerHTML=`
     <div class="verdict ${cls}" style="margin-bottom:12px">
-      <div class="vk">${T('看果判断','From the fruit','Daripada buah')} · ${n}/3 ${T('个特征','signs','ciri')}</div>
+      <div class="vk">${T('看果判断','From the fruit','Daripada buah')} · ${n}/3 ${T('个特征','signs','ciri')}${tree?' · '+T('树熟落果','tree-drop','gugur sendiri'):''}</div>
       <div class="vt">${title}</div>
       <div class="vd" style="margin-top:10px">${body}</div>
       ${firstLine?`<div class="vd" style="margin-top:9px;padding-top:9px;border-top:1px solid rgba(255,255,255,.25)">${firstLine}</div>`:''}
     </div>
-    <div class="rcard"><h4>📦 ${T('割下之后','After cutting','Selepas dipotong')}</h4><div style="font-size:13.5px;line-height:1.6">${keep}</div></div>
-    ${doaCardHTML(state.market==='export')}
-    <div class="disc">${T('下一季在「我的果园」记下开花日，本工具就能提前算出割果日，不必等到果在树上才判断。','Next season, log the flowering date in My Farms and this tool will project the cut date ahead of time, so you need not wait until the fruit is on the tree.','Musim depan, rekodkan tarikh berbunga dalam Kebun Saya dan alat ini akan mengunjurkan tarikh potong lebih awal, tanpa perlu menunggu buah berada di pokok.')}</div>`;
+    <div class="rcard"><h4>📦 ${afterTitle}</h4><div style="font-size:13.5px;line-height:1.6">${after}</div></div>
+    ${showDoa?doaCardHTML(state.market==='export'):''}
+    <div class="disc">${T('下一季在「我的果园」记下开花日，本工具就能提前算出日期，不必等到果在树上才判断。','Next season, log the flowering date in My Farms and this tool will project the date ahead of time, so you need not wait until the fruit is on the tree.','Musim depan, rekodkan tarikh berbunga dalam Kebun Saya dan alat ini akan mengunjurkan tarikhnya lebih awal, tanpa perlu menunggu buah berada di pokok.')}</div>`;
   el.classList.add('show');
   foldCards(el,['📦']);
 }
