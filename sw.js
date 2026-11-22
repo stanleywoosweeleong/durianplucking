@@ -9,6 +9,8 @@
 var CACHE_PREFIX = "durianripe-";   /* unique to THIS app — see activate */
 var CACHE = "durianripe-shell";     /* fixed name; never changes between deploys */
 var INDEX = "./index.html";
+var APP_PATH = new URL("./", self.location).pathname;   /* e.g. "/durianplucking/" */
+var pendingUpdate = false;   /* install fetched a changed index.html before any page asked */
 
 var SHELL = [
   INDEX,
@@ -54,7 +56,7 @@ function refreshShell(){
 /* install: precache, then take over at once. Safe because the cache name is
    stable — a new worker never strands an open page on a deleted cache. */
 self.addEventListener("install", function(e){
-  e.waitUntil(refreshShell().then(function(){ return self.skipWaiting(); }));
+  e.waitUntil(refreshShell().then(function(changed){ if (changed) pendingUpdate = true; return self.skipWaiting(); }));
 });
 
 /* activate: delete only THIS app's other caches (e.g. old versioned ones).
@@ -82,6 +84,10 @@ self.addEventListener("fetch", function(e){
   var url;
   try { url = new URL(req.url); } catch (err) { return; }
   if (url.origin !== self.location.origin) return;
+
+  /* Only the app's own address gets the cached app. Other pages under the same path
+     (references/*.pdf, README, sw.js …) go to the network untouched. */
+  if (req.mode === "navigate" && url.pathname !== APP_PATH && url.pathname !== APP_PATH + "index.html") return;
 
   if (req.mode === "navigate"){
     e.respondWith(
@@ -119,7 +125,8 @@ self.addEventListener("message", function(e){
   if (e.data !== "check") return;
   e.waitUntil(
     refreshShell().then(function(changed){
-      if (!changed) return;
+      if (!changed && !pendingUpdate) return;
+      pendingUpdate = false;
       return self.clients.matchAll({ type: "window" }).then(function(list){
         list.forEach(function(c){ c.postMessage("updated"); });
       });
