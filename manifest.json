@@ -2,7 +2,7 @@
   "name": "树熟 · 割果 · 决策 · 榴梿成熟学",
   "short_name": "榴梿成熟学",
   "description": "Durian ripening science & harvest-timing decision tool (树熟 vs 割果).",
-  "id": "./",
+  "id": "/durianplucking/",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
